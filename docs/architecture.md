@@ -38,7 +38,7 @@ flowchart TD
     RoutePolicy -- yes --> CheckEligibility[check_replacement_eligibility]
 
     CheckEligibility --> RouteEligibility{eligibility_status}
-    RouteEligibility -- not_eligible --> GenerateResponse[generate_customer_response]
+    RouteEligibility -- not_eligible --> Guardrail[guardrail_check]
     RouteEligibility -- unknown or human_review_required --> Escalate
     RouteEligibility -- eligible --> CheckInventory[check_inventory_availability]
 
@@ -64,3 +64,17 @@ Future enhancements include LangGraph interrupts, persistence, observability, Ra
 The workflow records audit events for meaningful steps: workflow start, identity verification, order lookup, policy retrieval, eligibility checks, inventory checks, guardrail decisions, replacement request creation, human escalation, customer response generation, workflow completion, and workflow failure.
 
 Audit logging is currently in-memory through `backend/app/audit/store.py`. This keeps Phase 1 deterministic and testable while preserving the shape of the audit trail that will later move to Postgres for durable persistence and query support.
+
+## Phase 1 API Layer
+
+FastAPI exposes the local workflow for frontend or external callers while keeping state in memory for Phase 1. The API does not add Postgres persistence, deployment configuration, frontend code, real LLM calls, or LangGraph interrupt/resume behavior.
+
+Endpoints:
+
+- `GET /health`: health check.
+- `POST /api/workflows/start`: starts a warranty workflow and stores the final state in memory.
+- `GET /api/workflows/{workflow_id}`: retrieves the stored workflow state.
+- `GET /api/workflows/{workflow_id}/audit`: retrieves the audit timeline for a stored workflow.
+- `POST /api/workflows/{workflow_id}/human-review`: simulates human review metadata for escalated workflows.
+
+Workflow results are stored in `backend/app/workflow/store.py`. This store is process-local and will be replaced by durable persistence in a later phase.
