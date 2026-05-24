@@ -1,0 +1,60 @@
+# Architecture
+
+## Phase 1 LangGraph Workflow
+
+Phase 1 uses LangGraph to model the warranty replacement flow as an explicit local state machine. The graph gives the capstone a clear orchestration layer for sequencing governed tools, branching on deterministic state, and preserving decision fields that can later become audit records.
+
+No real LLM calls, database persistence, external integrations, interrupts, or deployment concerns are included in this phase. The workflow is deterministic and uses the mocked tools in `backend/app/tools/warranty_tools.py`.
+
+## Workflow Sequence
+
+The local workflow follows this sequence:
+
+1. Verify the customer identity.
+2. Look up the order and confirm the order belongs to the customer.
+3. Retrieve the current US laptop warranty policy.
+4. Check replacement eligibility under the current policy.
+5. If eligible, check inventory availability.
+6. Run the replacement creation guardrail.
+7. Create a replacement request only when all guardrail conditions pass.
+8. Escalate to a human when required.
+9. Generate a safe customer response.
+
+For the primary scenario, “My laptop screen cracked after 9 months. Can I get a replacement?”, the workflow determines that accidental damage and cracked screens are excluded by the current policy. It does not create a replacement request.
+
+```mermaid
+flowchart TD
+    START([START]) --> VerifyIdentity[verify_identity]
+    VerifyIdentity --> RouteIdentity{identity_verified?}
+    RouteIdentity -- no --> Escalate[escalate_to_human]
+    RouteIdentity -- yes --> LookupOrder[lookup_order]
+
+    LookupOrder --> RouteOrder{order retrieved and authorized?}
+    RouteOrder -- no --> Escalate
+    RouteOrder -- yes --> RetrievePolicy[retrieve_warranty_policy]
+
+    RetrievePolicy --> RoutePolicy{policy_reference present?}
+    RoutePolicy -- no --> Escalate
+    RoutePolicy -- yes --> CheckEligibility[check_replacement_eligibility]
+
+    CheckEligibility --> RouteEligibility{eligibility_status}
+    RouteEligibility -- not_eligible --> GenerateResponse[generate_customer_response]
+    RouteEligibility -- unknown or human_review_required --> Escalate
+    RouteEligibility -- eligible --> CheckInventory[check_inventory_availability]
+
+    CheckInventory --> Guardrail[guardrail_check]
+    Guardrail --> RouteGuardrail{guardrail_decision}
+    RouteGuardrail -- allow --> CreateReplacement[create_replacement_request]
+    RouteGuardrail -- block --> GenerateResponse
+    RouteGuardrail -- escalate --> Escalate
+
+    CreateReplacement --> GenerateResponse
+    Escalate --> GenerateResponse
+    GenerateResponse --> END([END])
+```
+
+## Phase 1 Tooling
+
+All tools are deterministic mock functions. They return simple dictionaries, include `result_status`, and apply local guardrails before returning action-oriented results. The workflow does not use the deprecated warranty policy in the happy path; it retrieves only the current policy for decisioning.
+
+Future enhancements include LangGraph interrupts, persistence, observability, Ragas evaluation, CrewAI collaboration patterns, MCP tool integration, and A2A interoperability. Those capabilities are intentionally deferred so the first workflow remains easy to test and explain.
