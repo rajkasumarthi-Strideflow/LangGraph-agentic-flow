@@ -78,3 +78,11 @@ Endpoints:
 - `POST /api/workflows/{workflow_id}/human-review`: simulates human review metadata for escalated workflows.
 
 Workflow results are stored in `backend/app/workflow/store.py`. This store is process-local and will be replaced by durable persistence in a later phase.
+
+## Phase 1 Frontend Demo
+
+The Phase 1 frontend is a lightweight static UI served directly by FastAPI from the `frontend/` directory. It uses vanilla HTML, CSS, and JavaScript, with no React, Vite, Node, npm, or frontend build tooling.
+
+The UI visualizes the local LangGraph workflow by letting a user submit a customer request, view the final decision state, inspect the guardrail result, read the audit timeline, and simulate human review when an escalation exists.
+
+React and Vite can be added later if the UI grows into a richer application. They are intentionally skipped in Phase 1 to reduce tooling complexity and keep the capstone demo focused on backend workflow behavior, governance, and auditability.

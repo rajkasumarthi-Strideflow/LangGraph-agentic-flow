@@ -1,7 +1,10 @@
 from typing import Any
+from pathlib import Path
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.audit.store import get_audit_events
 from app.models.api import (
@@ -20,6 +23,11 @@ app = FastAPI(
     title="WarrantyWise Agentic Support Platform",
     version="0.1.0",
 )
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+FRONTEND_DIR = PROJECT_ROOT / "frontend"
+
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 
 def _build_initial_state(
@@ -80,6 +88,11 @@ def health_check():
         "service": "warrantywise-agentic-support",
         "version": "0.1.0",
     }
+
+
+@app.get("/", response_class=FileResponse)
+def frontend_index() -> FileResponse:
+    return FileResponse(FRONTEND_DIR / "index.html")
 
 
 @app.post("/api/workflows/start", response_model=StartWorkflowResponse)

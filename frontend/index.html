@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WarrantyWise</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">WarrantyWise</p>
+        <h1>Enterprise Agentic Warranty Replacement Workflow</h1>
+      </div>
+      <span class="badge badge-phase">Phase 1 Prototype</span>
+    </header>
+
+    <main class="dashboard">
+      <section class="panel request-panel">
+        <div class="panel-heading">
+          <h2>Customer Request</h2>
+          <p>Run a deterministic warranty workflow against the Phase 1 mock data.</p>
+        </div>
+
+        <label for="customer-request">Request</label>
+        <textarea id="customer-request" rows="5">My laptop screen cracked after 9 months. Can I get a replacement?</textarea>
+
+        <div class="field-grid">
+          <div>
+            <label for="customer-id">Customer ID</label>
+            <input id="customer-id" type="text" value="cust_primary_001" />
+          </div>
+          <div>
+            <label for="order-id">Order ID</label>
+            <input id="order-id" type="text" value="ord_laptop_001" />
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="run-workflow" class="button button-primary" type="button">Run Warranty Workflow</button>
+          <button id="load-cracked" class="button" type="button">Load Cracked Screen Scenario</button>
+          <button id="load-unknown" class="button" type="button">Load Unknown Customer Scenario</button>
+        </div>
+
+        <div id="status-message" class="status-message" role="status"></div>
+      </section>
+
+      <section class="panel result-panel">
+        <div class="panel-heading">
+          <h2>Workflow Result</h2>
+          <p>Final state returned by the workflow API.</p>
+        </div>
+        <div id="workflow-result" class="kv-grid empty-state">Run a workflow to see the result.</div>
+      </section>
+
+      <section class="panel decision-panel">
+        <div class="panel-heading">
+          <h2>Decision / Guardrail</h2>
+          <p>Operational signals used before any replacement action.</p>
+        </div>
+        <div id="decision-summary" class="decision-grid empty-state">No decision state yet.</div>
+      </section>
+
+      <section class="panel audit-panel">
+        <div class="panel-heading">
+          <h2>Audit Timeline</h2>
+          <p>Chronological events emitted by workflow nodes and audit lifecycle hooks.</p>
+        </div>
+        <div id="audit-timeline" class="timeline empty-state">Audit events will appear after a workflow run.</div>
+      </section>
+
+      <section class="panel review-panel">
+        <div class="panel-heading">
+          <h2>Human Review Simulation</h2>
+          <p>Phase 1 records review metadata only; graph interrupt/resume comes later.</p>
+        </div>
+
+        <div id="review-content" class="empty-state">No human review currently required.</div>
+
+        <form id="review-form" class="review-form hidden">
+          <div class="field-grid">
+            <div>
+              <label for="reviewer-id">Reviewer ID</label>
+              <input id="reviewer-id" type="text" value="reviewer_001" />
+            </div>
+            <div>
+              <label for="review-decision">Decision</label>
+              <select id="review-decision">
+                <option value="approve_replacement">approve_replacement</option>
+                <option value="reject_replacement">reject_replacement</option>
+                <option value="request_more_info">request_more_info</option>
+              </select>
+            </div>
+          </div>
+          <label for="review-reason">Reason</label>
+          <input id="review-reason" type="text" value="Manual review completed for escalated workflow." />
+          <button class="button button-primary" type="submit">Submit Human Review</button>
+        </form>
+
+        <div id="review-response" class="review-response"></div>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

@@ -41,3 +41,21 @@ curl http://localhost:8000/api/workflows/{workflow_id}
 ```bash
 curl http://localhost:8000/api/workflows/{workflow_id}/audit
 ```
+
+## Frontend Demo
+
+Run the local backend:
+
+```bash
+cd backend
+source .venv/bin/activate
+uvicorn app.main:app --reload
+```
+
+Open:
+
+```text
+http://localhost:8000
+```
+
+The Phase 1 UI demonstrates the customer request, workflow result, guardrail decision, audit timeline, and human review simulation using the existing FastAPI workflow endpoints.
