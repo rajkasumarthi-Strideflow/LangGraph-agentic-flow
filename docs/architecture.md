@@ -58,3 +58,9 @@ flowchart TD
 All tools are deterministic mock functions. They return simple dictionaries, include `result_status`, and apply local guardrails before returning action-oriented results. The workflow does not use the deprecated warranty policy in the happy path; it retrieves only the current policy for decisioning.
 
 Future enhancements include LangGraph interrupts, persistence, observability, Ragas evaluation, CrewAI collaboration patterns, MCP tool integration, and A2A interoperability. Those capabilities are intentionally deferred so the first workflow remains easy to test and explain.
+
+## Phase 1 Auditability
+
+The workflow records audit events for meaningful steps: workflow start, identity verification, order lookup, policy retrieval, eligibility checks, inventory checks, guardrail decisions, replacement request creation, human escalation, customer response generation, workflow completion, and workflow failure.
+
+Audit logging is currently in-memory through `backend/app/audit/store.py`. This keeps Phase 1 deterministic and testable while preserving the shape of the audit trail that will later move to Postgres for durable persistence and query support.

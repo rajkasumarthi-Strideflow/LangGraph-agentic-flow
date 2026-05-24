@@ -1,5 +1,7 @@
 from typing import Any
 
+from app.audit.events import AuditEventType
+from app.audit.logger import log_node_event
 from app.tools.warranty_tools import (
     check_inventory_availability,
     check_replacement_eligibility,
@@ -37,13 +39,25 @@ def verify_identity_node(state: WarrantyWorkflowState) -> dict[str, Any]:
             }
         )
 
+    log_node_event(
+        state={**state, **updates},
+        event_type=AuditEventType.IDENTITY_VERIFIED,
+        node_name="verify_identity",
+        tool_name="verify_identity",
+        input_summary={"customer_id": state["customer_id"]},
+        output_summary={
+            "identity_verified": identity_verified,
+            "result_status": result.get("result_status"),
+        },
+        reason=updates.get("escalation_reason") or result.get("reason"),
+    )
     return updates
 
 
 def lookup_order_node(state: WarrantyWorkflowState) -> dict[str, Any]:
     result = lookup_order(state["customer_id"], state["order_id"])
     if result.get("result_status") == "success":
-        return {
+        updates = {
             "product_id": result["product_id"],
             "product_family": result["product_family"],
             "order_status": result["order_status"],
@@ -52,8 +66,28 @@ def lookup_order_node(state: WarrantyWorkflowState) -> dict[str, Any]:
             "customer_authorized": True,
             "workflow_status": "order_retrieved",
         }
+        log_node_event(
+            state={**state, **updates},
+            event_type=AuditEventType.ORDER_LOOKUP_COMPLETED,
+            node_name="lookup_order",
+            tool_name="lookup_order",
+            input_summary={
+                "customer_id": state["customer_id"],
+                "order_id": state["order_id"],
+            },
+            output_summary={
+                "result_status": result.get("result_status"),
+                "order_retrieved": True,
+                "customer_authorized": True,
+                "product_id": result["product_id"],
+                "product_family": result["product_family"],
+                "order_status": result["order_status"],
+                "purchase_age_months": result["purchase_age_months"],
+            },
+        )
+        return updates
 
-    return {
+    updates = {
         "order_retrieved": False,
         "customer_authorized": result.get("result_status") != "authorization_error",
         "escalation_required": True,
@@ -64,28 +98,70 @@ def lookup_order_node(state: WarrantyWorkflowState) -> dict[str, Any]:
         "error_category": str(result.get("result_status") or "order_lookup_failed"),
         "workflow_status": "order_lookup_failed",
     }
+    log_node_event(
+        state={**state, **updates},
+        event_type=AuditEventType.ORDER_LOOKUP_COMPLETED,
+        node_name="lookup_order",
+        tool_name="lookup_order",
+        input_summary={
+            "customer_id": state["customer_id"],
+            "order_id": state["order_id"],
+        },
+        output_summary={
+            "result_status": result.get("result_status"),
+            "order_retrieved": False,
+            "customer_authorized": updates["customer_authorized"],
+        },
+        reason=updates["escalation_reason"],
+    )
+    return updates
 
 
 def retrieve_warranty_policy_node(state: WarrantyWorkflowState) -> dict[str, Any]:
     product_family = state.get("product_family")
     if not product_family:
-        return {
+        updates = {
             "escalation_required": True,
             "escalation_reason": "Product family is required to retrieve warranty policy.",
             "error_category": "missing_product_family",
             "workflow_status": "policy_lookup_failed",
         }
+        log_node_event(
+            state={**state, **updates},
+            event_type=AuditEventType.POLICY_RETRIEVED,
+            node_name="retrieve_warranty_policy",
+            tool_name="retrieve_warranty_policy",
+            input_summary={"product_family": None, "region": "US"},
+            output_summary={"result_status": "missing_product_family"},
+            reason=updates["escalation_reason"],
+        )
+        return updates
 
     result = retrieve_warranty_policy(product_family, region="US")
     if result.get("result_status") == "success":
-        return {
+        updates = {
             "policy_id": result["policy_id"],
             "policy_reference": result["policy_reference"],
             "policy_version": result["version"],
             "workflow_status": "policy_retrieved",
         }
+        log_node_event(
+            state={**state, **updates},
+            event_type=AuditEventType.POLICY_RETRIEVED,
+            node_name="retrieve_warranty_policy",
+            tool_name="retrieve_warranty_policy",
+            input_summary={"product_family": product_family, "region": "US"},
+            output_summary={
+                "result_status": result.get("result_status"),
+                "policy_id": result["policy_id"],
+                "policy_reference": result["policy_reference"],
+                "policy_version": result["version"],
+                "status": result["status"],
+            },
+        )
+        return updates
 
-    return {
+    updates = {
         "escalation_required": True,
         "escalation_reason": _failure_reason(
             result,
@@ -94,6 +170,16 @@ def retrieve_warranty_policy_node(state: WarrantyWorkflowState) -> dict[str, Any
         "error_category": str(result.get("result_status") or "policy_lookup_failed"),
         "workflow_status": "policy_lookup_failed",
     }
+    log_node_event(
+        state={**state, **updates},
+        event_type=AuditEventType.POLICY_RETRIEVED,
+        node_name="retrieve_warranty_policy",
+        tool_name="retrieve_warranty_policy",
+        input_summary={"product_family": product_family, "region": "US"},
+        output_summary={"result_status": result.get("result_status")},
+        reason=updates["escalation_reason"],
+    )
+    return updates
 
 
 def check_replacement_eligibility_node(
@@ -101,13 +187,27 @@ def check_replacement_eligibility_node(
 ) -> dict[str, Any]:
     policy_id = state.get("policy_id")
     if not policy_id:
-        return {
+        updates = {
             "eligibility_status": "human_review_required",
             "escalation_required": True,
             "escalation_reason": "Policy ID is required to check replacement eligibility.",
             "error_category": "missing_policy_id",
             "workflow_status": "eligibility_check_failed",
         }
+        log_node_event(
+            state={**state, **updates},
+            event_type=AuditEventType.ELIGIBILITY_CHECKED,
+            node_name="check_replacement_eligibility",
+            tool_name="check_replacement_eligibility",
+            input_summary={
+                "customer_id": state["customer_id"],
+                "order_id": state["order_id"],
+                "policy_id": None,
+            },
+            output_summary={"eligibility_status": "human_review_required"},
+            reason=updates["escalation_reason"],
+        )
+        return updates
 
     result = check_replacement_eligibility(
         state["customer_id"],
@@ -133,6 +233,25 @@ def check_replacement_eligibility_node(
             }
         )
 
+    log_node_event(
+        state={**state, **updates},
+        event_type=AuditEventType.ELIGIBILITY_CHECKED,
+        node_name="check_replacement_eligibility",
+        tool_name="check_replacement_eligibility",
+        input_summary={
+            "customer_id": state["customer_id"],
+            "order_id": state["order_id"],
+            "policy_id": policy_id,
+        },
+        output_summary={
+            "result_status": result.get("result_status"),
+            "eligibility_status": eligibility_status,
+            "eligibility_reason": reason,
+            "policy_reference": updates.get("policy_reference"),
+            "policy_version": updates.get("policy_version"),
+        },
+        reason=reason,
+    )
     return updates
 
 
@@ -141,7 +260,7 @@ def check_inventory_availability_node(
 ) -> dict[str, Any]:
     product_id = state.get("product_id")
     if not product_id:
-        return {
+        updates = {
             "inventory_available": False,
             "inventory_status": "unavailable",
             "escalation_required": True,
@@ -149,6 +268,19 @@ def check_inventory_availability_node(
             "error_category": "missing_product_id",
             "workflow_status": "inventory_check_failed",
         }
+        log_node_event(
+            state={**state, **updates},
+            event_type=AuditEventType.INVENTORY_CHECKED,
+            node_name="check_inventory_availability",
+            tool_name="check_inventory_availability",
+            input_summary={"product_id": None},
+            output_summary={
+                "inventory_available": False,
+                "inventory_status": "unavailable",
+            },
+            reason=updates["escalation_reason"],
+        )
+        return updates
 
     result = check_inventory_availability(product_id)
     inventory_available = bool(result.get("inventory_available"))
@@ -170,6 +302,20 @@ def check_inventory_availability_node(
             }
         )
 
+    log_node_event(
+        state={**state, **updates},
+        event_type=AuditEventType.INVENTORY_CHECKED,
+        node_name="check_inventory_availability",
+        tool_name="check_inventory_availability",
+        input_summary={"product_id": product_id},
+        output_summary={
+            "result_status": result.get("result_status"),
+            "inventory_available": inventory_available,
+            "inventory_status": result.get("inventory_status"),
+            "available_quantity": result.get("available_quantity"),
+        },
+        reason=updates.get("escalation_reason"),
+    )
     return updates
 
 
@@ -186,38 +332,87 @@ def guardrail_check_node(state: WarrantyWorkflowState) -> dict[str, Any]:
     )
 
     if allow_replacement:
-        return {
+        updates = {
             "guardrail_decision": "allow",
             "workflow_status": "guardrail_allowed",
         }
+        log_node_event(
+            state={**state, **updates},
+            event_type=AuditEventType.GUARDRAIL_DECISION,
+            node_name="guardrail_check",
+            input_summary={
+                "eligibility_status": state.get("eligibility_status"),
+                "inventory_available": state.get("inventory_available"),
+                "escalation_required": state.get("escalation_required"),
+            },
+            output_summary={"guardrail_decision": "allow"},
+            reason="All replacement creation guardrail conditions passed.",
+        )
+        return updates
 
     if state.get("eligibility_status") == "not_eligible":
-        return {
+        reason = (
+            state.get("eligibility_reason")
+            or "Replacement is not eligible under the current warranty policy."
+        )
+        updates = {
             "guardrail_decision": "block",
-            "eligibility_reason": state.get("eligibility_reason")
-            or "Replacement is not eligible under the current warranty policy.",
+            "eligibility_reason": reason,
             "workflow_status": "guardrail_blocked",
         }
+        log_node_event(
+            state={**state, **updates},
+            event_type=AuditEventType.GUARDRAIL_DECISION,
+            node_name="guardrail_check",
+            input_summary={
+                "eligibility_status": state.get("eligibility_status"),
+                "inventory_available": state.get("inventory_available"),
+                "escalation_required": state.get("escalation_required"),
+            },
+            output_summary={
+                "guardrail_decision": "block",
+                "eligibility_reason": reason,
+            },
+            reason=reason,
+        )
+        return updates
 
-    return {
+    reason = (
+        state.get("escalation_reason")
+        or state.get("eligibility_reason")
+        or "Replacement creation guardrail requires human review."
+    )
+    updates = {
         "guardrail_decision": "escalate",
         "escalation_required": True,
-        "escalation_reason": state.get("escalation_reason")
-        or state.get("eligibility_reason")
-        or "Replacement creation guardrail requires human review.",
+        "escalation_reason": reason,
         "workflow_status": "guardrail_escalated",
     }
+    log_node_event(
+        state={**state, **updates},
+        event_type=AuditEventType.GUARDRAIL_DECISION,
+        node_name="guardrail_check",
+        input_summary={
+            "eligibility_status": state.get("eligibility_status"),
+            "inventory_available": state.get("inventory_available"),
+            "escalation_required": state.get("escalation_required"),
+        },
+        output_summary={"guardrail_decision": "escalate"},
+        reason=reason,
+    )
+    return updates
 
 
 def create_replacement_request_node(
     state: WarrantyWorkflowState,
 ) -> dict[str, Any]:
     if state.get("guardrail_decision") != "allow":
-        return {
+        updates = {
             "replacement_request_id": None,
             "replacement_status": "not_created",
             "workflow_status": "replacement_not_created",
         }
+        return updates
 
     result = create_replacement_request(
         customer_id=state["customer_id"],
@@ -227,13 +422,32 @@ def create_replacement_request_node(
         inventory_available=bool(state.get("inventory_available")),
     )
     if result.get("result_status") == "success":
-        return {
+        updates = {
             "replacement_request_id": result["replacement_request_id"],
             "replacement_status": result["replacement_status"],
             "workflow_status": "replacement_created",
         }
+        log_node_event(
+            state={**state, **updates},
+            event_type=AuditEventType.REPLACEMENT_REQUEST_CREATED,
+            node_name="create_replacement_request",
+            tool_name="create_replacement_request",
+            input_summary={
+                "customer_id": state["customer_id"],
+                "order_id": state["order_id"],
+                "product_id": state.get("product_id"),
+                "eligibility_status": state.get("eligibility_status"),
+                "inventory_available": state.get("inventory_available"),
+            },
+            output_summary={
+                "result_status": result.get("result_status"),
+                "replacement_request_id": result["replacement_request_id"],
+                "replacement_status": result["replacement_status"],
+            },
+        )
+        return updates
 
-    return {
+    updates = {
         "replacement_request_id": None,
         "replacement_status": result.get("replacement_status", "not_created"),
         "guardrail_decision": "block",
@@ -243,6 +457,26 @@ def create_replacement_request_node(
         ),
         "workflow_status": "replacement_not_created",
     }
+    log_node_event(
+        state={**state, **updates},
+        event_type=AuditEventType.REPLACEMENT_REQUEST_CREATED,
+        node_name="create_replacement_request",
+        tool_name="create_replacement_request",
+        input_summary={
+            "customer_id": state["customer_id"],
+            "order_id": state["order_id"],
+            "product_id": state.get("product_id"),
+            "eligibility_status": state.get("eligibility_status"),
+            "inventory_available": state.get("inventory_available"),
+        },
+        output_summary={
+            "result_status": result.get("result_status"),
+            "replacement_status": updates["replacement_status"],
+            "guardrail_decision": "block",
+        },
+        reason=updates["eligibility_reason"],
+    )
+    return updates
 
 
 def escalate_to_human_node(state: WarrantyWorkflowState) -> dict[str, Any]:
@@ -256,12 +490,29 @@ def escalate_to_human_node(state: WarrantyWorkflowState) -> dict[str, Any]:
         order_id=state["order_id"],
         reason=reason,
     )
-    return {
+    updates = {
         "escalation_id": result.get("escalation_id"),
         "escalation_required": True,
         "escalation_reason": reason,
         "workflow_status": "escalated",
     }
+    log_node_event(
+        state={**state, **updates},
+        event_type=AuditEventType.HUMAN_ESCALATION_CREATED,
+        node_name="escalate_to_human",
+        tool_name="escalate_to_human",
+        input_summary={
+            "customer_id": state["customer_id"],
+            "order_id": state["order_id"],
+        },
+        output_summary={
+            "result_status": result.get("result_status"),
+            "escalation_id": result.get("escalation_id"),
+            "escalation_status": result.get("escalation_status"),
+        },
+        reason=reason,
+    )
+    return updates
 
 
 def generate_customer_response_node(
@@ -278,8 +529,25 @@ def generate_customer_response_node(
         escalation_id=state.get("escalation_id"),
         reason=reason,
     )
-    return {
+    updates = {
         "customer_response": result["customer_response"],
         "response_type": result["response_type"],
         "workflow_status": "completed",
     }
+    log_node_event(
+        state={**state, **updates},
+        event_type=AuditEventType.CUSTOMER_RESPONSE_GENERATED,
+        node_name="generate_customer_response",
+        tool_name="generate_customer_response",
+        input_summary={
+            "eligibility_status": state.get("eligibility_status"),
+            "replacement_request_id": state.get("replacement_request_id"),
+            "escalation_id": state.get("escalation_id"),
+        },
+        output_summary={
+            "response_type": result["response_type"],
+            "workflow_status": "completed",
+        },
+        reason=reason,
+    )
+    return updates

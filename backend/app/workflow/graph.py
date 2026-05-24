@@ -2,6 +2,11 @@ from typing import Any
 
 from langgraph.graph import END, START, StateGraph
 
+from app.audit.logger import (
+    log_workflow_completed,
+    log_workflow_failed,
+    log_workflow_started,
+)
 from app.workflow.nodes import (
     check_inventory_availability_node,
     check_replacement_eligibility_node,
@@ -36,7 +41,7 @@ def route_after_policy(state: WarrantyWorkflowState) -> str:
 
 def route_after_eligibility(state: WarrantyWorkflowState) -> str:
     if state.get("eligibility_status") == "not_eligible":
-        return "generate_customer_response"
+        return "guardrail_check"
     if state.get("eligibility_status") in {"unknown", "human_review_required"}:
         return "escalate_to_human"
     return "check_inventory_availability"
@@ -87,4 +92,12 @@ def run_warranty_workflow(
     initial_state: WarrantyWorkflowState,
 ) -> WarrantyWorkflowState:
     workflow = build_warranty_workflow()
-    return workflow.invoke(initial_state)
+    log_workflow_started(initial_state)
+    try:
+        final_state = workflow.invoke(initial_state)
+    except Exception as exc:
+        log_workflow_failed(initial_state, reason=str(exc))
+        raise
+
+    log_workflow_completed(final_state)
+    return final_state
