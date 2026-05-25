@@ -121,3 +121,7 @@ The Railway deployment architecture is intentionally simple:
 The app listens on `0.0.0.0` and uses Railway’s `PORT` environment variable. Railway injects the Postgres `DATABASE_URL`, and the app normalizes standard `postgresql://...` URLs to SQLAlchemy’s psycopg-compatible driver format.
 
 No Vercel, separate frontend service, real LLM service, LangGraph interrupts, or observability stack is added in Phase 1. The deployment shape stays focused on one app container plus one managed database.
+
+## Phase 1 Screenshots
+
+Baseline screenshots are available in `docs/screenshots/phase1/`. These show the deployed Railway demo before the polished UI enhancement step.

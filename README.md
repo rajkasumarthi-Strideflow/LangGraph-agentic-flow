@@ -251,3 +251,27 @@ frontend                 Static HTML/CSS/JavaScript demo UI served by FastAPI
 docs                     Architecture, audit, guardrail, cost, and mapping notes
 backend/tests            Unit and API tests for workflow, tools, persistence, and serving
 ```
+
+## Phase 1 Demo Screenshots
+
+These screenshots show the baseline deployed Phase 1 workflow. The UI will be polished in a later step, but this version demonstrates the working LangGraph workflow, guardrail decisioning, audit timeline, and human review simulation.
+
+### Customer Request Screen
+
+![Customer Request Screen](docs/screenshots/phase1/01-home-request-screen.png)
+
+### Cracked-Screen Workflow Result
+
+![Cracked-Screen Workflow Result](docs/screenshots/phase1/02-cracked-screen-result.png)
+
+### Guardrail Block Decision
+
+![Guardrail Block Decision](docs/screenshots/phase1/03-guardrail-block-decision.png)
+
+### Audit Timeline
+
+![Audit Timeline](docs/screenshots/phase1/04-audit-timeline.png)
+
+### Human Review Panel
+
+![Human Review Panel](docs/screenshots/phase1/05-human-review-panel.png)
