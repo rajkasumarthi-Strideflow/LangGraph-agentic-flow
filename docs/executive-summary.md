@@ -53,6 +53,8 @@ Browser UI
 
 WarrantyWise reduces manual triage for common warranty requests while preventing unsupported replacement actions. It improves consistency of policy application, creates an auditable decision trail, supports future cost tracking and optimization, and provides a reusable architecture pattern for other customer support workflows.
 
+The [Cost Model v1](cost-model.md) outlines how the architecture will estimate and control LLM, tool, retrieval, audit, observability, infrastructure, and human review costs.
+
 ## Phase 1 Scope
 
 Phase 1 implements synthetic domain data, a deterministic warranty workflow, the cracked-screen scenario, no automatic replacement for excluded accidental damage, persisted workflow/audit/human review records, and a deployed demo.

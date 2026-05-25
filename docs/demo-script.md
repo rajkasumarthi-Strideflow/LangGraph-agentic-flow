@@ -80,6 +80,8 @@ The audit trail shows not only the final outcome, but also which node and tool p
 
 ## H. Cost-Aware Architecture Preview
 
+Reference: [docs/cost-model.md](cost-model.md)
+
 Future cost modeling will include:
 
 - LLM token cost

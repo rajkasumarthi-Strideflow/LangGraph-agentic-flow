@@ -44,6 +44,8 @@ Demo walkthrough script: [docs/demo-script.md](docs/demo-script.md)
 
 Executive summary: [docs/executive-summary.md](docs/executive-summary.md)
 
+Cost model v1: [docs/cost-model.md](docs/cost-model.md)
+
 ## Phase 1 Capabilities
 
 - FastAPI backend
