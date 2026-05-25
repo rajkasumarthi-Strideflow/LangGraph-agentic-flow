@@ -65,6 +65,8 @@ For the cracked-screen scenario, the most important message is that the system d
 
 ## G. Audit Replay Talking Points
 
+Reference: [docs/audit-replay-example.md](audit-replay-example.md)
+
 The system can reconstruct:
 
 - Customer request
