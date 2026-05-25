@@ -85,3 +85,19 @@ DATABASE_URL=postgresql://user:password@host:port/dbname
 ```
 
 Alembic migrations are a future enhancement.
+
+## Railway Deployment
+
+Railway deployment is designed as one FastAPI app service plus one Railway Postgres service.
+
+1. Create a new Railway project.
+2. Add a Postgres service.
+3. Add a GitHub repo service connected to this repository.
+4. Make sure the app service has `DATABASE_URL` from the Railway Postgres service.
+5. Railway provides the `PORT` environment variable automatically.
+6. The Docker start command runs Uvicorn on `0.0.0.0:$PORT`.
+7. Generate a public domain from the Railway Networking settings.
+
+The app uses Dockerfile-based deployment. FastAPI serves both the API and the static frontend, so no Vercel or separate frontend service is needed for Phase 1.
+
+SQLite is for local development only. Railway should use Postgres through `DATABASE_URL`.

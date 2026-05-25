@@ -101,3 +101,17 @@ The persistence tables are:
 The design is compatible with Railway Postgres later by setting `DATABASE_URL` to a `postgresql://...` connection string. Phase 1 uses `Base.metadata.create_all()` at startup instead of Alembic migrations; migrations are a future enhancement.
 
 Persistence improves auditability because workflow decisions, guardrail outcomes, and human review records survive API calls and process restarts. It gives the capstone a durable trail for enterprise review without changing the deterministic workflow behavior.
+
+## Phase 1 Deployment Architecture
+
+The Railway deployment architecture is intentionally simple:
+
+- One Railway project.
+- One FastAPI service built from the root Dockerfile.
+- One Railway Postgres service.
+- FastAPI serves both API routes and the static frontend.
+- SQLAlchemy abstracts the local SQLite database and the deployed Postgres database.
+
+The app listens on `0.0.0.0` and uses Railway’s `PORT` environment variable. Railway injects the Postgres `DATABASE_URL`, and the app normalizes standard `postgresql://...` URLs to SQLAlchemy’s psycopg-compatible driver format.
+
+No Vercel, separate frontend service, real LLM service, LangGraph interrupts, or observability stack is added in Phase 1. The deployment shape stays focused on one app container plus one managed database.
