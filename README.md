@@ -38,6 +38,8 @@ Customer UI
 
 FastAPI serves both the API and the static frontend. LangGraph orchestrates the warranty workflow as a stateful graph. Governed tools perform identity verification, order lookup, warranty policy retrieval, eligibility checks, inventory checks, replacement creation, escalation, and customer response generation. SQLAlchemy persists workflow runs, audit events, and human review records.
 
+Architecture diagrams: [docs/diagrams.md](docs/diagrams.md)
+
 ## Phase 1 Capabilities
 
 - FastAPI backend

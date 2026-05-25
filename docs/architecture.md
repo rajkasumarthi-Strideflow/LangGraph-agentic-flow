@@ -1,5 +1,11 @@
 # Architecture
 
+## Architecture Diagrams
+
+See [WarrantyWise Architecture Diagrams](diagrams.md) for Mermaid diagrams covering the system architecture, LangGraph workflow, guardrail decisioning, audit/event flow, Railway deployment, and future-state extensions.
+
+At a high level, the Phase 1 architecture is: Browser UI → FastAPI → LangGraph → governed tools → guardrails → SQLAlchemy persistence → Postgres audit trail. FastAPI serves both the static frontend and API routes, while LangGraph coordinates deterministic tool calls and records workflow state, audit events, and human review records.
+
 ## Phase 1 LangGraph Workflow
 
 Phase 1 uses LangGraph to model the warranty replacement flow as an explicit local state machine. The graph gives the capstone a clear orchestration layer for sequencing governed tools, branching on deterministic state, and preserving decision fields that can later become audit records.
