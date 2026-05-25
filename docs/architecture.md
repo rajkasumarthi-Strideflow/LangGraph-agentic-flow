@@ -12,6 +12,8 @@ For a concise business and architecture overview, see [WarrantyWise Executive Su
 
 For a replayable example of the cracked-screen decision path, see [WarrantyWise Audit Replay Example](audit-replay-example.md).
 
+For a Salesforce-native mapping, see [WarrantyWise Agentforce Mapping](agentforce-mapping.md).
+
 ## Phase 1 LangGraph Workflow
 
 Phase 1 uses LangGraph to model the warranty replacement flow as an explicit local state machine. The graph gives the capstone a clear orchestration layer for sequencing governed tools, branching on deterministic state, and preserving decision fields that can later become audit records.

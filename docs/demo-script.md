@@ -109,7 +109,7 @@ The current deterministic workflow establishes the control plane where those cos
 - CrewAI review crew
 - MCP tool/resource abstraction
 - A2A fulfillment delegation
-- Agentforce implementation mapping
+- Agentforce implementation mapping ([docs/agentforce-mapping.md](agentforce-mapping.md))
 
 ## J. 30-Second Version
 

@@ -55,6 +55,8 @@ WarrantyWise reduces manual triage for common warranty requests while preventing
 
 The [Cost Model v1](cost-model.md) outlines how the architecture will estimate and control LLM, tool, retrieval, audit, observability, infrastructure, and human review costs.
 
+The [Agentforce mapping](agentforce-mapping.md) translates the same architecture into Salesforce-native concepts such as Agent Script, subagents, actions, variables, available-when filters, and Agentforce DX.
+
 ## Phase 1 Scope
 
 Phase 1 implements synthetic domain data, a deterministic warranty workflow, the cracked-screen scenario, no automatic replacement for excluded accidental damage, persisted workflow/audit/human review records, and a deployed demo.

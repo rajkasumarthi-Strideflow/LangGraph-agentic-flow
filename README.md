@@ -48,6 +48,8 @@ Cost model v1: [docs/cost-model.md](docs/cost-model.md)
 
 Audit replay example: [docs/audit-replay-example.md](docs/audit-replay-example.md)
 
+Agentforce mapping: [docs/agentforce-mapping.md](docs/agentforce-mapping.md)
+
 ## Phase 1 Capabilities
 
 - FastAPI backend
