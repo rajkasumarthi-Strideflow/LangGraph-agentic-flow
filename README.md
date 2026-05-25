@@ -42,6 +42,8 @@ Architecture diagrams: [docs/diagrams.md](docs/diagrams.md)
 
 Demo walkthrough script: [docs/demo-script.md](docs/demo-script.md)
 
+Executive summary: [docs/executive-summary.md](docs/executive-summary.md)
+
 ## Phase 1 Capabilities
 
 - FastAPI backend
