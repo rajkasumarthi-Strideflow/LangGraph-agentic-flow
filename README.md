@@ -1,6 +1,6 @@
 # warrantywise-agentic-support
 
-WarrantyWise Agentic Support is a local capstone project for a governed warranty replacement workflow. The backend currently exposes a deterministic FastAPI API backed by mocked domain data, governed tools, a local LangGraph workflow, and in-memory audit logging.
+WarrantyWise Agentic Support is a local capstone project for a governed warranty replacement workflow. The backend currently exposes a deterministic FastAPI API backed by mocked domain data, governed tools, a local LangGraph workflow, and SQLAlchemy persistence.
 
 ## Run Local Backend
 
@@ -59,3 +59,29 @@ http://localhost:8000
 ```
 
 The Phase 1 UI demonstrates the customer request, workflow result, guardrail decision, audit timeline, and human review simulation using the existing FastAPI workflow endpoints.
+
+## Database Persistence
+
+The local default database is SQLite:
+
+```env
+DATABASE_URL=sqlite:///./warrantywise.db
+```
+
+Run locally as usual:
+
+```bash
+cd backend
+source .venv/bin/activate
+uvicorn app.main:app --reload
+```
+
+Workflow results, audit events, and human review decisions are persisted with SQLAlchemy. Phase 1 creates tables automatically at startup with `Base.metadata.create_all()`, so no local Postgres instance is required.
+
+The persistence layer is compatible with Railway-style Postgres URLs for a later deployment phase:
+
+```env
+DATABASE_URL=postgresql://user:password@host:port/dbname
+```
+
+Alembic migrations are a future enhancement.

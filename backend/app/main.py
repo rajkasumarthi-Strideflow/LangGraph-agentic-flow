@@ -1,12 +1,16 @@
-from typing import Any
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from app.audit.human_review_store import get_human_reviews, save_human_review
 from app.audit.store import get_audit_events
+from app.database import init_db
 from app.models.api import (
     AuditTimelineResponse,
     HumanReviewRequest,
@@ -19,13 +23,21 @@ from app.workflow.graph import run_warranty_workflow
 from app.workflow.state import WarrantyWorkflowState
 from app.workflow.store import get_workflow_result, save_workflow_result
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+FRONTEND_DIR = PROJECT_ROOT / "frontend"
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    init_db()
+    yield
+
+
 app = FastAPI(
     title="WarrantyWise Agentic Support Platform",
     version="0.1.0",
+    lifespan=lifespan,
 )
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-FRONTEND_DIR = PROJECT_ROOT / "frontend"
 
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
@@ -147,6 +159,14 @@ def submit_human_review(
             message="No human review is currently required for this workflow.",
         )
 
+    save_human_review(
+        workflow_id=workflow_id,
+        escalation_id=state.get("escalation_id"),
+        reviewer_id=request.reviewer_id,
+        decision=request.decision,
+        reason=request.reason,
+        status="completed",
+    )
     state.update(
         {
             "human_review_decision": request.decision,
@@ -164,3 +184,15 @@ def submit_human_review(
         status="completed",
         message="Human review simulation completed.",
     )
+
+
+@app.get("/api/workflows/{workflow_id}/human-reviews")
+def get_workflow_human_reviews(workflow_id: str) -> dict[str, Any]:
+    state = get_workflow_result(workflow_id)
+    if state is None:
+        raise HTTPException(status_code=404, detail="Workflow not found.")
+
+    return {
+        "workflow_id": workflow_id,
+        "reviews": get_human_reviews(workflow_id),
+    }

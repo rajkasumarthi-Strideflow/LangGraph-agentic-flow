@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from app.audit.human_review_store import clear_human_reviews
 from app.audit.store import clear_audit_events
 from app.main import app
 from app.workflow.store import clear_workflow_results
@@ -8,6 +9,7 @@ from app.workflow.store import clear_workflow_results
 
 @pytest.fixture(autouse=True)
 def clear_in_memory_stores() -> None:
+    clear_human_reviews()
     clear_audit_events()
     clear_workflow_results()
 

@@ -4,7 +4,7 @@
 
 Audit logging makes each workflow run reconstructable. Instead of only seeing the final customer response, reviewers can inspect the event timeline and understand which node ran, which deterministic tool was called, what minimal inputs were used, what result was produced, which policy was referenced, and whether a guardrail allowed, blocked, or escalated the action.
 
-Phase 1 uses an in-memory audit store. It is intentionally simple and local so tests can verify the workflow timeline without adding database persistence yet.
+Phase 1 persists audit events to the database through SQLAlchemy. Local development uses SQLite by default, while the schema is designed to remain compatible with Postgres for later Railway deployment.
 
 ## AuditEvent Schema
 
@@ -77,6 +77,17 @@ Enterprise agentic workflows need auditability because actions must be explainab
 
 This is especially important for warranty decisions because customer-facing outcomes depend on identity, order ownership, policy status, eligibility, and inventory availability.
 
-## Future Postgres Persistence
+Persisted audit events make enterprise replay possible after the process restarts. A reviewer can reconstruct the workflow from the `audit_events` table instead of relying on process memory or logs.
 
-In a later step, the in-memory `AUDIT_EVENTS` list will move to Postgres. The event model, event types, and safe summary payloads should remain stable while storage changes from process memory to durable database tables with query support.
+## Database Table
+
+Audit events are stored in the `audit_events` table. The table mirrors the `AuditEvent` model and keeps safe summaries in JSON columns:
+
+- `input_summary`
+- `output_summary`
+
+These summaries are intentionally minimal and should not include full customer profiles, payment data, or sensitive internal data.
+
+## Future Postgres Deployment
+
+The local SQLite database will be replaceable with Postgres in a later Railway deployment step by setting `DATABASE_URL`. Alembic migrations are also deferred to a future phase; Phase 1 uses SQLAlchemy `create_all()`.

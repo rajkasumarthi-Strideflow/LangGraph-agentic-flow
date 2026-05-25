@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from app.audit.human_review_store import clear_human_reviews
 from app.audit.store import clear_audit_events
 from app.main import app
 from app.tools.mock_data import PRIMARY_CUSTOMER_ID, PRIMARY_ORDER_ID
@@ -9,6 +10,7 @@ from app.workflow.store import clear_workflow_results
 
 @pytest.fixture(autouse=True)
 def clear_in_memory_stores() -> None:
+    clear_human_reviews()
     clear_audit_events()
     clear_workflow_results()
 
@@ -108,6 +110,15 @@ def test_human_review_endpoint_handles_escalated_workflow(client: TestClient) ->
     assert data["status"] == "completed"
     assert data["reviewer_id"] == "reviewer_001"
 
+    reviews_response = client.get(
+        f"/api/workflows/{started['workflow_id']}/human-reviews"
+    )
+    assert reviews_response.status_code == 200
+    reviews = reviews_response.json()["reviews"]
+    assert len(reviews) == 1
+    assert reviews[0]["reviewer_id"] == "reviewer_001"
+    assert reviews[0]["decision"] == "manual_review_completed"
+
 
 def test_human_review_endpoint_reports_no_review_required(
     client: TestClient,
@@ -127,3 +138,9 @@ def test_human_review_endpoint_reports_no_review_required(
     data = response.json()
     assert data["status"] == "not_required"
     assert "No human review" in data["message"]
+
+
+def test_unknown_workflow_returns_404_for_human_reviews(client: TestClient) -> None:
+    response = client.get("/api/workflows/wf_unknown/human-reviews")
+
+    assert response.status_code == 404
