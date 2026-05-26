@@ -19,12 +19,12 @@ def client() -> TestClient:
     return TestClient(app)
 
 
-def test_frontend_index_returns_warrantywise(client: TestClient) -> None:
+def test_frontend_index_returns_decisiontrace_branding(client: TestClient) -> None:
     response = client.get("/")
 
     assert response.status_code == 200
-    assert "WarrantyWise" in response.text
-    assert "Phase 1 Live" in response.text
+    assert "DecisionTrace AI" in response.text
+    assert "Auditable Agentic Workflows for Governed Customer Decisions" in response.text
 
 
 def test_frontend_static_assets_are_served(client: TestClient) -> None:

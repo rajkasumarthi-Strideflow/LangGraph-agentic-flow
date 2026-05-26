@@ -23,7 +23,7 @@ def test_frontend_root_still_serves_for_deployment() -> None:
     response = client.get("/")
 
     assert response.status_code == 200
-    assert "WarrantyWise" in response.text
+    assert "DecisionTrace AI" in response.text
 
 
 def test_database_url_default_is_sqlite() -> None:
