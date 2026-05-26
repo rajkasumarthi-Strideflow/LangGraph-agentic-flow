@@ -8,71 +8,102 @@
   </head>
   <body>
     <header class="app-header">
-      <div>
+      <div class="header-copy">
         <p class="eyebrow">WarrantyWise</p>
         <h1>Enterprise Agentic Warranty Replacement Workflow</h1>
       </div>
-      <span class="badge badge-phase">Phase 1 Prototype</span>
+      <div class="header-badges" aria-label="Architecture badges">
+        <span class="badge badge-live">Phase 1 Live</span>
+        <span class="badge badge-neutral">LangGraph</span>
+        <span class="badge badge-neutral">Auditable</span>
+        <span class="badge badge-neutral">Railway + Postgres</span>
+      </div>
     </header>
 
-    <main class="dashboard">
+    <main class="console-shell">
       <section class="panel request-panel">
         <div class="panel-heading">
-          <h2>Customer Request</h2>
-          <p>Run a deterministic warranty workflow against the Phase 1 mock data.</p>
+          <div>
+            <p class="section-kicker">Request</p>
+            <h2>Customer Intake</h2>
+          </div>
+          <span class="panel-note">Deterministic Phase 1 workflow</span>
         </div>
 
-        <label for="customer-request">Request</label>
+        <label for="customer-request">Customer request</label>
         <textarea id="customer-request" rows="5">My laptop screen cracked after 9 months. Can I get a replacement?</textarea>
 
         <div class="field-grid">
           <div>
             <label for="customer-id">Customer ID</label>
-            <input id="customer-id" type="text" value="cust_primary_001" />
+            <input id="customer-id" type="text" value="cust_primary_001" autocomplete="off" />
           </div>
           <div>
             <label for="order-id">Order ID</label>
-            <input id="order-id" type="text" value="ord_laptop_001" />
+            <input id="order-id" type="text" value="ord_laptop_001" autocomplete="off" />
           </div>
         </div>
 
-        <div class="button-row">
+        <div class="button-row scenario-row" aria-label="Scenario shortcuts">
+          <button id="load-cracked" class="button button-secondary" type="button">Load Cracked Screen Scenario</button>
+          <button id="load-unknown" class="button button-secondary" type="button">Load Unknown Customer Scenario</button>
+        </div>
+
+        <div class="button-row action-row">
           <button id="run-workflow" class="button button-primary" type="button">Run Warranty Workflow</button>
-          <button id="load-cracked" class="button" type="button">Load Cracked Screen Scenario</button>
-          <button id="load-unknown" class="button" type="button">Load Unknown Customer Scenario</button>
+          <div id="status-message" class="status-message" role="status" aria-live="polite"></div>
         </div>
-
-        <div id="status-message" class="status-message" role="status"></div>
-      </section>
-
-      <section class="panel result-panel">
-        <div class="panel-heading">
-          <h2>Workflow Result</h2>
-          <p>Final state returned by the workflow API.</p>
-        </div>
-        <div id="workflow-result" class="kv-grid empty-state">Run a workflow to see the result.</div>
       </section>
 
       <section class="panel decision-panel">
         <div class="panel-heading">
-          <h2>Decision / Guardrail</h2>
-          <p>Operational signals used before any replacement action.</p>
+          <div>
+            <p class="section-kicker">Decision</p>
+            <h2>Decision Summary</h2>
+          </div>
         </div>
-        <div id="decision-summary" class="decision-grid empty-state">No decision state yet.</div>
+        <div id="workflow-result" class="decision-summary empty-state">Run a workflow to see the decision.</div>
       </section>
 
-      <section class="panel audit-panel">
+      <section class="panel telemetry-panel">
         <div class="panel-heading">
-          <h2>Audit Timeline</h2>
-          <p>Chronological events emitted by workflow nodes and audit lifecycle hooks.</p>
+          <div>
+            <p class="section-kicker">Signals</p>
+            <h2>Real Telemetry</h2>
+          </div>
+          <span class="panel-note">Derived from workflow, audit, and review APIs</span>
         </div>
-        <div id="audit-timeline" class="timeline empty-state">Audit events will appear after a workflow run.</div>
+        <div id="telemetry-tiles" class="telemetry-grid"></div>
+      </section>
+
+      <section class="panel timeline-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">Execution</p>
+            <h2>Workflow Timeline</h2>
+          </div>
+        </div>
+        <div id="workflow-timeline" class="timeline empty-state">Audit events will appear after a workflow run.</div>
+      </section>
+
+      <section class="panel replay-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">Governance</p>
+            <h2>Audit Replay</h2>
+          </div>
+          <span class="panel-note">Persisted event evidence</span>
+        </div>
+        <div id="audit-replay" class="audit-replay empty-state">Run a workflow to inspect node, tool, policy, and guardrail evidence.</div>
       </section>
 
       <section class="panel review-panel">
         <div class="panel-heading">
-          <h2>Human Review Simulation</h2>
-          <p>Phase 1 records review metadata only; graph interrupt/resume comes later.</p>
+          <div>
+            <p class="section-kicker">Handoff</p>
+            <h2>Human Review</h2>
+          </div>
+          <span class="panel-note">Phase 1 simulation</span>
         </div>
 
         <div id="review-content" class="empty-state">No human review currently required.</div>
@@ -81,7 +112,7 @@
           <div class="field-grid">
             <div>
               <label for="reviewer-id">Reviewer ID</label>
-              <input id="reviewer-id" type="text" value="reviewer_001" />
+              <input id="reviewer-id" type="text" value="reviewer_001" autocomplete="off" />
             </div>
             <div>
               <label for="review-decision">Decision</label>
@@ -93,11 +124,28 @@
             </div>
           </div>
           <label for="review-reason">Reason</label>
-          <input id="review-reason" type="text" value="Manual review completed for escalated workflow." />
+          <input id="review-reason" type="text" value="Manual review completed for escalated workflow." autocomplete="off" />
           <button class="button button-primary" type="submit">Submit Human Review</button>
         </form>
 
+        <div id="review-records" class="review-records"></div>
         <div id="review-response" class="review-response"></div>
+      </section>
+
+      <section class="panel planned-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">Not Active Yet</p>
+            <h2>Planned Phase 2 Telemetry</h2>
+          </div>
+        </div>
+        <div class="planned-grid">
+          <span>Controlled LLM response drafting</span>
+          <span>Cost telemetry</span>
+          <span>Langfuse/LangSmith trace links</span>
+          <span>Ragas evaluation</span>
+          <span>True LangGraph interrupts</span>
+        </div>
       </section>
     </main>
 

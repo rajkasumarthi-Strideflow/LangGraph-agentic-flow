@@ -11,7 +11,7 @@ Phase 1 intentionally establishes a governed workflow foundation before adding p
 - Deterministic LangGraph workflow
 - Governed mock tools
 - FastAPI backend
-- Static browser UI served by FastAPI
+- Polished static browser workflow console served by FastAPI
 - Railway deployment
 - SQLAlchemy persistence
 - Railway Postgres compatibility
@@ -51,11 +51,11 @@ Phase 1 intentionally establishes a governed workflow foundation before adding p
 
 ### Polished Workflow UI
 
-The UI should evolve from a functional prototype into a simple, elegant enterprise workflow operations console. It should not look like a consumer chatbot. It should make the workflow observable at a glance.
+Status: completed for the Phase 1 data surface.
 
-Design principle: the polished UI should show decision, guardrail, audit, observability, cost, and human review as clear tiles.
+The UI has evolved from a functional prototype into a simple enterprise workflow operations console. It does not use React, Vite, Node, npm, or a frontend framework. It renders real workflow, audit, and human review data from existing backend APIs.
 
-Target UI sections:
+Implemented UI sections:
 
 - Header with app name, environment, and architecture badges
 - Request panel
@@ -64,11 +64,11 @@ Target UI sections:
 - Decision summary panel
 - Workflow timeline
 - Audit replay panel
-- Observability tiles
-- Cost telemetry tiles
+- Real telemetry tiles derived from workflow/audit/review APIs
 - Human review panel
+- Planned Phase 2 telemetry section
 
-Tile examples:
+Implemented tile examples:
 
 - Workflow Status
 - Eligibility
@@ -78,6 +78,11 @@ Tile examples:
 - Audit Events
 - Tool Calls
 - Human Review
+
+The UI intentionally does not show active LLM token, cost, latency, or tracing metrics yet because those backend telemetry sources are not implemented.
+
+Future telemetry tile examples:
+
 - Estimated Cost
 - LLM Tokens
 - Latency
@@ -309,7 +314,7 @@ Observability, audit, and cost telemetry should be neatly arranged as tiles so a
 | Phase | Theme | Key Enhancements | Outcome |
 | --- | --- | --- | --- |
 | Phase 1 | Governed workflow foundation | LangGraph workflow, governed tools, audit persistence, Railway deployment, screenshots, docs | Demonstrates deterministic enterprise control plane. |
-| Phase 2 | Polished UX, LLM boundaries, telemetry, evaluation | Better UI, LLM intake/drafting, LangGraph interrupts, cost telemetry, observability, Ragas | Makes the system more usable, measurable, and evaluation-ready. |
+| Phase 2 | LLM boundaries, telemetry, evaluation | Controlled LLM intake/drafting, LangGraph interrupts, cost telemetry, observability, Ragas | Makes the system more measurable, evaluation-ready, and production-aware. |
 | Phase 3 | Cost optimization, multi-agent, MCP/A2A, Agentforce path | Model routing, caching, CrewAI review crew, MCP abstraction, A2A delegation, Agentforce implementation | Evolves into a cost-aware, extensible enterprise agent architecture. |
 
 ## Architecture Principle

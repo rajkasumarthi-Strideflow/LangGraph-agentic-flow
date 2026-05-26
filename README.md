@@ -55,7 +55,7 @@ Known limitations and roadmap: [docs/roadmap.md](docs/roadmap.md)
 ## Phase 1 Capabilities
 
 - FastAPI backend
-- Browser-based demo UI
+- Polished browser-based workflow console
 - LangGraph workflow
 - Governed mock tools
 - Deterministic eligibility and guardrail logic
@@ -95,6 +95,8 @@ Known limitations and roadmap: [docs/roadmap.md](docs/roadmap.md)
 ## Live Demo
 
 Live demo: `<add Railway public URL here>`
+
+The Phase 1 UI is a polished enterprise workflow console built with vanilla HTML, CSS, and JavaScript. It displays real workflow state, persisted audit events, derived tool-call counts, human review status, and audit replay details from the backend APIs without adding frontend framework complexity.
 
 ## Local Setup
 
@@ -223,7 +225,7 @@ The current phase is deterministic and does not use real LLM calls. Future cost 
 
 ## Roadmap
 
-- Polished workflow UI
+- Controlled workflow console enhancements
 - Controlled LLM response drafting
 - Architecture diagrams
 - Screenshots
@@ -266,7 +268,7 @@ backend/tests            Unit and API tests for workflow, tools, persistence, an
 
 ## Phase 1 Demo Screenshots
 
-These screenshots show the baseline deployed Phase 1 workflow. The UI will be polished in a later step, but this version demonstrates the working LangGraph workflow, guardrail decisioning, audit timeline, and human review simulation.
+These screenshots show the baseline deployed Phase 1 workflow before the polished workflow console pass. The current UI preserves the same LangGraph workflow, guardrail decisioning, audit timeline, and human review simulation while presenting them in a more operations-focused dashboard.
 
 ### Customer Request Screen
 

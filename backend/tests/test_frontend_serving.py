@@ -24,6 +24,17 @@ def test_frontend_index_returns_warrantywise(client: TestClient) -> None:
 
     assert response.status_code == 200
     assert "WarrantyWise" in response.text
+    assert "Phase 1 Live" in response.text
+
+
+def test_frontend_static_assets_are_served(client: TestClient) -> None:
+    css_response = client.get("/static/styles.css")
+    js_response = client.get("/static/app.js")
+
+    assert css_response.status_code == 200
+    assert js_response.status_code == 200
+    assert "telemetry-grid" in css_response.text
+    assert "refreshWorkflowView" in js_response.text
 
 
 def test_health_still_returns_ok(client: TestClient) -> None:

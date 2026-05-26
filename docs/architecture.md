@@ -104,6 +104,14 @@ The UI visualizes the local LangGraph workflow by letting a user submit a custom
 
 React and Vite can be added later if the UI grows into a richer application. They are intentionally skipped in Phase 1 to reduce tooling complexity and keep the capstone demo focused on backend workflow behavior, governance, and auditability.
 
+## Polished Phase 1 Workflow Console
+
+The Phase 1 frontend has been polished into a simple enterprise workflow console without adding a frontend framework. It remains vanilla HTML, CSS, and JavaScript served by FastAPI, so the deployed architecture stays one app service plus one database.
+
+The console renders only real data from existing backend APIs: workflow state, persisted audit events, derived audit/tool-call counts, escalation state, and persisted human review records. Replacement action status, policy reference, guardrail decision, audit replay rows, and human review status are computed from those API responses instead of fabricated telemetry.
+
+Future LLM token metrics, cost telemetry, Langfuse/LangSmith trace links, latency instrumentation, and Ragas evaluation results should be added to the UI only after the backend emits real instrumentation for them. Until then, they are shown only as planned Phase 2 enhancements.
+
 ## Phase 1 Persistence Layer
 
 Phase 1 uses synchronous SQLAlchemy with a SQLite local fallback. The default `DATABASE_URL` is `sqlite:///./warrantywise.db`, so local development and tests do not require Postgres.
