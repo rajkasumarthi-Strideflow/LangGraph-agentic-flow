@@ -1,6 +1,6 @@
 # Tool Catalog
 
-The Step 3 mock tools are deterministic, in-memory functions that operate on the synthetic WarrantyWise domain data. They are intentionally governed: each tool returns structured dictionaries, includes `result_status`, avoids external integrations, and applies its own defensive checks.
+The Step 3 mock tools are deterministic, in-memory functions that operate on the synthetic DecisionTrace AI warranty replacement domain data. They are intentionally governed: each tool returns structured dictionaries, includes `result_status`, avoids external integrations, and applies its own defensive checks.
 
 | Tool Name | Type | Purpose | Inputs | Outputs | Preconditions | Guardrails | Audit Fields |
 | --- | --- | --- | --- | --- | --- | --- | --- |

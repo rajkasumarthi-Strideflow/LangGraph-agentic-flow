@@ -1,10 +1,10 @@
-# WarrantyWise Known Limitations and Future Roadmap
+# DecisionTrace AI Known Limitations and Future Roadmap
 
 ## Purpose
 
-This document clarifies Phase 1 boundaries and defines the planned roadmap for UI polish, controlled LLM use, observability, evaluation, cost telemetry, true HITL, CrewAI, MCP, A2A, and Agentforce implementation mapping.
+This document clarifies Phase 1 boundaries and defines the DecisionTrace AI roadmap for UI polish, controlled LLM use, observability, evaluation, cost telemetry, true HITL, CrewAI, MCP, A2A, Agentforce implementation mapping, and future domain expansion.
 
-Phase 1 intentionally establishes a governed workflow foundation before adding probabilistic model behavior or advanced multi-agent protocols.
+Phase 1 intentionally establishes a governed workflow foundation through the warranty replacement reference workflow before expanding to additional domains or advanced multi-agent protocols.
 
 ## Phase 1 Completed Scope
 
@@ -285,12 +285,22 @@ Move from conceptual mapping to a Salesforce-native implementation path using:
 - Case/queue/approval handoff
 - Agentforce DX
 
+### Domain Expansion
+
+DecisionTrace AI can extend the same governed workflow pattern beyond warranty replacement into additional customer-impacting domains:
+
+- Credit approval
+- Insurance claims
+- Refund governance
+- Subscription cancellation
+- Compliance exception review
+
 ## Future Polished UI Draft
 
 Header:
 
-- WarrantyWise
-- Enterprise Agentic Warranty Replacement Workflow
+- DecisionTrace AI
+- Auditable Agentic Workflows for Governed Customer Decisions
 - Badges: Phase 2, LangGraph, Auditable, Cost-Aware
 
 Main layout:
@@ -317,9 +327,9 @@ Observability, audit, and cost telemetry should be neatly arranged as tiles so a
 
 | Phase | Theme | Key Enhancements | Outcome |
 | --- | --- | --- | --- |
-| Phase 1 | Governed workflow foundation | LangGraph workflow, governed tools, audit persistence, Railway deployment, screenshots, docs | Demonstrates deterministic enterprise control plane. |
-| Phase 2 | LLM boundaries, telemetry, evaluation | Controlled LLM intake/drafting, LangGraph interrupts, cost telemetry, observability, Ragas | Makes the system more measurable, evaluation-ready, and production-aware. |
-| Phase 3 | Cost optimization, multi-agent, MCP/A2A, Agentforce path | Model routing, caching, CrewAI review crew, MCP abstraction, A2A delegation, Agentforce implementation | Evolves into a cost-aware, extensible enterprise agent architecture. |
+| Phase 1 | Governed workflow foundation | Warranty replacement reference workflow, LangGraph workflow, governed tools, audit persistence, Railway deployment, screenshots, docs | Demonstrates deterministic enterprise control plane. |
+| Phase 2 | LLM boundaries, telemetry, evaluation | Controlled LLM intake/drafting, LangGraph interrupts, cost telemetry, observability, Ragas, domain expansion planning | Makes DecisionTrace AI more measurable, evaluation-ready, and production-aware. |
+| Phase 3 | Cost optimization, multi-agent, MCP/A2A, Agentforce path | Model routing, caching, CrewAI review crew, MCP abstraction, A2A delegation, Agentforce implementation, additional governed decision workflows | Evolves into a cost-aware, extensible enterprise agent architecture. |
 
 ## Architecture Principle
 

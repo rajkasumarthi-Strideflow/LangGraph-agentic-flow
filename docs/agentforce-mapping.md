@@ -1,12 +1,12 @@
-# WarrantyWise Agentforce Mapping
+# DecisionTrace AI Agentforce Mapping
 
 ## Purpose
 
-This document maps the custom WarrantyWise LangGraph architecture to current Salesforce Agentforce concepts. The goal is to show how the same enterprise agentic architecture pattern could be implemented in a Salesforce-native way.
+This document maps the custom DecisionTrace AI LangGraph architecture to current Salesforce Agentforce concepts. The mapping uses the warranty replacement workflow as the first reference implementation. The goal is to show how the same enterprise agentic architecture pattern could be implemented in a Salesforce-native way.
 
 This is a conceptual mapping, not an implemented Salesforce or Agentforce integration. Current Agentforce terminology uses **subagents**. Older Salesforce references may still say “topics,” but this document uses “subagents” for the target architecture.
 
-## Current WarrantyWise Architecture Summary
+## Current DecisionTrace AI Architecture Summary
 
 ```text
 Browser UI
@@ -18,7 +18,7 @@ Browser UI
 → Postgres audit trail
 ```
 
-WarrantyWise currently implements the workflow outside Salesforce using FastAPI, LangGraph, deterministic Python tools, SQLAlchemy, and Railway Postgres-compatible persistence.
+DecisionTrace AI currently implements the warranty replacement reference workflow outside Salesforce using FastAPI, LangGraph, deterministic Python tools, controlled OpenAI response drafting, SQLAlchemy, and Railway Postgres-compatible persistence.
 
 ## Agentforce Target Architecture
 
@@ -37,14 +37,14 @@ Agent Script combines natural language instructions with deterministic expressio
 
 ## Concept Mapping Table
 
-| WarrantyWise / LangGraph Concept | Agentforce Concept | Mapping Explanation |
+| DecisionTrace AI / LangGraph Concept | Agentforce Concept | Mapping Explanation |
 | --- | --- | --- |
 | LangGraph workflow | Agent Script controlled flow / subagent transitions | Agent Script can define deterministic flow and transition logic between subagents. |
 | LangGraph state | Agent Script variables | Control facts become variables shared across subagents and turns. |
 | LangGraph nodes | Subagent logic blocks or action orchestration | Each node maps to subagent reasoning, deterministic logic, or action invocation. |
 | Conditional edges | Agent Script if/else, transitions, available-when conditions | Branching logic maps to deterministic expressions and action/subagent availability. |
 | Guardrail node | Agent Script rules, Flow/Apex policy checks, available-when filters | Replacement creation should be hidden and blocked unless deterministic conditions pass. |
-| Mock tools | Agentforce actions | WarrantyWise tools map to Flow, Apex, prompt template, external service, or Knowledge-backed actions. |
+| Mock tools | Agentforce actions | DecisionTrace AI tools map to Flow, Apex, prompt template, external service, or Knowledge-backed actions. |
 | Policy retrieval | Knowledge/Data Cloud/action-backed grounding | Current policy retrieval maps to approved policy grounding with metadata filters. |
 | `create_replacement_request` | Guarded write/action | Could be a Flow or Apex action with server-side eligibility enforcement. |
 | `escalate_to_human` | Service Case, queue, approval, Omni-Channel handoff | Escalation creates or routes a review package to a human path. |
@@ -127,7 +127,7 @@ Variables should track control facts needed for routing, action input/output, cu
 
 ## Agentforce Actions
 
-| WarrantyWise Tool | Agentforce Action Type | Possible Implementation | Risk Tier | Notes |
+| DecisionTrace AI Tool | Agentforce Action Type | Possible Implementation | Risk Tier | Notes |
 | --- | --- | --- | --- | --- |
 | `verify_identity` | Flow or Apex Invocable Method | Check Contact/Account identity verification flags or call identity service | read | Return minimal identity status. |
 | `lookup_order` | Flow, Apex, Named Query, external service | Query Order, Asset, Entitlement, or Commerce data | read | Return only required order/product facts. |
@@ -171,7 +171,7 @@ Warranty policy retrieval could map to:
 - Apex/Flow action that returns the current approved policy
 - Metadata filters such as `product_family`, `region`, `effective_date`, `approval_status`, and `audience`
 
-Deprecated policy sources should be filtered out or deprioritized, similar to the WarrantyWise source-priority design. The target policy retrieval action should return a policy reference/version so audit replay can prove which policy governed the decision.
+Deprecated policy sources should be filtered out or deprioritized, similar to the DecisionTrace AI source-priority design. The target policy retrieval action should return a policy reference/version so audit replay can prove which policy governed the decision.
 
 ## Human Handoff and Review
 
@@ -188,7 +188,7 @@ A true Agentforce implementation should preserve the evidence package: customer 
 
 ## Audit and Replay Mapping
 
-WarrantyWise audit events map to Agentforce/Salesforce audit needs:
+DecisionTrace AI audit events map to Agentforce/Salesforce audit needs:
 
 - Customer request
 - Selected subagent
@@ -229,7 +229,7 @@ Conceptual flow:
 5. External app streams responses if needed.
 6. External app ends the session.
 
-This is conceptual only; WarrantyWise does not currently implement Agent API integration.
+This is conceptual only; DecisionTrace AI does not currently implement Agent API integration.
 
 ## What Should Stay Outside Agentforce
 
@@ -259,7 +259,7 @@ LangGraph state maps to Agent Script variables. Variables should store durable c
 
 ### How do tools map to Agentforce actions?
 
-WarrantyWise tools map to Agentforce actions backed by Flow, Apex, prompt templates, Knowledge/Data Cloud grounding, or external service callouts.
+DecisionTrace AI tools map to Agentforce actions backed by Flow, Apex, prompt templates, Knowledge/Data Cloud grounding, or external service callouts.
 
 ### Why use available-when filters?
 

@@ -1,10 +1,10 @@
-# WarrantyWise Audit Replay Example
+# DecisionTrace AI Audit Replay Example
 
 ## Purpose
 
-This document shows how WarrantyWise supports audit replay for an enterprise agentic AI workflow. The goal is to reconstruct what happened, which policy was used, what decision was made, why the replacement was blocked, and what response was sent.
+This document shows how DecisionTrace AI supports audit replay for an enterprise agentic AI workflow. The goal is to reconstruct what happened, which policy was used, what decision was made, why the replacement was blocked, and what response was sent.
 
-The example focuses on the primary cracked-screen scenario and uses persisted workflow state plus audit events to explain the decision path.
+The cracked-screen warranty replay is the first reference audit scenario. It uses persisted workflow state plus audit events to explain the decision path for the warranty replacement reference workflow.
 
 ## Replay Scenario
 
@@ -113,7 +113,7 @@ curl <RAILWAY_PUBLIC_URL>/api/workflows/<WORKFLOW_ID>/audit
 
 ## What This Replay Does Not Yet Include
 
-- No real LLM prompt/response trace yet.
+- No full LLM prompt/response observability trace yet.
 - No token/cost trace yet.
 - No Langfuse/LangSmith trace yet.
 - No real LangGraph interrupt/resume yet.
@@ -121,7 +121,7 @@ curl <RAILWAY_PUBLIC_URL>/api/workflows/<WORKFLOW_ID>/audit
 
 ## Future Observability Extension
 
-WarrantyWise audit replay explains what happened from a business/governance perspective. Langfuse or LangSmith tracing will explain how the LLM/agent execution happened from an observability perspective once real LLM calls are added.
+DecisionTrace AI audit replay explains what happened from a business/governance perspective. Langfuse or LangSmith tracing will explain how the LLM/agent execution happened from an observability perspective once deeper tracing is added.
 
 Future trace fields may include:
 

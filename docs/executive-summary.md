@@ -1,25 +1,28 @@
-# WarrantyWise Executive Summary
+# DecisionTrace AI Executive Summary
 
 ## Overview
 
-WarrantyWise is an enterprise AI architecture capstone demonstrating a governed, auditable, production-aware agentic warranty replacement workflow. It shows how customer support automation can be designed around state, policies, tools, guardrails, persistence, and human review rather than relying on an unconstrained chatbot.
+DecisionTrace AI is an enterprise AI architecture capstone demonstrating governed, auditable, production-aware agentic workflows for customer-impacting decisions. It shows how AI-assisted automation can be designed around state, policies, tools, guardrails, persistence, controlled LLM response drafting, and human review rather than relying on an unconstrained chatbot.
 
-The Phase 1 implementation is deployed publicly on Railway and includes a FastAPI backend, browser UI, LangGraph workflow, governed mock tools, SQLAlchemy persistence, and Postgres-compatible audit storage.
+The first implemented reference workflow is warranty replacement, branded historically in the repository as the WarrantyWise workflow. The same architecture pattern can extend to regulated financial and operational workflows such as credit approval, claims review, refund governance, subscription cancellation, and compliance exception handling.
+
+The Phase 1 implementation is deployed publicly on Railway and includes a FastAPI backend, browser UI, LangGraph workflow, governed mock tools, controlled OpenAI response drafting, SQLAlchemy persistence, and Postgres-compatible audit storage.
 
 The project is intentionally scoped to demonstrate enterprise architecture patterns: controlled decisioning, explainable workflow execution, safe action boundaries, and a persistent audit trail.
 
 ## Business Problem
 
-Warranty replacement decisions require identity verification, order lookup, policy review, eligibility determination, inventory check, controlled action execution, customer-safe communication, and auditability. Without these controls, a support automation system can approve unsupported replacements, cite stale policy, expose unnecessary data, or fail to explain why a customer outcome occurred.
+Governed customer decisions require identity verification, context lookup, policy review, eligibility determination, action controls, customer-safe communication, and auditability. In the warranty replacement reference workflow, this means order lookup, warranty policy grounding, inventory checks, and replacement guardrails. Without these controls, an automation system can approve unsupported actions, cite stale policy, expose unnecessary data, or fail to explain why a customer outcome occurred.
 
 ## Solution Summary
 
-WarrantyWise uses:
+DecisionTrace AI uses:
 
 - FastAPI for the backend API
 - LangGraph for stateful workflow orchestration
 - Governed mock tools for identity, order, policy, eligibility, inventory, replacement, escalation, and response generation
 - Deterministic guardrails to block unsafe replacement creation
+- Controlled LLM response drafting for final customer-facing wording
 - SQLAlchemy persistence for workflow runs, audit events, and human reviews
 - Railway for public deployment
 - A browser UI for workflow visibility
@@ -32,6 +35,7 @@ Browser UI
 → LangGraph workflow
 → governed tools
 → deterministic guardrails
+→ controlled OpenAI response drafting
 → SQLAlchemy persistence
 → Postgres audit trail
 ```
@@ -51,7 +55,7 @@ Browser UI
 
 ## Business Value
 
-WarrantyWise reduces manual triage for common warranty requests while preventing unsupported replacement actions. It improves consistency of policy application, creates an auditable decision trail, supports future cost tracking and optimization, and provides a reusable architecture pattern for other customer support workflows.
+DecisionTrace AI reduces manual triage for governed customer decisions while preventing unsupported actions. In the warranty replacement reference workflow, it improves consistency of policy application, creates an auditable decision trail, supports future cost tracking and optimization, and provides a reusable architecture pattern for other support, financial, insurance, and compliance workflows.
 
 The [Cost Model v1](cost-model.md) outlines how the architecture will estimate and control LLM, tool, retrieval, audit, observability, infrastructure, and human review costs.
 
@@ -61,7 +65,7 @@ The [roadmap](roadmap.md) clarifies Phase 1 limitations and the planned path tow
 
 ## Phase 1 Scope
 
-Phase 1 implements synthetic domain data, a deterministic warranty workflow, the cracked-screen scenario, no automatic replacement for excluded accidental damage, persisted workflow/audit/human review records, and a deployed demo.
+Phase 1 implements synthetic domain data, a deterministic warranty replacement reference workflow, the cracked-screen scenario, no automatic replacement for excluded accidental damage, controlled LLM response drafting when configured, persisted workflow/audit/human review records, and a deployed demo.
 
 The primary scenario is intentionally nuanced: the customer is inside the 12-month warranty window, but the cracked screen is excluded because the current policy excludes accidental damage. The correct outcome is a blocked replacement request with a safe customer explanation and persisted audit trail.
 
@@ -71,7 +75,7 @@ The primary scenario is intentionally nuanced: the customer is inside the 12-mon
 - No real Salesforce integration
 - No real customer authentication
 - No real fulfillment/shipping integration
-- No real LLM call yet
+- No LLM intake classifier or multi-turn conversation yet
 - No true LangGraph interrupt/resume yet
 - No Ragas/Langfuse/LangSmith yet
 - No CrewAI/MCP/A2A implementation yet

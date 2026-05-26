@@ -1,8 +1,10 @@
-# WarrantyWise Cost Model v1
+# DecisionTrace AI Cost Model v1
 
 Cost modeling is part of enterprise agentic AI architecture. A production agent is not only an LLM prompt with tools; it is a workflow that consumes infrastructure, tool/API calls, retrieval, database writes, audit logging, observability, human review, and maintenance.
 
-Phase 1 now supports controlled LLM response drafting when OpenAI credentials and a model are configured. Token usage remains optional and provider-reported: if the provider response includes usage metadata, WarrantyWise stores input, output, total, and cached token counts in workflow state. If LLM drafting is not configured, token fields remain empty and the deterministic response is used.
+This cost model is demonstrated through the warranty replacement reference workflow, but it applies to broader governed agentic workflows such as credit approval, insurance claims, refunds, compliance exceptions, and service escalations.
+
+Phase 1 now supports controlled LLM response drafting when OpenAI credentials and a model are configured. Token usage remains optional and provider-reported: if the provider response includes usage metadata, DecisionTrace AI stores input, output, total, and cached token counts in workflow state. If LLM drafting is not configured, token fields remain empty and the deterministic response is used.
 
 ## Cost Modeling Framework
 
@@ -37,7 +39,7 @@ Phase 1 now supports controlled LLM response drafting when OpenAI credentials an
 - Broken API/integration fixes
 - Incident response
 
-## WarrantyWise Phase 1 Cost Drivers
+## Warranty Replacement Reference Workflow Cost Drivers
 
 | Workflow Step | Cost Driver | Cost Layer | Notes |
 | --- | --- | --- | --- |
@@ -96,7 +98,7 @@ A blocked cracked-screen case may be cheaper operationally than a replacement fl
 
 Multi-step ReAct-style agents can repeatedly resend system prompts, tool definitions, chat history, and retrieved context. A five-step loop may cost much more than a two-step loop because context is repeatedly passed back to the LLM.
 
-WarrantyWise Phase 1 avoids this by using deterministic LangGraph routing. Future LLM use should include max tool-call limits, max reasoning-loop limits, and fallback behavior.
+DecisionTrace AI Phase 1 avoids this by using deterministic LangGraph routing. Future LLM use should include max tool-call limits, max reasoning-loop limits, and fallback behavior.
 
 ## Prompt and Context Bloat
 
@@ -197,7 +199,7 @@ human_review_cost = average_review_minutes × loaded_hourly_rate / 60
 
 Track escalation rate and approval/rejection rate. A high escalation rate may indicate poor automation, policy ambiguity, weak retrieval, unclear guardrails, or missing integrations.
 
-## WarrantyWise Cost-Control Blueprint
+## DecisionTrace AI Cost-Control Blueprint
 
 | Step | Optimization Lever | Technical Mechanism | Financial Impact |
 | --- | --- | --- | --- |

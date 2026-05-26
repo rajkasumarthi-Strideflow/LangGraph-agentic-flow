@@ -1,12 +1,16 @@
-# WarrantyWise: Enterprise Agentic Warranty Replacement Platform
+# DecisionTrace AI
+
+Auditable Agentic Workflows for Governed Customer Decisions
+
+DecisionTrace AI is an enterprise agentic workflow platform that demonstrates how AI-assisted customer decisions can be governed, audited, replayed, and safely executed. The first implemented reference workflow is a warranty replacement use case, but the architecture generalizes to regulated and customer-impacting workflows such as credit approval, insurance claims, refunds, compliance exceptions, and service escalations.
 
 ## Executive Overview
 
-WarrantyWise is a portfolio-grade capstone demonstrating a governed, auditable, production-aware agentic AI workflow for customer support warranty replacement. It shows how an enterprise AI architecture can coordinate policy grounding, deterministic guardrails, action control, persistence, auditability, and human review without presenting the system as an unconstrained chatbot.
+DecisionTrace AI is a portfolio-grade capstone demonstrating a governed, auditable, production-aware agentic AI workflow platform. The current WarrantyWise reference workflow implements customer support warranty replacement, showing how an enterprise AI architecture can coordinate policy grounding, deterministic guardrails, controlled OpenAI response drafting, action control, persistence, auditability, and human review without presenting the system as an unconstrained chatbot.
 
 ## Business Problem
 
-Warranty replacement workflows are high-trust support processes. A correct decision requires customer verification, order lookup, warranty policy review, eligibility decisioning, inventory checks, controlled action execution, customer-safe communication, and a durable audit trail. A weak implementation can approve the wrong replacement, cite stale policy, expose unnecessary data, or leave the business unable to reconstruct why a decision was made.
+Customer-impacting decision workflows are high-trust processes. A correct warranty replacement decision, for example, requires customer verification, order lookup, warranty policy review, eligibility decisioning, inventory checks, controlled action execution, customer-safe communication, and a durable audit trail. A weak implementation can approve the wrong replacement, cite stale policy, expose unnecessary data, or leave the business unable to reconstruct why a decision was made.
 
 ## What the Demo Shows
 
@@ -32,11 +36,12 @@ Customer UI
 → LangGraph workflow
 → governed mock tools
 → deterministic guardrails
+→ controlled OpenAI response drafting
 → SQLAlchemy persistence
 → Postgres audit trail
 ```
 
-FastAPI serves both the API and the static frontend. LangGraph orchestrates the warranty workflow as a stateful graph. Governed tools perform identity verification, order lookup, warranty policy retrieval, eligibility checks, inventory checks, replacement creation, escalation, and customer response generation. SQLAlchemy persists workflow runs, audit events, and human review records.
+FastAPI serves both the API and the static frontend. LangGraph orchestrates the warranty workflow as a stateful graph. Governed tools perform identity verification, order lookup, warranty policy retrieval, eligibility checks, inventory checks, replacement creation, escalation, and deterministic response generation. OpenAI can draft final customer-facing response language from minimized approved workflow state when configured. SQLAlchemy persists workflow runs, audit events, and human review records.
 
 Architecture diagrams: [docs/diagrams.md](docs/diagrams.md)
 
@@ -86,6 +91,7 @@ Known limitations and roadmap: [docs/roadmap.md](docs/roadmap.md)
 - Python
 - FastAPI
 - LangGraph
+- OpenAI
 - SQLAlchemy
 - SQLite local fallback
 - Railway Postgres
@@ -177,7 +183,7 @@ curl http://127.0.0.1:8000/api/workflows/{workflow_id}/human-reviews
 
 ## Auditability and Governance
 
-WarrantyWise persists workflow state, audit events, and human review decisions. The audit trail helps reconstruct:
+DecisionTrace AI persists workflow state, audit events, and human review decisions for the warranty replacement reference workflow. The audit trail helps reconstruct:
 
 - Customer request
 - Identity verification
@@ -208,7 +214,7 @@ The current workflow keeps eligibility, guardrail, and action decisions determin
 
 ## Agentforce Mapping Preview
 
-- WarrantyWise workflow → Agentforce agent/subagent
+- DecisionTrace AI workflow → Agentforce agent/subagent
 - Tools → Agentforce actions
 - Warranty policy retrieval → grounding
 - Guardrails → Flow/Apex/policy controls

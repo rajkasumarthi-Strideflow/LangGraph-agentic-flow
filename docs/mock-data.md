@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The synthetic mock data provides a stable in-memory business domain for the WarrantyWise capstone. It gives later tools and workflow nodes predictable customers, products, orders, policies, and inventory records without requiring a database or external service integration.
+The synthetic mock data provides a stable in-memory business domain for the DecisionTrace AI warranty replacement reference workflow. It gives later tools and workflow nodes predictable customers, products, orders, policies, and inventory records without requiring a database or external service integration.
 
 This layer is intentionally small and deterministic. It is designed to support warranty replacement workflow development while keeping Step 2 focused on domain modeling and testable fixtures.
 

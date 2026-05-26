@@ -2,19 +2,23 @@
 
 ## Architecture Diagrams
 
-See [WarrantyWise Architecture Diagrams](diagrams.md) for Mermaid diagrams covering the system architecture, LangGraph workflow, guardrail decisioning, audit/event flow, Railway deployment, and future-state extensions.
+See [DecisionTrace AI Architecture Diagrams](diagrams.md) for Mermaid diagrams covering the system architecture, LangGraph workflow, guardrail decisioning, audit/event flow, Railway deployment, and future-state extensions.
+
+## Platform Positioning
+
+DecisionTrace AI is the broader governed decision workflow platform. The current implementation demonstrates the platform through a warranty replacement reference workflow. The same architecture pattern can support other customer-impacting workflows requiring policy grounding, guardrails, audit replay, human review, and cost-aware orchestration.
 
 At a high level, the Phase 1 architecture is: Browser UI → FastAPI → LangGraph → governed tools → guardrails → SQLAlchemy persistence → Postgres audit trail. FastAPI serves both the static frontend and API routes, while LangGraph coordinates deterministic tool calls and records workflow state, audit events, and human review records.
 
-For a presenter-oriented walkthrough, see the [WarrantyWise Demo Script](demo-script.md).
+For a presenter-oriented walkthrough, see the [DecisionTrace AI Demo Script](demo-script.md).
 
-For a concise business and architecture overview, see [WarrantyWise Executive Summary](executive-summary.md).
+For a concise business and architecture overview, see [DecisionTrace AI Executive Summary](executive-summary.md).
 
-For a replayable example of the cracked-screen decision path, see [WarrantyWise Audit Replay Example](audit-replay-example.md).
+For a replayable example of the cracked-screen decision path, see [DecisionTrace AI Audit Replay Example](audit-replay-example.md).
 
-For a Salesforce-native mapping, see [WarrantyWise Agentforce Mapping](agentforce-mapping.md).
+For a Salesforce-native mapping, see [DecisionTrace AI Agentforce Mapping](agentforce-mapping.md).
 
-For known limitations and future roadmap, see [WarrantyWise Known Limitations and Future Roadmap](roadmap.md).
+For known limitations and future roadmap, see [DecisionTrace AI Known Limitations and Future Roadmap](roadmap.md).
 
 ## Phase 1 LangGraph Workflow
 
@@ -77,7 +81,7 @@ Future enhancements include LangGraph interrupts, persistence, observability, Ra
 
 ## Controlled LLM Response Drafting
 
-WarrantyWise supports controlled LLM response drafting at the end of the workflow when `OPENAI_API_KEY` and `OPENAI_MODEL` are configured. The LLM receives only minimized structured state: customer request, eligibility result, policy reference/version, guardrail decision, replacement/escalation identifiers, escalation reason, and workflow status.
+DecisionTrace AI supports controlled LLM response drafting at the end of the workflow when `OPENAI_API_KEY` and `OPENAI_MODEL` are configured. The LLM receives only minimized structured state: customer request, eligibility result, policy reference/version, guardrail decision, replacement/escalation identifiers, escalation reason, and workflow status.
 
 The LLM does not decide identity verification, order lookup, policy outcome, eligibility, guardrail decisions, replacement creation, or escalation. Those remain governed by deterministic LangGraph nodes and mock tools.
 

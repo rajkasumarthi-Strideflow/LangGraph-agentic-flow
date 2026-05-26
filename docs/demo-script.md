@@ -1,19 +1,19 @@
-# WarrantyWise Demo Script
+# DecisionTrace AI Demo Script
 
-This script is for a 5–7 minute walkthrough of the Phase 1 WarrantyWise capstone.
+This script is for a 5–7 minute walkthrough of the Phase 1 DecisionTrace AI capstone.
 
 ## A. Opening / Positioning
 
-WarrantyWise demonstrates an enterprise-grade agentic workflow for warranty replacement decisions. The problem is not simply answering a customer chat message; the system has to verify identity, retrieve order context, apply the current warranty policy, enforce action guardrails, generate a safe customer response, persist the decision trail, and support human review.
+This is DecisionTrace AI: an enterprise platform for auditable agentic workflows that support governed customer decisions. The first implemented workflow is warranty replacement, but the pattern generalizes to other customer-impacting decisions where policy grounding, guardrails, audit replay, and human review matter.
 
-This is a governed warranty replacement workflow. The architecture is designed to show how an enterprise AI architect would separate workflow orchestration, tools, policy grounding, guardrails, persistence, auditability, and human handoff.
+The platform demonstrates auditability, deterministic workflow control, governed tools, action guardrails, controlled LLM response drafting, persistence, and human review. The problem is not simply answering a customer chat message; the system has to verify identity, retrieve order context, apply the current warranty policy, enforce action guardrails, generate a safe customer response, persist the decision trail, and support human review.
 
 ## B. Architecture Overview
 
 The Phase 1 architecture is:
 
 ```text
-Browser UI -> FastAPI -> LangGraph -> governed tools -> guardrails -> SQLAlchemy persistence -> Postgres audit trail
+Browser UI -> FastAPI -> LangGraph -> governed tools -> guardrails -> controlled OpenAI response drafting -> SQLAlchemy persistence -> Postgres audit trail
 ```
 
 FastAPI serves both the API and the static frontend from one Railway app to reduce tool complexity. LangGraph coordinates the stateful workflow. Governed mock tools perform bounded actions like identity verification, order lookup, policy retrieval, eligibility checks, inventory checks, escalation, and response generation. SQLAlchemy persists workflow runs, audit events, and human review records, with Railway Postgres used in deployment and SQLite available locally.
@@ -115,7 +115,7 @@ Reference: [docs/roadmap.md](roadmap.md)
 
 ## J. 30-Second Version
 
-WarrantyWise is an enterprise agentic AI capstone for warranty replacement support. It uses FastAPI, LangGraph, governed tools, deterministic guardrails, SQLAlchemy persistence, and Railway Postgres to show how a customer request can be verified, policy-grounded, decisioned, audited, and escalated without relying on an uncontrolled chatbot. The primary demo blocks a cracked-screen replacement because the current warranty policy excludes accidental damage, and it persists the full audit trail for replay.
+DecisionTrace AI is an enterprise agentic AI capstone for governed customer decisions. Its first implemented reference workflow is warranty replacement support: it uses FastAPI, LangGraph, OpenAI response drafting, governed tools, deterministic guardrails, SQLAlchemy persistence, and Railway Postgres to show how a customer request can be verified, policy-grounded, decisioned, audited, and escalated without relying on an uncontrolled chatbot. The primary demo blocks a cracked-screen replacement because the current warranty policy excludes accidental damage, and it persists the full audit trail for replay.
 
 ## K. Interview Q&A Prompts
 

@@ -1,6 +1,6 @@
-# WarrantyWise Architecture Diagrams
+# DecisionTrace AI Architecture Diagrams
 
-These diagrams show the Phase 1 architecture and planned future-state extensions for an enterprise-grade agentic AI support workflow. Phase 1 is deterministic and production-aware: FastAPI serves the frontend and API, LangGraph orchestrates the workflow, governed tools execute bounded actions, SQLAlchemy persists state and audit records, and Railway provides the deployment target.
+These diagrams show the Phase 1 architecture and planned future-state extensions for DecisionTrace AI, an enterprise-grade agentic decision workflow platform. The diagrams currently show the warranty replacement reference workflow implemented in Phase 1. Phase 1 is deterministic and production-aware: FastAPI serves the frontend and API, LangGraph orchestrates the workflow, governed tools execute bounded actions, SQLAlchemy persists state and audit records, and Railway provides the deployment target.
 
 ## Diagram 1: System Architecture
 
@@ -11,7 +11,7 @@ flowchart TD
     subgraph RailwayApp["Railway App Service"]
         Frontend["Static Frontend<br/>HTML / CSS / JavaScript"]
         API["FastAPI API Layer"]
-        Graph["LangGraph Warranty Workflow"]
+        Graph["LangGraph Warranty Reference Workflow"]
         Tools["Governed Mock Tools"]
         Guardrails["Deterministic Guardrails"]
         Persistence["SQLAlchemy Persistence Layer"]
@@ -152,9 +152,9 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Phase1["Phase 1 implemented core<br/>FastAPI + LangGraph + tools + persistence"] --> Future["Future-state extensions"]
+    Phase1["Phase 1 implemented core<br/>FastAPI + LangGraph + tools + OpenAI response drafting + persistence"] --> Future["Future-state extensions"]
 
-    Future --> LLM["Controlled LLM response drafting"]
+    Future --> LLM["Natural language intake<br/>and drafting expansion"]
     Future --> Ragas["Ragas evaluation"]
     Future --> Observability["Langfuse / LangSmith observability"]
     Future --> CrewAI["CrewAI review crew"]
