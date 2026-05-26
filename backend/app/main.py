@@ -75,6 +75,16 @@ def _build_initial_state(
         "guardrail_decision": None,
         "customer_response": None,
         "response_type": None,
+        "llm_drafting_status": None,
+        "llm_customer_response": None,
+        "llm_model_name": None,
+        "llm_input_tokens": None,
+        "llm_output_tokens": None,
+        "llm_total_tokens": None,
+        "llm_cached_tokens": None,
+        "llm_validation_status": None,
+        "llm_validation_errors": None,
+        "final_response_source": None,
         "error_category": None,
         "workflow_status": "started",
     }
@@ -90,6 +100,10 @@ def _workflow_response(state: dict[str, Any]) -> StartWorkflowResponse:
         replacement_request_id=state.get("replacement_request_id"),
         escalation_id=state.get("escalation_id"),
         customer_response=state.get("customer_response"),
+        llm_drafting_status=state.get("llm_drafting_status"),
+        llm_model_name=state.get("llm_model_name"),
+        llm_validation_status=state.get("llm_validation_status"),
+        final_response_source=state.get("final_response_source"),
     )
 
 

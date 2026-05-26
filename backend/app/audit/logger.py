@@ -89,6 +89,7 @@ def log_workflow_completed(state: WarrantyWorkflowState) -> AuditEvent:
         output_summary={
             "workflow_status": state["workflow_status"],
             "response_type": state.get("response_type"),
+            "final_response_source": state.get("final_response_source"),
             "replacement_request_id": state.get("replacement_request_id"),
             "escalation_id": state.get("escalation_id"),
         },

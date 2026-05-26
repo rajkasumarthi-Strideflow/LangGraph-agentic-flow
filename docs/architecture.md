@@ -20,7 +20,7 @@ For known limitations and future roadmap, see [WarrantyWise Known Limitations an
 
 Phase 1 uses LangGraph to model the warranty replacement flow as an explicit local state machine. The graph gives the capstone a clear orchestration layer for sequencing governed tools, branching on deterministic state, and preserving decision fields that can later become audit records.
 
-No real LLM calls, external integrations, interrupts, or deployment concerns are included in this phase. The workflow is deterministic and uses the mocked tools in `backend/app/tools/warranty_tools.py`.
+No real external integrations, interrupts, or deployment concerns are included in this phase. Eligibility, guardrail, and action execution remain deterministic and use the mocked tools in `backend/app/tools/warranty_tools.py`.
 
 ## Workflow Sequence
 
@@ -75,6 +75,16 @@ All tools are deterministic mock functions. They return simple dictionaries, inc
 
 Future enhancements include LangGraph interrupts, persistence, observability, Ragas evaluation, CrewAI collaboration patterns, MCP tool integration, and A2A interoperability. Those capabilities are intentionally deferred so the first workflow remains easy to test and explain.
 
+## Controlled LLM Response Drafting
+
+WarrantyWise supports controlled LLM response drafting at the end of the workflow when `OPENAI_API_KEY` and `OPENAI_MODEL` are configured. The LLM receives only minimized structured state: customer request, eligibility result, policy reference/version, guardrail decision, replacement/escalation identifiers, escalation reason, and workflow status.
+
+The LLM does not decide identity verification, order lookup, policy outcome, eligibility, guardrail decisions, replacement creation, or escalation. Those remain governed by deterministic LangGraph nodes and mock tools.
+
+The deterministic `generate_customer_response` tool still runs first. The LLM may draft alternate customer-facing wording, but a deterministic validator must pass before the LLM response becomes the final response. The validator blocks drafts that claim a replacement was created without a `replacement_request_id`, promise eligibility for a `not_eligible` case, imply a blocked action was allowed, invent human escalation, or mention implementation details.
+
+If LLM drafting is disabled, not configured, fails, or fails validation, the workflow keeps the deterministic customer response and records the fallback source in workflow state and audit events.
+
 ## Phase 1 Auditability
 
 The workflow records audit events for meaningful steps: workflow start, identity verification, order lookup, policy retrieval, eligibility checks, inventory checks, guardrail decisions, replacement request creation, human escalation, customer response generation, workflow completion, and workflow failure.
@@ -83,7 +93,7 @@ Audit logging is persisted through SQLAlchemy in the `audit_events` table. This 
 
 ## Phase 1 API Layer
 
-FastAPI exposes the local workflow for frontend or external callers. The API does not add deployment configuration, real LLM calls, or LangGraph interrupt/resume behavior.
+FastAPI exposes the local workflow for frontend or external callers. The API does not add LangGraph interrupt/resume behavior.
 
 Endpoints:
 
@@ -110,7 +120,7 @@ The Phase 1 frontend has been polished into a simple enterprise workflow console
 
 The console renders only real data from existing backend APIs: workflow state, persisted audit events, derived audit/tool-call counts, escalation state, and persisted human review records. Replacement action status, policy reference, guardrail decision, audit replay rows, and human review status are computed from those API responses instead of fabricated telemetry.
 
-Future LLM token metrics, cost telemetry, Langfuse/LangSmith trace links, latency instrumentation, and Ragas evaluation results should be added to the UI only after the backend emits real instrumentation for them. Until then, they are shown only as planned Phase 2 enhancements.
+The UI now shows real LLM drafting metadata when present, including drafting status, model name, validation status, response source, and provider-reported token fields. Cost telemetry, Langfuse/LangSmith trace links, latency instrumentation, and Ragas evaluation results should be added only after the backend emits real instrumentation for them. Until then, they are shown only as planned Phase 2 enhancements.
 
 ## Phase 1 Persistence Layer
 

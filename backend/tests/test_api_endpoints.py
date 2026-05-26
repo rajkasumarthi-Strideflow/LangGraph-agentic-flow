@@ -53,6 +53,8 @@ def test_start_workflow_primary_cracked_screen(client: TestClient) -> None:
     assert data["eligibility_status"] == "not_eligible"
     assert data["replacement_request_id"] is None
     assert data["customer_response"]
+    assert data["llm_drafting_status"] == "not_configured"
+    assert data["final_response_source"] == "llm_not_configured_fallback"
 
 
 def test_get_workflow_returns_final_state(client: TestClient) -> None:
@@ -65,6 +67,7 @@ def test_get_workflow_returns_final_state(client: TestClient) -> None:
     assert data["workflow_id"] == started["workflow_id"]
     assert data["state"]["workflow_status"] == "completed"
     assert data["state"]["eligibility_status"] == "not_eligible"
+    assert data["state"]["llm_drafting_status"] == "not_configured"
 
 
 def test_get_workflow_audit_returns_timeline(client: TestClient) -> None:

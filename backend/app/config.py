@@ -5,6 +5,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     DATABASE_URL: str = "sqlite:///./warrantywise.db"
+    OPENAI_API_KEY: str | None = None
+    OPENAI_MODEL: str | None = None
+    LLM_RESPONSE_DRAFTING_ENABLED: bool = True
 
     @property
     def sqlalchemy_database_url(self) -> str:

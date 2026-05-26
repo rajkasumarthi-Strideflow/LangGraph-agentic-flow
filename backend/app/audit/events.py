@@ -16,6 +16,11 @@ class AuditEventType(StrEnum):
     REPLACEMENT_REQUEST_CREATED = "replacement_request_created"
     HUMAN_ESCALATION_CREATED = "human_escalation_created"
     CUSTOMER_RESPONSE_GENERATED = "customer_response_generated"
+    LLM_RESPONSE_DRAFTING_SKIPPED = "llm_response_drafting_skipped"
+    LLM_RESPONSE_DRAFTED = "llm_response_drafted"
+    LLM_RESPONSE_VALIDATION_PASSED = "llm_response_validation_passed"
+    LLM_RESPONSE_VALIDATION_FAILED = "llm_response_validation_failed"
+    LLM_RESPONSE_DRAFTING_FAILED = "llm_response_drafting_failed"
     WORKFLOW_COMPLETED = "workflow_completed"
     WORKFLOW_FAILED = "workflow_failed"
 

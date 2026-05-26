@@ -33,7 +33,7 @@ Phase 1 intentionally establishes a governed workflow foundation before adding p
 - No real Salesforce integration
 - No real customer authentication
 - No real order, inventory, shipping, or fulfillment systems
-- No real LLM calls yet
+- No LLM intake classifier or multi-turn LLM conversation yet
 - No natural language intent classifier yet
 - No true LangGraph interrupt/resume yet
 - Human review is simulated through API state update
@@ -79,7 +79,7 @@ Implemented tile examples:
 - Tool Calls
 - Human Review
 
-The UI intentionally does not show active LLM token, cost, latency, or tracing metrics yet because those backend telemetry sources are not implemented.
+The UI shows LLM drafting status and provider-reported token fields when available. It intentionally does not show active dollar cost, latency, or tracing metrics yet because those backend telemetry sources are not implemented.
 
 Future telemetry tile examples:
 
@@ -118,7 +118,9 @@ Example structured output:
 
 ### Controlled LLM Response Drafting
 
-Add LLM only for customer-safe response drafting first, not for eligibility decisioning.
+Status: implemented for final customer response drafting when OpenAI credentials and a model are configured.
+
+LLM use is limited to customer-safe response drafting, not eligibility decisioning.
 
 Inputs:
 
@@ -134,6 +136,8 @@ Output:
 Validation:
 
 - Must not claim replacement was created unless `replacement_request_id` exists.
+- Must pass deterministic output validation before replacing the deterministic response.
+- Falls back to deterministic response when LLM drafting is disabled, not configured, fails, or fails validation.
 
 ### True HITL with LangGraph Interrupts
 
@@ -157,9 +161,9 @@ Tracked values:
 - `audit_event_count`
 - `human_review_required`
 - `estimated_human_review_cost`
-- Future `llm_input_tokens`
-- Future `llm_output_tokens`
-- Future `cached_tokens`
+- `llm_input_tokens` when provider usage metadata is available
+- `llm_output_tokens` when provider usage metadata is available
+- `cached_tokens` when provider usage metadata is available
 - `estimated_total_cost`
 
 ### Observability with Langfuse or LangSmith

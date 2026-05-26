@@ -9,3 +9,4 @@ pytest
 httpx
 psycopg[binary]
 sqlalchemy
+openai

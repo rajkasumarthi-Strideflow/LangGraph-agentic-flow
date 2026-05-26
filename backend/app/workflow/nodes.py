@@ -2,6 +2,8 @@ from typing import Any
 
 from app.audit.events import AuditEventType
 from app.audit.logger import log_node_event
+from app.llm.response_drafter import draft_customer_response_with_llm
+from app.llm.response_validator import validate_llm_customer_response
 from app.tools.warranty_tools import (
     check_inventory_availability,
     check_replacement_eligibility,
@@ -529,11 +531,124 @@ def generate_customer_response_node(
         escalation_id=state.get("escalation_id"),
         reason=reason,
     )
-    updates = {
+    deterministic_response = result["customer_response"]
+    updates: dict[str, Any] = {
         "customer_response": result["customer_response"],
         "response_type": result["response_type"],
+        "final_response_source": "deterministic",
         "workflow_status": "completed",
     }
+
+    llm_result = draft_customer_response_with_llm({**state, **updates})
+    usage = llm_result.get("usage") or {}
+    llm_updates = {
+        "llm_drafting_status": llm_result.get("drafting_status"),
+        "llm_customer_response": llm_result.get("llm_customer_response"),
+        "llm_model_name": llm_result.get("model_name"),
+        "llm_input_tokens": usage.get("input_tokens"),
+        "llm_output_tokens": usage.get("output_tokens"),
+        "llm_total_tokens": usage.get("total_tokens"),
+        "llm_cached_tokens": usage.get("cached_tokens"),
+    }
+    updates.update(llm_updates)
+
+    drafting_status = llm_result.get("drafting_status")
+    if drafting_status in {"disabled", "not_configured"}:
+        source = (
+            "llm_disabled_fallback"
+            if drafting_status == "disabled"
+            else "llm_not_configured_fallback"
+        )
+        updates["final_response_source"] = source
+        log_node_event(
+            state={**state, **updates},
+            event_type=AuditEventType.LLM_RESPONSE_DRAFTING_SKIPPED,
+            node_name="generate_customer_response",
+            tool_name="draft_customer_response_with_llm",
+            input_summary=llm_result.get("llm_input_payload"),
+            output_summary={
+                "drafting_status": drafting_status,
+                "final_response_source": source,
+            },
+            reason=f"LLM response drafting {drafting_status}.",
+        )
+    elif drafting_status == "failed":
+        updates["final_response_source"] = "llm_failed_fallback"
+        log_node_event(
+            state={**state, **updates},
+            event_type=AuditEventType.LLM_RESPONSE_DRAFTING_FAILED,
+            node_name="generate_customer_response",
+            tool_name="draft_customer_response_with_llm",
+            input_summary=llm_result.get("llm_input_payload"),
+            output_summary={
+                "drafting_status": "failed",
+                "final_response_source": "llm_failed_fallback",
+            },
+            reason=llm_result.get("error_message"),
+        )
+    elif drafting_status == "completed":
+        log_node_event(
+            state={**state, **updates},
+            event_type=AuditEventType.LLM_RESPONSE_DRAFTED,
+            node_name="generate_customer_response",
+            tool_name="draft_customer_response_with_llm",
+            input_summary=llm_result.get("llm_input_payload"),
+            output_summary={
+                "drafting_status": "completed",
+                "model_name": llm_result.get("model_name"),
+                "usage": usage,
+            },
+            reason="LLM drafted customer response from minimized approved state.",
+        )
+        validation = validate_llm_customer_response(
+            {**state, **updates},
+            llm_result.get("llm_customer_response"),
+        )
+        updates.update(
+            {
+                "llm_validation_status": validation["validation_status"],
+                "llm_validation_errors": validation["validation_errors"],
+            }
+        )
+        if validation["validation_status"] == "passed":
+            updates.update(
+                {
+                    "customer_response": llm_result.get("llm_customer_response")
+                    or deterministic_response,
+                    "final_response_source": "llm_validated",
+                }
+            )
+            log_node_event(
+                state={**state, **updates},
+                event_type=AuditEventType.LLM_RESPONSE_VALIDATION_PASSED,
+                node_name="generate_customer_response",
+                input_summary={"drafting_status": "completed"},
+                output_summary={
+                    "validation_status": "passed",
+                    "final_response_source": "llm_validated",
+                },
+                reason="LLM response passed deterministic safety validation.",
+            )
+        else:
+            updates.update(
+                {
+                    "customer_response": deterministic_response,
+                    "final_response_source": "llm_failed_fallback",
+                }
+            )
+            log_node_event(
+                state={**state, **updates},
+                event_type=AuditEventType.LLM_RESPONSE_VALIDATION_FAILED,
+                node_name="generate_customer_response",
+                input_summary={"drafting_status": "completed"},
+                output_summary={
+                    "validation_status": "failed",
+                    "validation_errors": validation["validation_errors"],
+                    "final_response_source": "llm_failed_fallback",
+                },
+                reason="LLM response failed deterministic safety validation.",
+            )
+
     log_node_event(
         state={**state, **updates},
         event_type=AuditEventType.CUSTOMER_RESPONSE_GENERATED,
@@ -546,6 +661,9 @@ def generate_customer_response_node(
         },
         output_summary={
             "response_type": result["response_type"],
+            "final_response_source": updates.get("final_response_source"),
+            "llm_drafting_status": updates.get("llm_drafting_status"),
+            "llm_validation_status": updates.get("llm_validation_status"),
             "workflow_status": "completed",
         },
         reason=reason,

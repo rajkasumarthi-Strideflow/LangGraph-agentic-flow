@@ -117,6 +117,7 @@ h2 {
 }
 
 .telemetry-panel,
+.ai-panel,
 .timeline-panel,
 .replay-panel,
 .review-panel,
@@ -343,6 +344,20 @@ select:focus {
   gap: 12px;
 }
 
+.ai-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ai-grid .summary-card {
+  background: #fbfaff;
+}
+
+.ai-grid .response-card {
+  grid-column: 1 / -1;
+}
+
 .telemetry-card {
   min-height: 112px;
   border-top: 4px solid var(--primary);
@@ -543,6 +558,10 @@ select:focus {
   .telemetry-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .ai-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) {
@@ -559,6 +578,7 @@ select:focus {
   .field-grid,
   .decision-summary,
   .telemetry-grid,
+  .ai-grid,
   .timeline-row,
   .replay-body {
     grid-template-columns: 1fr;

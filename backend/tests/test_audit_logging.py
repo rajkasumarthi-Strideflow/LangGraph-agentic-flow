@@ -40,6 +40,16 @@ def _base_state(
         "guardrail_decision": None,
         "customer_response": None,
         "response_type": None,
+        "llm_drafting_status": None,
+        "llm_customer_response": None,
+        "llm_model_name": None,
+        "llm_input_tokens": None,
+        "llm_output_tokens": None,
+        "llm_total_tokens": None,
+        "llm_cached_tokens": None,
+        "llm_validation_status": None,
+        "llm_validation_errors": None,
+        "final_response_source": None,
         "error_category": None,
         "workflow_status": "started",
     }
@@ -64,6 +74,7 @@ def test_primary_cracked_screen_audit_timeline() -> None:
     assert AuditEventType.POLICY_RETRIEVED in event_types
     assert AuditEventType.ELIGIBILITY_CHECKED in event_types
     assert AuditEventType.GUARDRAIL_DECISION in event_types
+    assert AuditEventType.LLM_RESPONSE_DRAFTING_SKIPPED in event_types
     assert AuditEventType.CUSTOMER_RESPONSE_GENERATED in event_types
     assert AuditEventType.WORKFLOW_COMPLETED in event_types
     assert AuditEventType.REPLACEMENT_REQUEST_CREATED not in event_types

@@ -38,6 +38,11 @@ Audit payloads must stay minimal. They should not include full customer profiles
 - `replacement_request_created`
 - `human_escalation_created`
 - `customer_response_generated`
+- `llm_response_drafting_skipped`
+- `llm_response_drafted`
+- `llm_response_validation_passed`
+- `llm_response_validation_failed`
+- `llm_response_drafting_failed`
 - `workflow_completed`
 - `workflow_failed`
 
@@ -51,8 +56,9 @@ For the primary customer request, “My laptop screen cracked after 9 months. Ca
 4. `policy_retrieved`
 5. `eligibility_checked`
 6. `guardrail_decision` with `guardrail_decision=block`
-7. `customer_response_generated`
-8. `workflow_completed`
+7. `llm_response_drafting_skipped` when OpenAI credentials/model are not configured, or LLM draft/validation events when configured
+8. `customer_response_generated`
+9. `workflow_completed`
 
 There should be no `replacement_request_created` event because the current policy excludes accidental damage and cracked screens caused by drops, impact, or accidental damage.
 
@@ -68,8 +74,9 @@ For a future eligible issue, such as a covered manufacturing defect with availab
 6. `inventory_checked`
 7. `guardrail_decision` with `guardrail_decision=allow`
 8. `replacement_request_created`
-9. `customer_response_generated`
-10. `workflow_completed`
+9. `llm_response_drafting_skipped` when OpenAI credentials/model are not configured, or LLM draft/validation events when configured
+10. `customer_response_generated`
+11. `workflow_completed`
 
 ## Enterprise Importance
 

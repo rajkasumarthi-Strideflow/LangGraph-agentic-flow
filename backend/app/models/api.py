@@ -18,6 +18,10 @@ class StartWorkflowResponse(BaseModel):
     replacement_request_id: str | None
     escalation_id: str | None
     customer_response: str | None
+    llm_drafting_status: str | None = None
+    llm_model_name: str | None = None
+    llm_validation_status: str | None = None
+    final_response_source: str | None = None
 
 
 class WorkflowStateResponse(BaseModel):

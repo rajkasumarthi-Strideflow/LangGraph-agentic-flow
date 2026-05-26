@@ -1,5 +1,7 @@
 from typing import Any
 
+from app.audit.events import AuditEventType
+from app.audit.store import clear_audit_events, get_audit_events
 from app.tools.mock_data import PRIMARY_CUSTOMER_ID, PRIMARY_ORDER_ID
 from app.workflow.graph import run_warranty_workflow
 from app.workflow.nodes import create_replacement_request_node
@@ -38,13 +40,25 @@ def _base_state(
         "guardrail_decision": None,
         "customer_response": None,
         "response_type": None,
+        "llm_drafting_status": None,
+        "llm_customer_response": None,
+        "llm_model_name": None,
+        "llm_input_tokens": None,
+        "llm_output_tokens": None,
+        "llm_total_tokens": None,
+        "llm_cached_tokens": None,
+        "llm_validation_status": None,
+        "llm_validation_errors": None,
+        "final_response_source": None,
         "error_category": None,
         "workflow_status": "started",
     }
 
 
 def test_primary_cracked_screen_workflow_blocks_replacement() -> None:
+    clear_audit_events()
     result = run_warranty_workflow(_base_state())
+    event_types = [event.event_type for event in get_audit_events("wf_test_001")]
 
     assert result["workflow_status"] == "completed"
     assert result["identity_verified"] is True
@@ -55,6 +69,9 @@ def test_primary_cracked_screen_workflow_blocks_replacement() -> None:
     assert result["replacement_request_id"] is None
     assert result["customer_response"]
     assert "replacement request has been created" not in result["customer_response"]
+    assert result["llm_drafting_status"] == "not_configured"
+    assert result["final_response_source"] == "llm_not_configured_fallback"
+    assert AuditEventType.LLM_RESPONSE_DRAFTING_SKIPPED in event_types
 
 
 def test_unknown_customer_workflow_routes_to_escalation() -> None:
@@ -115,3 +132,64 @@ def test_create_replacement_request_node_does_not_create_when_not_eligible() -> 
 
     assert result["replacement_request_id"] is None
     assert result["replacement_status"] == "not_created"
+
+
+def test_valid_llm_draft_replaces_deterministic_response(monkeypatch: Any) -> None:
+    def fake_draft_customer_response_with_llm(state: dict) -> dict[str, Any]:
+        return {
+            "drafting_status": "completed",
+            "llm_customer_response": "Based on the current policy, this item is not automatically eligible for replacement because cracked screens from accidental damage are excluded.",
+            "model_name": "test-model",
+            "llm_input_payload": {"eligibility_status": state.get("eligibility_status")},
+            "usage": {
+                "input_tokens": 10,
+                "output_tokens": 12,
+                "total_tokens": 22,
+                "cached_tokens": 0,
+            },
+            "error_message": None,
+        }
+
+    monkeypatch.setattr(
+        "app.workflow.nodes.draft_customer_response_with_llm",
+        fake_draft_customer_response_with_llm,
+    )
+
+    result = run_warranty_workflow(_base_state())
+
+    assert result["customer_response"].startswith("Based on the current policy")
+    assert result["final_response_source"] == "llm_validated"
+    assert result["llm_validation_status"] == "passed"
+    assert result["llm_model_name"] == "test-model"
+    assert result["llm_total_tokens"] == 22
+
+
+def test_unsafe_llm_draft_falls_back_to_deterministic_response(
+    monkeypatch: Any,
+) -> None:
+    def fake_draft_customer_response_with_llm(state: dict) -> dict[str, Any]:
+        return {
+            "drafting_status": "completed",
+            "llm_customer_response": "Your replacement request has been created and you are eligible for shipment.",
+            "model_name": "test-model",
+            "llm_input_payload": {"eligibility_status": state.get("eligibility_status")},
+            "usage": {
+                "input_tokens": None,
+                "output_tokens": None,
+                "total_tokens": None,
+                "cached_tokens": None,
+            },
+            "error_message": None,
+        }
+
+    monkeypatch.setattr(
+        "app.workflow.nodes.draft_customer_response_with_llm",
+        fake_draft_customer_response_with_llm,
+    )
+
+    result = run_warranty_workflow(_base_state())
+
+    assert result["final_response_source"] == "llm_failed_fallback"
+    assert result["llm_validation_status"] == "failed"
+    assert result["llm_validation_errors"]
+    assert "replacement request has been created" not in result["customer_response"]

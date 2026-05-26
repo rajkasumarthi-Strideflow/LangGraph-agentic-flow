@@ -59,6 +59,7 @@ Known limitations and roadmap: [docs/roadmap.md](docs/roadmap.md)
 - LangGraph workflow
 - Governed mock tools
 - Deterministic eligibility and guardrail logic
+- Controlled LLM response drafting when configured
 - Persisted workflow runs
 - Persisted audit events
 - Persisted human review records
@@ -97,6 +98,8 @@ Known limitations and roadmap: [docs/roadmap.md](docs/roadmap.md)
 Live demo: `<add Railway public URL here>`
 
 The Phase 1 UI is a polished enterprise workflow console built with vanilla HTML, CSS, and JavaScript. It displays real workflow state, persisted audit events, derived tool-call counts, human review status, and audit replay details from the backend APIs without adding frontend framework complexity.
+
+Controlled LLM response drafting is supported when `OPENAI_API_KEY` and `OPENAI_MODEL` are configured. Without those variables, the app uses deterministic response generation and marks LLM drafting as `not_configured`.
 
 ## Local Setup
 
@@ -190,7 +193,7 @@ Audit payloads are intentionally minimal. The workflow avoids logging full custo
 
 ## Cost-Aware Architecture
 
-The current phase is deterministic and does not use real LLM calls. Future cost modeling will include:
+The current workflow keeps eligibility, guardrail, and action decisions deterministic. Optional LLM response drafting can add provider-reported token fields when configured. Future cost modeling will include:
 
 - Token consumption
 - Tool/API calls
@@ -218,7 +221,7 @@ The current phase is deterministic and does not use real LLM calls. Future cost 
 - No real Salesforce integration
 - No real customer authentication
 - No real shipping/fulfillment integration
-- No real LLM call yet
+- No LLM intake classifier or multi-turn conversation yet
 - No real Ragas/Langfuse/LangSmith yet
 - No real MCP/A2A yet
 - Human review is simulated, not a true LangGraph interrupt/resume yet
@@ -226,7 +229,7 @@ The current phase is deterministic and does not use real LLM calls. Future cost 
 ## Roadmap
 
 - Controlled workflow console enhancements
-- Controlled LLM response drafting
+- Expanded controlled LLM response drafting
 - Architecture diagrams
 - Screenshots
 - Cost model v1

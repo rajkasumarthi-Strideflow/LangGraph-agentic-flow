@@ -29,5 +29,15 @@ class WarrantyWorkflowState(TypedDict):
     guardrail_decision: str | None
     customer_response: str | None
     response_type: str | None
+    llm_drafting_status: str | None
+    llm_customer_response: str | None
+    llm_model_name: str | None
+    llm_input_tokens: int | None
+    llm_output_tokens: int | None
+    llm_total_tokens: int | None
+    llm_cached_tokens: int | None
+    llm_validation_status: str | None
+    llm_validation_errors: list[str] | None
+    final_response_source: str | None
     error_category: str | None
     workflow_status: str

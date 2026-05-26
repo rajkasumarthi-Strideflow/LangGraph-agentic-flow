@@ -15,6 +15,7 @@ const elements = {
   status: document.querySelector("#status-message"),
   result: document.querySelector("#workflow-result"),
   telemetry: document.querySelector("#telemetry-tiles"),
+  aiDrafting: document.querySelector("#ai-drafting"),
   timeline: document.querySelector("#workflow-timeline"),
   auditReplay: document.querySelector("#audit-replay"),
   reviewContent: document.querySelector("#review-content"),
@@ -84,6 +85,17 @@ function statusClass(kind, value) {
 
   if (kind === "replacement" && value !== "Not Created") {
     return "status-positive";
+  }
+
+  if (kind === "llm") {
+    if (value === "completed" || value === "passed") return "status-positive";
+    if (value === "not_configured" || value === "disabled" || value === "Not Run") return "status-neutral";
+    if (value === "failed") return "status-danger";
+  }
+
+  if (kind === "response") {
+    if (value === "llm_validated") return "status-positive";
+    if (value.includes("fallback")) return "status-warning";
   }
 
   return "status-neutral";
@@ -203,6 +215,7 @@ async function refreshWorkflowView(workflowId) {
 
   renderDecisionSummary();
   renderTelemetryTiles();
+  renderAiDraftingPanel();
   renderWorkflowTimeline();
   renderAuditReplay();
   renderHumanReviewPanel();
@@ -229,6 +242,34 @@ function renderDecisionSummary() {
     summaryCard("Customer Response", workflow.customer_response || "No customer response yet.", {
       response: true,
     }),
+    summaryCard("Response Source", pill(workflow.final_response_source, "response", "deterministic"), { html: true }),
+  ].join("");
+}
+
+function renderAiDraftingPanel() {
+  const workflow = appState.workflow;
+  if (!workflow) {
+    elements.aiDrafting.className = "ai-grid empty-state";
+    elements.aiDrafting.textContent = "Run a workflow to see LLM drafting status.";
+    return;
+  }
+
+  const validationErrors = workflow.llm_validation_errors || [];
+  elements.aiDrafting.className = "ai-grid";
+  elements.aiDrafting.innerHTML = [
+    summaryCard("Drafting Status", pill(workflow.llm_drafting_status, "llm", "Not Available"), { html: true }),
+    summaryCard("Model Used", workflow.llm_model_name || "Not Configured"),
+    summaryCard("Validation Status", pill(workflow.llm_validation_status, "llm", "Not Run"), { html: true }),
+    summaryCard("Final Response Source", pill(workflow.final_response_source, "response", "deterministic"), { html: true }),
+    summaryCard("Input Tokens", workflow.llm_input_tokens ?? "Not Available"),
+    summaryCard("Output Tokens", workflow.llm_output_tokens ?? "Not Available"),
+    summaryCard("Cached Tokens", workflow.llm_cached_tokens ?? "Not Available"),
+    summaryCard("Total Tokens", workflow.llm_total_tokens ?? "Not Available"),
+    summaryCard(
+      "Validation Errors",
+      validationErrors.length ? validationErrors.join("; ") : "None",
+      { response: true },
+    ),
   ].join("");
 }
 
@@ -303,6 +344,12 @@ function timelineTone(event) {
   if (event.event_type === "replacement_request_created" || event.event_type === "workflow_completed") {
     return "positive";
   }
+  if (event.event_type === "llm_response_validation_passed") {
+    return "positive";
+  }
+  if (event.event_type === "llm_response_validation_failed" || event.event_type === "llm_response_drafting_failed") {
+    return "warning";
+  }
   return "";
 }
 
@@ -345,6 +392,11 @@ function auditMeaning(event) {
     guardrail_decision: "The deterministic replacement action guardrail made a decision.",
     replacement_request_created: "A replacement request was created after guardrails allowed it.",
     human_escalation_created: "The workflow created a human escalation for review.",
+    llm_response_drafting_skipped: "LLM drafting was skipped because it was disabled or not configured.",
+    llm_response_drafted: "The LLM drafted response language from minimized approved workflow state.",
+    llm_response_validation_passed: "The LLM draft passed deterministic response validation.",
+    llm_response_validation_failed: "The LLM draft failed validation and deterministic fallback was used.",
+    llm_response_drafting_failed: "The LLM drafting call failed and deterministic fallback was used.",
     customer_response_generated: "A customer-safe response was generated from workflow state.",
     workflow_completed: "The workflow completed successfully.",
     workflow_failed: "The workflow failed and recorded an audit event.",
@@ -483,6 +535,7 @@ function loadUnknownCustomerScenario() {
 
 function initializeConsole() {
   renderTelemetryTiles();
+  renderAiDraftingPanel();
   elements.runButton.addEventListener("click", startWorkflow);
   elements.loadCracked.addEventListener("click", loadCrackedScreenScenario);
   elements.loadUnknown.addEventListener("click", loadUnknownCustomerScenario);

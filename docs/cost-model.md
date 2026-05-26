@@ -2,7 +2,7 @@
 
 Cost modeling is part of enterprise agentic AI architecture. A production agent is not only an LLM prompt with tools; it is a workflow that consumes infrastructure, tool/API calls, retrieval, database writes, audit logging, observability, human review, and maintenance.
 
-Phase 1 does not use real LLM calls yet, so token costs are documented as future/estimated costs rather than measured costs. Current Phase 1 cost drivers include app hosting, database persistence, API/tool execution, audit storage, and human review simulation.
+Phase 1 now supports controlled LLM response drafting when OpenAI credentials and a model are configured. Token usage remains optional and provider-reported: if the provider response includes usage metadata, WarrantyWise stores input, output, total, and cached token counts in workflow state. If LLM drafting is not configured, token fields remain empty and the deterministic response is used.
 
 ## Cost Modeling Framework
 
@@ -52,13 +52,13 @@ Phase 1 does not use real LLM calls yet, so token costs are documented as future
 | `guardrail_check` node | Guardrail execution | Architectural Overhead | Prevents unsafe replacement creation. |
 | `create_replacement_request` tool | Controlled write/action | Core Consumption | Runs only when guardrails allow. |
 | `escalate_to_human` tool | Escalation path | Business TCO | Future real queue/case routing adds operational cost. |
-| `generate_customer_response` tool | Response generation | Core Consumption | Deterministic Phase 1; future LLM drafting may add token cost. |
+| `generate_customer_response` tool | Response generation | Core Consumption | Deterministic response always runs first. |
 | `workflow_runs` database write | Persistence | Architectural Overhead | Stores final workflow state. |
 | `audit_events` database writes | Audit persistence | Architectural Overhead | One event per meaningful workflow step. |
 | `human_reviews` database write | Human review persistence | Business TCO | Stores simulated reviewer decisions. |
 | Railway app hosting | Compute hosting | Architectural Overhead | Container hosting for FastAPI and static frontend. |
 | Railway Postgres | Managed database | Architectural Overhead | Stores workflow, audit, and review tables. |
-| Future LLM response drafting | Token consumption | Core Consumption | Not implemented in Phase 1. |
+| Controlled LLM response drafting | Token consumption | Core Consumption | Active only when OpenAI credentials/model are configured; usage fields depend on provider metadata. |
 | Future RAG/vector retrieval | Embeddings, vector search, context tokens | Architectural Overhead | Future policy grounding at scale. |
 | Future Langfuse/LangSmith tracing | Trace storage and observability | Architectural Overhead | Future production observability. |
 | Future Ragas evaluation | Evaluation runs | Architectural Overhead | Future retrieval/answer quality measurement. |
@@ -76,7 +76,7 @@ cost_per_interaction =
   + infrastructure allocation
 ```
 
-In Phase 1, LLM token cost is zero because no real LLM call has been added yet. The dominant costs are hosting, database persistence, workflow/API execution, and audit writes.
+When LLM response drafting is not configured, LLM token cost is zero and the dominant costs are hosting, database persistence, workflow/API execution, and audit writes. When configured, token counts are captured as `input_tokens`, `output_tokens`, `total_tokens`, and `cached_tokens` when returned by the provider. Dollar-cost calculation is intentionally deferred until pricing configuration is added.
 
 ## Cost per Outcome
 
@@ -258,17 +258,19 @@ Cost per resolved case ties spend to business outcomes. A cheap interaction that
 
 ### Phase 1
 
-- No real LLM calls
 - Deterministic workflow
 - Mocked tools
 - Database persistence
 - Railway app and Postgres hosting
 - Audit storage
+- Optional controlled LLM response drafting
+- Provider usage fields when available
 
 ### Future
 
-- LLM token tracking
-- Cached token tracking
+- Dollar cost calculation from token usage and pricing configuration
+- Aggregated LLM token tracking
+- Aggregated cached token tracking
 - Real RAG retrieval cost
 - Langfuse/LangSmith tracing cost
 - Ragas evaluation cost
