@@ -101,6 +101,8 @@ The current deterministic workflow establishes the control plane where those cos
 
 ## I. Future Enhancements
 
+Reference: [docs/roadmap.md](roadmap.md)
+
 - Polished workflow UI
 - Controlled LLM response drafting
 - Ragas evaluation

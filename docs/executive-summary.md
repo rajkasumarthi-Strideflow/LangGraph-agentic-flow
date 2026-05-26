@@ -57,6 +57,8 @@ The [Cost Model v1](cost-model.md) outlines how the architecture will estimate a
 
 The [Agentforce mapping](agentforce-mapping.md) translates the same architecture into Salesforce-native concepts such as Agent Script, subagents, actions, variables, available-when filters, and Agentforce DX.
 
+The [roadmap](roadmap.md) clarifies Phase 1 limitations and the planned path toward polished UX, controlled LLM use, observability, evaluation, cost telemetry, true HITL, CrewAI, MCP, A2A, and Agentforce implementation.
+
 ## Phase 1 Scope
 
 Phase 1 implements synthetic domain data, a deterministic warranty workflow, the cracked-screen scenario, no automatic replacement for excluded accidental damage, persisted workflow/audit/human review records, and a deployed demo.
