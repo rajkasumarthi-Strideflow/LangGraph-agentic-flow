@@ -6,6 +6,8 @@ This document clarifies Phase 1 boundaries and defines the DecisionTrace AI road
 
 Phase 1 intentionally establishes a governed workflow foundation through the warranty replacement reference workflow before expanding to additional domains or advanced multi-agent protocols.
 
+Before sharing or demoing Phase 1, use the [DecisionTrace AI Phase 1 Release Checklist](phase-1-release-checklist.md) to validate branding, live demo behavior, workflow outcomes, LLM drafting boundaries, auditability, documentation, deployment, and tests.
+
 ## Phase 1 Completed Scope
 
 - Deterministic LangGraph workflow
@@ -26,6 +28,7 @@ Phase 1 intentionally establishes a governed workflow foundation through the war
 - Cost model v1
 - Audit replay example
 - Agentforce mapping
+- Phase 1 release checklist
 
 ## Known Phase 1 Limitations
 
