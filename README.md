@@ -55,6 +55,8 @@ Audit replay example: [docs/audit-replay-example.md](docs/audit-replay-example.m
 
 Agentforce mapping: [docs/agentforce-mapping.md](docs/agentforce-mapping.md)
 
+Phase 1 release notes: [docs/phase-1-release-notes.md](docs/phase-1-release-notes.md)
+
 Phase 1 release checklist: [docs/phase-1-release-checklist.md](docs/phase-1-release-checklist.md)
 
 Known limitations and roadmap: [docs/roadmap.md](docs/roadmap.md)

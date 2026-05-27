@@ -4,6 +4,8 @@
 
 This checklist validates the Phase 1 portfolio release of DecisionTrace AI, using warranty replacement as the first implemented reference workflow. It is intended for final review before public sharing, interview walkthroughs, or future enhancement work.
 
+Companion release notes: [DecisionTrace AI Phase 1 Release Notes](phase-1-release-notes.md).
+
 ## Branding Validation
 
 - [ ] UI header says DecisionTrace AI.
@@ -69,6 +71,7 @@ This checklist validates the Phase 1 portfolio release of DecisionTrace AI, usin
 - [ ] `docs/cost-model.md` reflects current LLM token telemetry and future cost model.
 - [ ] `docs/audit-replay-example.md` matches current audit behavior.
 - [ ] `docs/agentforce-mapping.md` uses current Agentforce terminology.
+- [ ] `docs/phase-1-release-notes.md` summarizes the release scope and telemetry integrity review.
 - [ ] `docs/roadmap.md` reflects completed and future work.
 
 ## Deployment Validation
