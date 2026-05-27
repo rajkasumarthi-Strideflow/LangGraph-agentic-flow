@@ -1,16 +1,47 @@
 # DecisionTrace AI
 
-Auditable Agentic Workflows for Governed Customer Decisions
+**Auditable Agentic Workflows for Governed Customer Decisions**
 
-DecisionTrace AI is an enterprise agentic workflow platform that demonstrates how AI-assisted customer decisions can be governed, audited, replayed, and safely executed. The first implemented reference workflow is a warranty replacement use case, but the architecture generalizes to regulated and customer-impacting workflows such as credit approval, insurance claims, refunds, compliance exceptions, and service escalations.
+> **Validate the control model before connecting production systems.**
+>
+> DecisionTrace AI lets teams prototype governed AI workflows with synthetic data, align Audit/Risk/Security stakeholders early, and connect to enterprise API adapters when ready — without redesigning the workflow architecture.
 
 ## Executive Overview
 
-DecisionTrace AI is a portfolio-grade capstone demonstrating a governed, auditable, production-aware agentic AI workflow platform. The current WarrantyWise reference workflow implements customer support warranty replacement, showing how an enterprise AI architecture can coordinate policy grounding, deterministic guardrails, controlled OpenAI response drafting, action control, persistence, auditability, and human review without presenting the system as an unconstrained chatbot.
+DecisionTrace AI is a working reference platform and prototype accelerator for enterprises exploring AI-assisted decision workflows. It helps teams model workflow steps, decision points, guardrails, audit events, human review paths, LLM response boundaries, and cost drivers before exposing sensitive production systems.
+
+The current implementation is a warranty replacement reference workflow, but the architecture is broader than warranty support. The same pattern can apply to regulated and customer-impacting workflows such as credit approval, insurance claims, refunds, compliance exceptions, and service escalations.
+
+## Prototype Accelerator Value
+
+A client does not need to connect sensitive production systems on day one. The current reference workflow uses synthetic data and controlled tool simulations so cross-functional stakeholders can validate the control model quickly and cost-effectively. Once the control model is validated, tool implementations can be connected to enterprise API adapters while preserving the same LangGraph workflow, state model, guardrails, audit trail, LLM response drafting boundary, and UI telemetry.
 
 ## Business Problem
 
 Customer-impacting decision workflows are high-trust processes. A correct warranty replacement decision, for example, requires customer verification, order lookup, warranty policy review, eligibility decisioning, inventory checks, controlled action execution, customer-safe communication, and a durable audit trail. A weak implementation can approve the wrong replacement, cite stale policy, expose unnecessary data, or leave the business unable to reconstruct why a decision was made.
+
+## Current Reference Workflow
+
+The first implemented workflow is warranty replacement. Warranty replacement is useful as a reference workflow because it demonstrates the same control challenges found in higher-stakes workflows:
+
+- Policy grounding
+- Eligibility checks
+- Guardrail-controlled actions
+- Human review
+- Audit replay
+- Customer-safe communication
+- LLM boundary control
+
+## Future Workflow Domains
+
+- Credit approval
+- Loan document review
+- Insurance claims
+- Refund governance
+- Subscription cancellation
+- Benefit eligibility
+- Compliance exception review
+- Customer escalation routing
 
 ## What the Demo Shows
 
@@ -34,14 +65,14 @@ Expected behavior:
 Customer UI
 → FastAPI API layer
 → LangGraph workflow
-→ governed mock tools
+→ governed tool layer
 → deterministic guardrails
 → controlled OpenAI response drafting
 → SQLAlchemy persistence
 → Postgres audit trail
 ```
 
-FastAPI serves both the API and the static frontend. LangGraph orchestrates the warranty workflow as a stateful graph. Governed tools perform identity verification, order lookup, warranty policy retrieval, eligibility checks, inventory checks, replacement creation, escalation, and deterministic response generation. OpenAI can draft final customer-facing response language from minimized approved workflow state when configured. SQLAlchemy persists workflow runs, audit events, and human review records.
+FastAPI serves both the API and the static frontend. LangGraph orchestrates the warranty workflow as a stateful graph. Controlled tool simulations perform identity verification, order lookup, warranty policy retrieval, eligibility checks, inventory checks, replacement creation, escalation, and deterministic response generation in Phase 1. OpenAI can draft final customer-facing response language from minimized approved workflow state when configured. SQLAlchemy persists workflow runs, audit events, and human review records.
 
 Architecture diagrams: [docs/diagrams.md](docs/diagrams.md)
 
@@ -66,7 +97,7 @@ Known limitations and roadmap: [docs/roadmap.md](docs/roadmap.md)
 - FastAPI backend
 - Polished browser-based workflow console
 - LangGraph workflow
-- Governed mock tools
+- Controlled tool simulations
 - Deterministic eligibility and guardrail logic
 - Controlled LLM response drafting when configured
 - Persisted workflow runs
@@ -81,7 +112,7 @@ Known limitations and roadmap: [docs/roadmap.md](docs/roadmap.md)
 - Agentic workflow orchestration
 - State-based control
 - Tool/action design
-- RAG-style policy grounding using mock policy retrieval
+- RAG-style policy grounding using controlled policy retrieval
 - Deterministic guardrails
 - Human handoff simulation
 - Auditability and replay
@@ -110,6 +141,10 @@ Live demo: `<add Railway public URL here>`
 The Phase 1 UI is a polished enterprise workflow console built with vanilla HTML, CSS, and JavaScript. It displays real workflow state, persisted audit events, derived tool-call counts, human review status, and audit replay details from the backend APIs without adding frontend framework complexity.
 
 Controlled LLM response drafting is supported when `OPENAI_API_KEY` and `OPENAI_MODEL` are configured. Without those variables, the app uses deterministic response generation and marks LLM drafting as `not_configured`.
+
+## Telemetry Integrity
+
+The demo uses synthetic business data, but active telemetry is real. Workflow state, audit events, tool-call counts, human review records, OpenAI model metadata, and token usage are generated by actual application execution and backend API responses. Planned telemetry is clearly labeled as future work.
 
 ## Local Setup
 
@@ -227,7 +262,7 @@ The current workflow keeps eligibility, guardrail, and action decisions determin
 
 ## Current Limitations
 
-- Mock data only
+- Synthetic data only
 - No real Salesforce integration
 - No real customer authentication
 - No real shipping/fulfillment integration
@@ -271,7 +306,7 @@ SQLite is for local development only. Railway should use Postgres through `DATAB
 ```text
 backend/app              FastAPI application, database setup, and app entry point
 backend/app/workflow     LangGraph state, nodes, graph, and workflow persistence
-backend/app/tools        Governed mock tools and synthetic domain data
+backend/app/tools        Controlled tool simulations and synthetic domain data
 backend/app/audit        Audit event logging, audit storage, and human review storage
 backend/app/models       Pydantic API/domain models and SQLAlchemy ORM models
 frontend                 Static HTML/CSS/JavaScript demo UI served by FastAPI

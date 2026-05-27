@@ -2,11 +2,13 @@
 
 ## Overview
 
-DecisionTrace AI is an enterprise AI architecture capstone demonstrating governed, auditable, production-aware agentic workflows for customer-impacting decisions. It shows how AI-assisted automation can be designed around state, policies, tools, guardrails, persistence, controlled LLM response drafting, and human review rather than relying on an unconstrained chatbot.
+DecisionTrace AI is a working reference platform and prototype accelerator for governed, auditable AI-assisted workflows. It is designed to help teams validate the control model before connecting sensitive production systems.
 
-The first implemented reference workflow is warranty replacement, branded historically in the repository as the WarrantyWise workflow. The same architecture pattern can extend to regulated financial and operational workflows such as credit approval, claims review, refund governance, subscription cancellation, and compliance exception handling.
+The platform lets stakeholders evaluate the workflow, decision points, guardrails, audit evidence, human review paths, LLM response boundaries, and cost drivers using synthetic data and controlled tool simulations. This enables early alignment across Product, Operations, Audit, Risk, Security, Compliance, Legal, and Model Risk Management teams before production integration begins.
 
-The Phase 1 implementation is deployed publicly on Railway and includes a FastAPI backend, browser UI, LangGraph workflow, governed mock tools, controlled OpenAI response drafting, SQLAlchemy persistence, and Postgres-compatible audit storage.
+The first implemented reference workflow is warranty replacement, branded historically in the repository as the WarrantyWise workflow. DecisionTrace AI is broader than warranty replacement: the same architecture pattern can extend to regulated financial and operational workflows such as credit approval, claims review, refund governance, subscription cancellation, and compliance exception handling.
+
+The Phase 1 implementation is deployed publicly on Railway and includes a FastAPI backend, browser UI, LangGraph workflow, controlled tool simulations, controlled OpenAI response drafting, SQLAlchemy persistence, and Postgres-compatible audit storage. Phase 1 is not presented as production-ready or regulatory-compliant; it demonstrates patterns required for governed workflows before production integration.
 
 The project is intentionally scoped to demonstrate enterprise architecture patterns: controlled decisioning, explainable workflow execution, safe action boundaries, and a persistent audit trail.
 
@@ -20,12 +22,14 @@ DecisionTrace AI uses:
 
 - FastAPI for the backend API
 - LangGraph for stateful workflow orchestration
-- Governed mock tools for identity, order, policy, eligibility, inventory, replacement, escalation, and response generation
+- Controlled tool simulations for identity, order, policy, eligibility, inventory, replacement, escalation, and response generation
 - Deterministic guardrails to block unsafe replacement creation
 - Controlled LLM response drafting for final customer-facing wording
 - SQLAlchemy persistence for workflow runs, audit events, and human reviews
 - Railway for public deployment
 - A browser UI for workflow visibility
+
+Once the control model is validated, tool implementations can be connected to enterprise API adapters without redesigning the workflow architecture. The LangGraph workflow, state model, guardrails, audit logging, LLM response drafting boundary, and UI telemetry can remain stable while the tool layer is connected to systems such as CRM, order management, policy/knowledge repositories, inventory, approval engines, or case management platforms.
 
 ## Architecture at a Glance
 
@@ -55,7 +59,7 @@ Browser UI
 
 ## Business Value
 
-DecisionTrace AI reduces manual triage for governed customer decisions while preventing unsupported actions. In the warranty replacement reference workflow, it improves consistency of policy application, creates an auditable decision trail, supports future cost tracking and optimization, and provides a reusable architecture pattern for other support, financial, insurance, and compliance workflows.
+DecisionTrace AI provides a fast, cost-effective way to validate the control model for AI-assisted workflows before production integration. In the warranty replacement reference workflow, it shows how teams can improve consistency of policy application, prevent unsupported actions, create an auditable decision trail, support future cost tracking and optimization, and reuse the same architecture pattern for support, financial, insurance, and compliance workflows.
 
 The [Cost Model v1](cost-model.md) outlines how the architecture will estimate and control LLM, tool, retrieval, audit, observability, infrastructure, and human review costs.
 
@@ -65,13 +69,15 @@ The [roadmap](roadmap.md) clarifies Phase 1 limitations and the planned path tow
 
 ## Phase 1 Scope
 
-Phase 1 implements synthetic domain data, a deterministic warranty replacement reference workflow, the cracked-screen scenario, no automatic replacement for excluded accidental damage, controlled LLM response drafting when configured, persisted workflow/audit/human review records, and a deployed demo.
+Phase 1 implements synthetic domain data, controlled tool simulations, a deterministic warranty replacement reference workflow, the cracked-screen scenario, no automatic replacement for excluded accidental damage, controlled LLM response drafting when configured, persisted workflow/audit/human review records, and a deployed demo.
 
 The primary scenario is intentionally nuanced: the customer is inside the 12-month warranty window, but the cracked screen is excluded because the current policy excludes accidental damage. The correct outcome is a blocked replacement request with a safe customer explanation and persisted audit trail.
 
+Active telemetry is real even though the business data is synthetic. Workflow state, audit events, tool-call counts, human review records, OpenAI model metadata, and token usage are generated from actual workflow execution, database writes, backend API responses, and provider usage metadata when OpenAI is configured.
+
 ## Current Limitations
 
-- Mock data only
+- Synthetic data only
 - No real Salesforce integration
 - No real customer authentication
 - No real fulfillment/shipping integration
