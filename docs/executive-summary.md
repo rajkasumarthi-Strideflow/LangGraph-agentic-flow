@@ -67,6 +67,8 @@ The [Agentforce mapping](agentforce-mapping.md) translates the same architecture
 
 The [roadmap](roadmap.md) clarifies Phase 1 limitations and the planned path toward polished UX, controlled LLM use, observability, evaluation, cost telemetry, true HITL, CrewAI, MCP, A2A, and Agentforce implementation.
 
+Future phases will extend DecisionTrace AI from audit replay into safe iteration: workflow traces and production issues can be converted into evaluation cases and regression tests, enabling teams to improve agent behavior without weakening governance controls.
+
 ## Phase 1 Scope
 
 Phase 1 implements synthetic domain data, controlled tool simulations, a deterministic warranty replacement reference workflow, the cracked-screen scenario, no automatic replacement for excluded accidental damage, controlled LLM response drafting when configured, persisted workflow/audit/human review records, and a deployed demo.

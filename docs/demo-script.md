@@ -16,7 +16,7 @@ The Phase 1 architecture is:
 Browser UI -> FastAPI -> LangGraph -> governed tools -> guardrails -> controlled OpenAI response drafting -> SQLAlchemy persistence -> Postgres audit trail
 ```
 
-FastAPI serves both the API and the static frontend from one Railway app to reduce tool complexity. LangGraph coordinates the stateful workflow. Governed mock tools perform bounded actions like identity verification, order lookup, policy retrieval, eligibility checks, inventory checks, escalation, and response generation. SQLAlchemy persists workflow runs, audit events, and human review records, with Railway Postgres used in deployment and SQLite available locally.
+FastAPI serves both the API and the static frontend from one Railway app to reduce tool complexity. LangGraph coordinates the stateful workflow. Controlled tool simulations perform bounded actions like identity verification, order lookup, policy retrieval, eligibility checks, inventory checks, escalation, and response generation. SQLAlchemy persists workflow runs, audit events, and human review records, with Railway Postgres used in deployment and SQLite available locally.
 
 ## C. Scenario Setup
 
@@ -105,6 +105,8 @@ Reference: [docs/roadmap.md](roadmap.md)
 
 - Polished workflow UI
 - Controlled LLM response drafting
+- Stateful intake router
+- Safe iteration loop where audit/trace data feeds evaluation and regression testing
 - Ragas evaluation
 - Langfuse/LangSmith observability
 - LangGraph interrupts for true HITL pause/resume

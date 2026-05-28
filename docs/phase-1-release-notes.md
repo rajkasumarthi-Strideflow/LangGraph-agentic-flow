@@ -10,7 +10,7 @@ The Phase 1 implementation is intentionally scoped: it proves the control plane 
 
 - FastAPI backend
 - LangGraph workflow orchestration
-- Governed mock tools
+- Controlled tool simulations
 - Deterministic eligibility and guardrail logic
 - Controlled OpenAI response drafting
 - LLM output validation and deterministic fallback
@@ -54,7 +54,7 @@ LLM token values are displayed only when returned by provider usage metadata. Th
 
 ## Known Phase 1 Boundaries
 
-- Mock data only
+- Synthetic data only
 - No real Salesforce integration
 - No real authentication
 - No real fulfillment integration
@@ -81,6 +81,10 @@ LLM token values are displayed only when returned by provider usage metadata. Th
 
 - Natural language intake classifier
 - Multi-turn clarification workflow
+- Stateful intake router
+- Prompt governance checklist
+- Observability-to-evaluation loop
+- Production failures become regression tests
 - Cost telemetry
 - Langfuse/LangSmith tracing
 - Ragas evaluation

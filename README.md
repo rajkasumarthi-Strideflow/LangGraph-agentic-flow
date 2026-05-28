@@ -86,11 +86,17 @@ Audit replay example: [docs/audit-replay-example.md](docs/audit-replay-example.m
 
 Agentforce mapping: [docs/agentforce-mapping.md](docs/agentforce-mapping.md)
 
+Prompt governance checklist: [docs/prompt-governance-checklist.md](docs/prompt-governance-checklist.md)
+
+Safe iteration loop: [docs/safe-iteration-loop.md](docs/safe-iteration-loop.md)
+
 Phase 1 release notes: [docs/phase-1-release-notes.md](docs/phase-1-release-notes.md)
 
 Phase 1 release checklist: [docs/phase-1-release-checklist.md](docs/phase-1-release-checklist.md)
 
 Known limitations and roadmap: [docs/roadmap.md](docs/roadmap.md)
+
+DecisionTrace AI’s roadmap includes a stateful intake router, prompt governance, and an observability-to-evaluation loop so production failures can become regression tests.
 
 ## Phase 1 Capabilities
 
