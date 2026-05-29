@@ -9,6 +9,31 @@ class StartWorkflowRequest(BaseModel):
     order_id: str
 
 
+class IntakeRouteRequest(BaseModel):
+    message: str
+    customer_id: str | None = None
+    order_id: str | None = None
+
+
+class IntakeRouteResponse(BaseModel):
+    intent: str
+    confidence: float | None = None
+    product_type: str | None = None
+    product_issue: str | None = None
+    damage_type: str | None = None
+    customer_id: str | None = None
+    order_id: str | None = None
+    requires_order_lookup: bool
+    requires_policy_lookup: bool
+    requires_clarification: bool
+    missing_fields: list[str]
+    next_question: str | None = None
+    routed_workflow: str | None = None
+    routing_status: str
+    error_message: str | None = None
+    can_start_workflow: bool = False
+
+
 class StartWorkflowResponse(BaseModel):
     workflow_id: str
     correlation_id: str

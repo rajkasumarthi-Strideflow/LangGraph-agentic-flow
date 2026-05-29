@@ -11,10 +11,13 @@ from fastapi.staticfiles import StaticFiles
 from app.audit.human_review_store import get_human_reviews, save_human_review
 from app.audit.store import get_audit_events
 from app.database import init_db
+from app.intake.router import route_customer_message
 from app.models.api import (
     AuditTimelineResponse,
     HumanReviewRequest,
     HumanReviewResponse,
+    IntakeRouteRequest,
+    IntakeRouteResponse,
     StartWorkflowRequest,
     StartWorkflowResponse,
     WorkflowStateResponse,
@@ -119,6 +122,20 @@ def health_check():
 @app.get("/", response_class=FileResponse)
 def frontend_index() -> FileResponse:
     return FileResponse(FRONTEND_DIR / "index.html")
+
+
+@app.post("/api/intake/route", response_model=IntakeRouteResponse)
+def route_intake_request(request: IntakeRouteRequest) -> IntakeRouteResponse:
+    result = route_customer_message(
+        message=request.message,
+        customer_id=request.customer_id,
+        order_id=request.order_id,
+    )
+    result["can_start_workflow"] = (
+        result.get("routed_workflow") == "warranty_replacement"
+        and not result.get("requires_clarification")
+    )
+    return IntakeRouteResponse(**result)
 
 
 @app.post("/api/workflows/start", response_model=StartWorkflowResponse)

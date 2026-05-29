@@ -58,6 +58,20 @@ execution
 
 **Production failures should become regression tests.**
 
+## Phase 2 Intake Router
+
+The `phase-2/intake-router` branch adds an implemented stateful natural-language intake router in `backend/app/intake/`. The router accepts a freeform customer message plus optional customer and order identifiers, then returns structured routing output.
+
+The router can:
+
+- Classify supported intents: `warranty_replacement_request`, `warranty_policy_question`, and `unknown`.
+- Extract basic structured facts such as product type, product issue, and damage type.
+- Preserve explicit `customer_id` and `order_id` values passed by the caller.
+- Identify missing required facts and produce a next clarification question.
+- Route ready warranty replacement requests to `routed_workflow = warranty_replacement`.
+
+The router does not decide eligibility, set guardrail decisions, create replacement requests, claim action approval, or execute business tools. When OpenAI configuration is unavailable, the router uses deterministic fallback classification so local development and tests remain stable. The FastAPI endpoint is `POST /api/intake/route`, and the frontend displays router output before the existing workflow is started.
+
 ## Phase 1 LangGraph Workflow
 
 Phase 1 uses LangGraph to model the warranty replacement flow as an explicit local state machine. The graph gives the capstone a clear orchestration layer for sequencing governed tools, branching on deterministic state, and preserving decision fields that can later become audit records.

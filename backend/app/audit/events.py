@@ -6,6 +6,10 @@ from pydantic import BaseModel, Field
 
 
 class AuditEventType(StrEnum):
+    INTAKE_ROUTER_STARTED = "intake_router_started"
+    INTAKE_ROUTER_COMPLETED = "intake_router_completed"
+    INTAKE_ROUTER_FAILED = "intake_router_failed"
+    INTAKE_CLARIFICATION_REQUIRED = "intake_clarification_required"
     WORKFLOW_STARTED = "workflow_started"
     IDENTITY_VERIFIED = "identity_verified"
     ORDER_LOOKUP_COMPLETED = "order_lookup_completed"

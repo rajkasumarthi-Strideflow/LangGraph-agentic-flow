@@ -93,6 +93,8 @@ Future telemetry tile examples:
 
 ### Stateful Natural Language Intake Router
 
+Status: implemented on the `phase-2/intake-router` branch for the warranty replacement reference workflow.
+
 Replace the simpler idea of intent classification with a stateful natural language intake router. The router interprets user messages, classifies intent, extracts structured facts, identifies missing information, and routes to the right controlled workflow.
 
 Examples:
@@ -103,7 +105,7 @@ Examples:
 
 Architecture principle: the intake router is the language layer; LangGraph remains the control layer.
 
-The router may ask for clarification in future multi-turn flows. It may classify intent and extract structured fields, but it must not decide eligibility, approve requests, or execute business actions.
+The current implementation returns a `next_question` when required fields are missing. The router may ask for clarification in future multi-turn flows. It may classify intent and extract structured fields, but it must not decide eligibility, approve requests, or execute business actions.
 
 Example structured output:
 

@@ -10,6 +10,8 @@ Prompts are not just text. In agentic systems, prompts influence routing, tool u
 
 Poor prompt design can create ambiguity, unsafe action selection, missed escalation, hallucinated policy interpretation, or unsupported customer promises. As LLM usage expands, prompts should be treated as governed workflow assets with ownership, versioning, tests, and approval criteria.
 
+The Phase 2 intake router prompt boundary is intentionally narrow: classify intent, extract structured facts, identify missing fields, and route to a controlled workflow. It must not decide eligibility, claim approval, create replacement requests, override guardrails, or imply that a business action has been executed.
+
 ## Prompt Scope
 
 - [ ] What is the prompt responsible for?

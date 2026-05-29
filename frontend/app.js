@@ -3,9 +3,14 @@ const appState = {
   workflow: null,
   auditEvents: [],
   humanReviews: [],
+  intakeResult: null,
 };
 
 const elements = {
+  intakeMessage: document.querySelector("#intake-message"),
+  analyzeRequest: document.querySelector("#analyze-request"),
+  intakeStatus: document.querySelector("#intake-status"),
+  intakeResult: document.querySelector("#intake-result"),
   request: document.querySelector("#customer-request"),
   customerId: document.querySelector("#customer-id"),
   orderId: document.querySelector("#order-id"),
@@ -58,6 +63,11 @@ function setLoading(isLoading) {
 function setStatus(message, isError = false) {
   elements.status.textContent = message;
   elements.status.className = isError ? "status-message error" : "status-message";
+}
+
+function setIntakeStatus(message, isError = false) {
+  elements.intakeStatus.textContent = message;
+  elements.intakeStatus.className = isError ? "status-message error" : "status-message";
 }
 
 function statusClass(kind, value) {
@@ -130,6 +140,16 @@ function telemetryCard(label, value, help, tone = "") {
   `;
 }
 
+function routerField(label, value, kind = "neutral") {
+  const rendered = kind === "pill" ? pill(value) : escapeHtml(safeText(value));
+  return `
+    <div class="router-field">
+      <div class="summary-label">${escapeHtml(label)}</div>
+      <div class="summary-value">${rendered}</div>
+    </div>
+  `;
+}
+
 function replacementAction(workflow) {
   if (!workflow) {
     return "Not Started";
@@ -199,6 +219,73 @@ async function startWorkflow() {
   } finally {
     setLoading(false);
   }
+}
+
+async function analyzeRequest() {
+  elements.analyzeRequest.disabled = true;
+  elements.analyzeRequest.textContent = "Analyzing...";
+  setIntakeStatus("Routing customer message...");
+
+  try {
+    const result = await requestJson("/api/intake/route", {
+      method: "POST",
+      body: JSON.stringify({
+        message: elements.intakeMessage.value,
+        customer_id: elements.customerId.value || null,
+        order_id: elements.orderId.value || null,
+      }),
+    });
+
+    appState.intakeResult = result;
+    renderIntakeResult();
+
+    if (result.customer_id) {
+      elements.customerId.value = result.customer_id;
+    }
+    if (result.order_id) {
+      elements.orderId.value = result.order_id;
+    }
+    elements.request.value = elements.intakeMessage.value;
+
+    setIntakeStatus(
+      result.can_start_workflow
+        ? "Ready to start the warranty workflow."
+        : result.requires_clarification
+          ? "Clarification needed before workflow start."
+          : "No workflow route selected.",
+    );
+  } catch (error) {
+    setIntakeStatus(error.message, true);
+  } finally {
+    elements.analyzeRequest.disabled = false;
+    elements.analyzeRequest.textContent = "Analyze Request";
+  }
+}
+
+function renderIntakeResult() {
+  const result = appState.intakeResult;
+  if (!result) {
+    elements.intakeResult.className = "intake-result empty-state";
+    elements.intakeResult.textContent = "Analyze a message to see intent, missing facts, and workflow routing.";
+    return;
+  }
+
+  const missingFields = result.missing_fields?.length
+    ? result.missing_fields.join(", ")
+    : "None";
+  elements.intakeResult.className = "intake-result router-grid";
+  elements.intakeResult.innerHTML = [
+    routerField("Intent", result.intent, "pill"),
+    routerField("Confidence", result.confidence ?? "Not Available"),
+    routerField("Product Issue", result.product_issue || "Not Available"),
+    routerField("Damage Type", result.damage_type || "Not Available"),
+    routerField("Missing Fields", missingFields),
+    routerField("Routed Workflow", result.routed_workflow || "Not Routed"),
+    routerField("Routing Status", result.routing_status, "pill"),
+    routerField("Can Start Workflow", result.can_start_workflow),
+    routerField("Next Question", result.next_question || "None"),
+    routerField("Error", result.error_message || "None"),
+  ].join("");
 }
 
 async function refreshWorkflowView(workflowId) {
@@ -520,6 +607,7 @@ async function submitHumanReview(event) {
 }
 
 function loadCrackedScreenScenario() {
+  elements.intakeMessage.value = "My laptop screen cracked after 9 months. Can I get a replacement?";
   elements.request.value = "My laptop screen cracked after 9 months. Can I get a replacement?";
   elements.customerId.value = "cust_primary_001";
   elements.orderId.value = "ord_laptop_001";
@@ -527,6 +615,7 @@ function loadCrackedScreenScenario() {
 }
 
 function loadUnknownCustomerScenario() {
+  elements.intakeMessage.value = "I need a replacement for my laptop.";
   elements.request.value = "I need a replacement for my laptop.";
   elements.customerId.value = "UNKNOWN_CUSTOMER";
   elements.orderId.value = "ord_laptop_001";
@@ -536,6 +625,8 @@ function loadUnknownCustomerScenario() {
 function initializeConsole() {
   renderTelemetryTiles();
   renderAiDraftingPanel();
+  renderIntakeResult();
+  elements.analyzeRequest.addEventListener("click", analyzeRequest);
   elements.runButton.addEventListener("click", startWorkflow);
   elements.loadCracked.addEventListener("click", loadCrackedScreenScenario);
   elements.loadUnknown.addEventListener("click", loadUnknownCustomerScenario);
