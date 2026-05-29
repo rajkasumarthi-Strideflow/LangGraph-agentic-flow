@@ -36,14 +36,15 @@ def validate_router_output(output: dict[str, Any]) -> dict[str, Any]:
         errors.append(f"Unsupported routed_workflow: {routed_workflow}.")
 
     missing_fields = output.get("missing_fields") or []
-    if output.get("can_start_workflow") and missing_fields:
-        errors.append("Router cannot start workflow while required fields are missing.")
+    invalid_fields = output.get("invalid_fields") or []
+    if output.get("can_start_workflow") and (missing_fields or invalid_fields):
+        errors.append("Router cannot start workflow while required fields are missing or invalid.")
 
     if output.get("can_start_workflow") and routed_workflow != "warranty_replacement":
         errors.append("Router can_start_workflow requires warranty_replacement route.")
 
-    if output.get("requires_clarification") != bool(missing_fields):
-        errors.append("requires_clarification must match missing_fields.")
+    if output.get("requires_clarification") != bool(missing_fields or invalid_fields):
+        errors.append("requires_clarification must match missing_fields or invalid_fields.")
 
     for field in FORBIDDEN_ROUTER_FIELDS:
         if field in output:

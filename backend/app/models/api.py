@@ -1,6 +1,6 @@
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class StartWorkflowRequest(BaseModel):
@@ -27,6 +27,7 @@ class IntakeRouteResponse(BaseModel):
     requires_policy_lookup: bool
     requires_clarification: bool
     missing_fields: list[str]
+    invalid_fields: list[str] = Field(default_factory=list)
     next_question: str | None = None
     routed_workflow: str | None = None
     routing_status: str

@@ -38,6 +38,7 @@ class IntakeRouterOutput(BaseModel):
     requires_policy_lookup: bool = False
     requires_clarification: bool = False
     missing_fields: list[str] = Field(default_factory=list)
+    invalid_fields: list[str] = Field(default_factory=list)
     next_question: str | None = None
     routed_workflow: Literal["warranty_replacement"] | None = None
     can_start_workflow: bool = False
@@ -50,8 +51,8 @@ You classify a customer message for a governed workflow router.
 Return JSON only, with these keys:
 intent, confidence, product_type, product_issue, damage_type, customer_id,
 order_id, requires_order_lookup, requires_policy_lookup,
-requires_clarification, missing_fields, next_question, routed_workflow,
-routing_status, error_message.
+requires_clarification, missing_fields, invalid_fields, next_question,
+routed_workflow, routing_status, error_message.
 
 Allowed intents: warranty_replacement_request, warranty_policy_question, unknown.
 Allowed routed_workflow: warranty_replacement or null.
@@ -69,7 +70,23 @@ def _clean(value: str | None) -> str | None:
     return stripped or None
 
 
-def _next_question(missing_fields: list[str]) -> str | None:
+def _is_valid_customer_id(customer_id: str | None) -> bool:
+    return bool(customer_id and re.fullmatch(r"cust_[A-Za-z0-9_]+", customer_id))
+
+
+def _is_valid_order_id(order_id: str | None) -> bool:
+    return bool(order_id and re.fullmatch(r"ord_[A-Za-z0-9_]+", order_id))
+
+
+def _next_question(
+    missing_fields: list[str],
+    invalid_fields: list[str],
+) -> str | None:
+    if invalid_fields:
+        return (
+            "Please provide a valid customer ID and order ID using the expected "
+            "cust_... and ord_... formats so I can route this request."
+        )
     if not missing_fields:
         return None
     labels = {
@@ -116,6 +133,7 @@ def _finalize_output(
     error_message: str | None = None,
 ) -> dict[str, Any]:
     missing_fields: list[str] = []
+    invalid_fields: list[str] = []
     requires_order_lookup = intent == "warranty_replacement_request"
     requires_policy_lookup = intent in {
         "warranty_replacement_request",
@@ -125,10 +143,14 @@ def _finalize_output(
     if intent == "warranty_replacement_request":
         if not customer_id:
             missing_fields.append("customer_id")
+        elif not _is_valid_customer_id(customer_id):
+            invalid_fields.append("customer_id")
         if not order_id:
             missing_fields.append("order_id")
+        elif not _is_valid_order_id(order_id):
+            invalid_fields.append("order_id")
 
-    requires_clarification = bool(missing_fields)
+    requires_clarification = bool(missing_fields or invalid_fields)
     routed_workflow = (
         "warranty_replacement"
         if intent == "warranty_replacement_request"
@@ -161,7 +183,8 @@ def _finalize_output(
         requires_policy_lookup=requires_policy_lookup,
         requires_clarification=requires_clarification,
         missing_fields=missing_fields,
-        next_question=_next_question(missing_fields),
+        invalid_fields=invalid_fields,
+        next_question=_next_question(missing_fields, invalid_fields),
         routed_workflow=routed_workflow,
         can_start_workflow=can_start_workflow,
         routing_status=routing_status,

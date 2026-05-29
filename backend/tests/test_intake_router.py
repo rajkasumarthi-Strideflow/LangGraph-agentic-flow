@@ -47,6 +47,7 @@ def test_router_routes_when_customer_and_order_are_provided() -> None:
 
     assert result["requires_clarification"] is False
     assert result["missing_fields"] == []
+    assert result["invalid_fields"] == []
     assert result["customer_id"] == PRIMARY_CUSTOMER_ID
     assert result["order_id"] == PRIMARY_ORDER_ID
     assert result["can_start_workflow"] is True
@@ -54,16 +55,44 @@ def test_router_routes_when_customer_and_order_are_provided() -> None:
     assert result["routing_status"] == "fallback_routed"
 
 
-def test_router_extracts_customer_and_order_ids_from_message() -> None:
+def test_router_extracts_but_rejects_invalid_identifier_formats() -> None:
     result = route_customer_message(
         "My laptop screen cracked. customer id is 12345 and order id is 776644",
     )
 
     assert result["customer_id"] == "12345"
     assert result["order_id"] == "776644"
+    assert result["requires_clarification"] is True
+    assert result["missing_fields"] == []
+    assert result["invalid_fields"] == ["customer_id", "order_id"]
+    assert result["routed_workflow"] == "warranty_replacement"
+    assert result["can_start_workflow"] is False
+    assert "valid customer ID and order ID" in result["next_question"]
+
+
+def test_router_rejects_unknown_customer_literal_format() -> None:
+    result = route_customer_message(
+        "I need a replacement for my laptop. Customer ID is UNKNOWN_CUSTOMER and order ID is ord_laptop_001.",
+    )
+
+    assert result["customer_id"] == "UNKNOWN_CUSTOMER"
+    assert result["order_id"] == PRIMARY_ORDER_ID
+    assert result["requires_clarification"] is True
+    assert result["missing_fields"] == []
+    assert result["invalid_fields"] == ["customer_id"]
+    assert result["can_start_workflow"] is False
+
+
+def test_router_allows_syntactically_valid_unknown_customer() -> None:
+    result = route_customer_message(
+        "I need a replacement for my laptop. Customer ID is cust_unknown_001 and order ID is ord_laptop_001.",
+    )
+
+    assert result["customer_id"] == "cust_unknown_001"
+    assert result["order_id"] == PRIMARY_ORDER_ID
     assert result["requires_clarification"] is False
     assert result["missing_fields"] == []
-    assert result["routed_workflow"] == "warranty_replacement"
+    assert result["invalid_fields"] == []
     assert result["can_start_workflow"] is True
 
 
@@ -77,6 +106,7 @@ def test_router_extracts_primary_mock_ids_from_complete_prompt() -> None:
     assert result["order_id"] == PRIMARY_ORDER_ID
     assert result["requires_clarification"] is False
     assert result["missing_fields"] == []
+    assert result["invalid_fields"] == []
     assert result["can_start_workflow"] is True
 
 
@@ -149,6 +179,7 @@ def test_intake_route_api_requires_clarification_without_ids() -> None:
     assert data["intent"] == "warranty_replacement_request"
     assert data["requires_clarification"] is True
     assert data["missing_fields"] == ["customer_id", "order_id"]
+    assert data["invalid_fields"] == []
     assert data["can_start_workflow"] is False
 
 
@@ -172,4 +203,5 @@ def test_intake_route_api_returns_embedded_customer_and_order_ids() -> None:
     assert data["customer_id"] == PRIMARY_CUSTOMER_ID
     assert data["order_id"] == PRIMARY_ORDER_ID
     assert data["requires_clarification"] is False
+    assert data["invalid_fields"] == []
     assert data["can_start_workflow"] is True

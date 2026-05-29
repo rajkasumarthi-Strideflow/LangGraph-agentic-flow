@@ -110,7 +110,7 @@ function statusClass(kind, value) {
   if (value === "Ready to Start Governed Workflow" || value === "No Clarification Required") {
     return "status-positive";
   }
-  if (value === "Not Ready" || value === "Clarification Required") {
+  if (value === "Not Ready" || value === "Clarification Required" || value === "Invalid identifier format") {
     return "status-warning";
   }
 
@@ -323,6 +323,12 @@ function renderIntakeResult() {
   const missingFields = result.missing_fields?.length
     ? result.missing_fields.join(", ")
     : "None";
+  const invalidFields = result.invalid_fields?.length
+    ? result.invalid_fields.join(", ")
+    : "None";
+  const identifierValidation = result.invalid_fields?.length
+    ? "Invalid identifier format"
+    : "Valid or not required";
   elements.intakeResult.className = "intake-result router-grid";
   elements.intakeResult.innerHTML = [
     routerField("Intent", result.intent, "pill"),
@@ -334,6 +340,8 @@ function renderIntakeResult() {
     routerField("Damage Type", result.damage_type || "Not Available"),
     routerField("Requires Clarification", clarificationText(result), "pill"),
     routerField("Missing Fields", missingFields),
+    routerField("Invalid Fields", invalidFields),
+    routerField("Identifier Validation", identifierValidation, "pill"),
     routerField("Routed Workflow", result.routed_workflow || "Not Routed"),
     routerField("Routing Status", result.routing_status, "pill"),
     routerField("Can Start Workflow", routerReadinessText(result), "pill"),
@@ -679,7 +687,7 @@ function loadCrackedScreenScenario() {
 }
 
 function loadUnknownCustomerScenario() {
-  elements.intakeMessage.value = "I need a replacement for my laptop. Customer ID is UNKNOWN_CUSTOMER and order ID is ord_laptop_001.";
+  elements.intakeMessage.value = "I need a replacement for my laptop. Customer ID is cust_unknown_001 and order ID is ord_laptop_001.";
   appState.intakeResult = null;
   renderIntakeResult();
   updateRunWorkflowAvailability();

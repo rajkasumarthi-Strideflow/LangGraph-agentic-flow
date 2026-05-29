@@ -58,6 +58,9 @@ def test_frontend_static_assets_are_served(client: TestClient) -> None:
     assert "clearContext" not in js_response.text
     assert "Extracted Customer ID" in js_response.text
     assert "Extracted Order ID" in js_response.text
+    assert "Invalid identifier format" in js_response.text
+    assert "cust_unknown_001" in js_response.text
+    assert "UNKNOWN_CUSTOMER" not in js_response.text
 
 
 def test_health_still_returns_ok(client: TestClient) -> None:
