@@ -176,50 +176,6 @@ h3 {
   font-size: 13px;
 }
 
-.context-section {
-  margin-top: 18px;
-  padding: 16px;
-  background: #fbfdff;
-  border: 1px solid #e1e7ef;
-  border-radius: 10px;
-}
-
-.context-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 10px;
-}
-
-.checkbox-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  color: #344054;
-}
-
-.checkbox-row input {
-  width: auto;
-  min-height: auto;
-}
-
-.context-preview {
-  margin-top: 12px;
-  padding: 10px 12px;
-  color: #475467;
-  background: #f4f6f9;
-  border: 1px solid #e1e7ef;
-  border-radius: 8px;
-  font-size: 13px;
-}
-
-.context-divider {
-  padding: 0 8px;
-  color: #98a2b3;
-}
-
 label {
   display: block;
   margin: 14px 0 6px;
@@ -268,6 +224,10 @@ select:focus {
 
 .action-row {
   align-items: center;
+}
+
+.router-output-heading {
+  margin-top: 20px;
 }
 
 .button {
@@ -649,8 +609,7 @@ select:focus {
 
 @media (max-width: 760px) {
   .app-header,
-  .panel-heading,
-  .context-heading {
+  .panel-heading {
     align-items: flex-start;
     flex-direction: column;
   }

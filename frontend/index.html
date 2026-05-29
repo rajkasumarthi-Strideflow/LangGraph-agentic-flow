@@ -31,36 +31,10 @@
         <label for="intake-message">Freeform customer message</label>
         <textarea id="intake-message" rows="4">My laptop screen cracked after 9 months. Can I get a replacement?</textarea>
 
-        <div class="context-section">
-          <div class="context-heading">
-            <div>
-              <p class="section-kicker">Optional Context</p>
-              <h3>Optional Workflow Context</h3>
-            </div>
-            <label class="checkbox-row" for="use-context">
-              <input id="use-context" type="checkbox" />
-              <span>Use optional workflow context when analyzing request</span>
-            </label>
-          </div>
-
-          <div class="field-grid">
-            <div>
-              <label for="customer-id">Customer ID</label>
-              <input id="customer-id" type="text" autocomplete="off" />
-            </div>
-            <div>
-              <label for="order-id">Order ID</label>
-              <input id="order-id" type="text" autocomplete="off" />
-            </div>
-          </div>
-
-          <div id="context-preview" class="context-preview"></div>
-        </div>
-
         <div class="button-row scenario-row" aria-label="Scenario shortcuts">
-          <button id="load-cracked" class="button button-secondary" type="button">Load Cracked Screen Scenario</button>
-          <button id="load-unknown" class="button button-secondary" type="button">Load Unknown Customer Scenario</button>
-          <button id="clear-context" class="button button-secondary" type="button">Clear Context</button>
+          <button id="load-missing" class="button button-secondary" type="button">Missing Info Scenario</button>
+          <button id="load-cracked" class="button button-secondary" type="button">Complete Cracked Screen Scenario</button>
+          <button id="load-unknown" class="button button-secondary" type="button">Unknown Customer Scenario</button>
           <button id="clear-intake" class="button button-secondary" type="button">Clear Intake</button>
         </div>
 
@@ -71,6 +45,7 @@
           <div id="intake-status" class="status-message" role="status" aria-live="polite"></div>
         </div>
 
+        <h3 class="router-output-heading">Router Output</h3>
         <div id="intake-result" class="intake-result empty-state">Analyze a message to see intent, missing facts, and workflow routing.</div>
       </section>
 
@@ -179,6 +154,6 @@
       </section>
     </main>
 
-    <script src="/static/app.js?v=phase2-router-output-2"></script>
+    <script src="/static/app.js?v=phase2-natural-intake-primary-1"></script>
   </body>
 </html>

@@ -26,15 +26,19 @@ def test_frontend_index_returns_decisiontrace_branding(client: TestClient) -> No
     assert "DecisionTrace AI" in response.text
     assert "Auditable Agentic Workflows for Governed Customer Decisions" in response.text
     assert "Natural Language Intake" in response.text
-    assert "Optional Workflow Context" in response.text
-    assert "Use optional workflow context when analyzing request" in response.text
-    assert "Clear Context" in response.text
+    assert "Router Output" in response.text
+    assert "Missing Info Scenario" in response.text
+    assert "Complete Cracked Screen Scenario" in response.text
+    assert "Unknown Customer Scenario" in response.text
     assert "Analyze Request" in response.text
     assert "Run Governed Workflow" in response.text
     assert 'id="analyze-intake-button"' in response.text
-    assert 'id="use-context"' in response.text
-    assert "Context sent to router" in response.text or "context-preview" in response.text
-    assert "/static/app.js?v=phase2-router-output-2" in response.text
+    assert "/static/app.js?v=phase2-natural-intake-primary-1" in response.text
+    assert "Optional Workflow Context" not in response.text
+    assert "Use optional workflow context when analyzing request" not in response.text
+    assert "Clear Context" not in response.text
+    assert 'id="use-context"' not in response.text
+    assert "Context sent to router" not in response.text
     assert 'id="customer-request"' not in response.text
     assert "Customer Intake" not in response.text
 
@@ -49,7 +53,9 @@ def test_frontend_static_assets_are_served(client: TestClient) -> None:
     assert "refreshWorkflowView" in js_response.text
     assert "analyze-intake-button" in js_response.text
     assert "getContextPayload" in js_response.text
-    assert "clearContext" in js_response.text
+    assert "customer_id: null" in js_response.text
+    assert "order_id: null" in js_response.text
+    assert "clearContext" not in js_response.text
     assert "Extracted Customer ID" in js_response.text
     assert "Extracted Order ID" in js_response.text
 
