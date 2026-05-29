@@ -59,6 +59,13 @@ h2 {
   letter-spacing: 0;
 }
 
+h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 760;
+  letter-spacing: 0;
+}
+
 .app-header {
   display: flex;
   align-items: flex-start;
@@ -167,6 +174,50 @@ h2 {
   margin: -6px 0 16px;
   color: var(--muted);
   font-size: 13px;
+}
+
+.context-section {
+  margin-top: 18px;
+  padding: 16px;
+  background: #fbfdff;
+  border: 1px solid #e1e7ef;
+  border-radius: 10px;
+}
+
+.context-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 10px;
+}
+
+.checkbox-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #344054;
+}
+
+.checkbox-row input {
+  width: auto;
+  min-height: auto;
+}
+
+.context-preview {
+  margin-top: 12px;
+  padding: 10px 12px;
+  color: #475467;
+  background: #f4f6f9;
+  border: 1px solid #e1e7ef;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.context-divider {
+  padding: 0 8px;
+  color: #98a2b3;
 }
 
 label {
@@ -598,7 +649,8 @@ select:focus {
 
 @media (max-width: 760px) {
   .app-header,
-  .panel-heading {
+  .panel-heading,
+  .context-heading {
     align-items: flex-start;
     flex-direction: column;
   }

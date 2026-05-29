@@ -31,46 +31,47 @@
         <label for="intake-message">Freeform customer message</label>
         <textarea id="intake-message" rows="4">My laptop screen cracked after 9 months. Can I get a replacement?</textarea>
 
-        <div class="button-row action-row">
-          <button id="analyze-intake-button" class="button button-primary" type="button">Analyze Request</button>
-          <div id="intake-status" class="status-message" role="status" aria-live="polite"></div>
-        </div>
-
-        <div id="intake-result" class="intake-result empty-state">Analyze a message to see intent, missing facts, and workflow routing.</div>
-      </section>
-
-      <section class="panel request-panel">
-        <div class="panel-heading">
-          <div>
-            <p class="section-kicker">Request</p>
-            <h2>Customer Intake</h2>
+        <div class="context-section">
+          <div class="context-heading">
+            <div>
+              <p class="section-kicker">Optional Context</p>
+              <h3>Optional Workflow Context</h3>
+            </div>
+            <label class="checkbox-row" for="use-context">
+              <input id="use-context" type="checkbox" />
+              <span>Use optional workflow context when analyzing request</span>
+            </label>
           </div>
-          <span class="panel-note">Controlled workflow</span>
-        </div>
 
-        <label for="customer-request">Customer request</label>
-        <textarea id="customer-request" rows="5">My laptop screen cracked after 9 months. Can I get a replacement?</textarea>
+          <div class="field-grid">
+            <div>
+              <label for="customer-id">Customer ID</label>
+              <input id="customer-id" type="text" autocomplete="off" />
+            </div>
+            <div>
+              <label for="order-id">Order ID</label>
+              <input id="order-id" type="text" autocomplete="off" />
+            </div>
+          </div>
 
-        <div class="field-grid">
-          <div>
-            <label for="customer-id">Customer ID</label>
-            <input id="customer-id" type="text" value="cust_primary_001" autocomplete="off" />
-          </div>
-          <div>
-            <label for="order-id">Order ID</label>
-            <input id="order-id" type="text" value="ord_laptop_001" autocomplete="off" />
-          </div>
+          <div id="context-preview" class="context-preview"></div>
         </div>
 
         <div class="button-row scenario-row" aria-label="Scenario shortcuts">
           <button id="load-cracked" class="button button-secondary" type="button">Load Cracked Screen Scenario</button>
           <button id="load-unknown" class="button button-secondary" type="button">Load Unknown Customer Scenario</button>
+          <button id="clear-context" class="button button-secondary" type="button">Clear Context</button>
+          <button id="clear-intake" class="button button-secondary" type="button">Clear Intake</button>
         </div>
 
         <div class="button-row action-row">
-          <button id="run-workflow" class="button button-primary" type="button">Run Warranty Workflow</button>
+          <button id="analyze-intake-button" class="button button-primary" type="button">Analyze Request</button>
+          <button id="run-workflow" class="button button-primary" type="button" disabled>Run Governed Workflow</button>
           <div id="status-message" class="status-message" role="status" aria-live="polite"></div>
+          <div id="intake-status" class="status-message" role="status" aria-live="polite"></div>
         </div>
+
+        <div id="intake-result" class="intake-result empty-state">Analyze a message to see intent, missing facts, and workflow routing.</div>
       </section>
 
       <section class="panel decision-panel">
@@ -178,6 +179,6 @@
       </section>
     </main>
 
-    <script src="/static/app.js"></script>
+    <script src="/static/app.js?v=phase2-intake-ui-1"></script>
   </body>
 </html>

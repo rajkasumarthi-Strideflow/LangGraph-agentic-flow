@@ -11,12 +11,15 @@ const elements = {
   analyzeRequest: document.querySelector("#analyze-intake-button"),
   intakeStatus: document.querySelector("#intake-status"),
   intakeResult: document.querySelector("#intake-result"),
-  request: document.querySelector("#customer-request"),
+  useContext: document.querySelector("#use-context"),
+  contextPreview: document.querySelector("#context-preview"),
   customerId: document.querySelector("#customer-id"),
   orderId: document.querySelector("#order-id"),
   runButton: document.querySelector("#run-workflow"),
   loadCracked: document.querySelector("#load-cracked"),
   loadUnknown: document.querySelector("#load-unknown"),
+  clearContext: document.querySelector("#clear-context"),
+  clearIntake: document.querySelector("#clear-intake"),
   status: document.querySelector("#status-message"),
   result: document.querySelector("#workflow-result"),
   telemetry: document.querySelector("#telemetry-tiles"),
@@ -57,7 +60,7 @@ function dash(value) {
 
 function setLoading(isLoading) {
   elements.runButton.disabled = isLoading;
-  elements.runButton.textContent = isLoading ? "Running Workflow..." : "Run Warranty Workflow";
+  elements.runButton.textContent = isLoading ? "Running Workflow..." : "Run Governed Workflow";
 }
 
 function setStatus(message, isError = false) {
@@ -108,6 +111,13 @@ function statusClass(kind, value) {
     if (value.includes("fallback")) return "status-warning";
   }
 
+  if (value === "Ready to Start Governed Workflow" || value === "No Clarification Required") {
+    return "status-positive";
+  }
+  if (value === "Not Ready" || value === "Clarification Required") {
+    return "status-warning";
+  }
+
   return "status-neutral";
 }
 
@@ -148,6 +158,75 @@ function routerField(label, value, kind = "neutral") {
       <div class="summary-value">${rendered}</div>
     </div>
   `;
+}
+
+function optionalValue(element) {
+  const value = element.value.trim();
+  return value || null;
+}
+
+function getContextPayload() {
+  if (!elements.useContext.checked) {
+    return {
+      customer_id: null,
+      order_id: null,
+    };
+  }
+  return {
+    customer_id: optionalValue(elements.customerId),
+    order_id: optionalValue(elements.orderId),
+  };
+}
+
+function getWorkflowIdentifiers() {
+  return {
+    customer_id: appState.intakeResult?.customer_id || optionalValue(elements.customerId),
+    order_id: appState.intakeResult?.order_id || optionalValue(elements.orderId),
+  };
+}
+
+function hasRequiredContext() {
+  const identifiers = getWorkflowIdentifiers();
+  return Boolean(identifiers.customer_id && identifiers.order_id);
+}
+
+function updateRunWorkflowAvailability() {
+  const messageReady = Boolean(elements.intakeMessage.value.trim());
+  const routerReady = Boolean(appState.intakeResult?.can_start_workflow);
+  const checkedContextReady = elements.useContext.checked
+    && Boolean(optionalValue(elements.customerId))
+    && Boolean(optionalValue(elements.orderId));
+  elements.runButton.disabled = !(messageReady && (routerReady || checkedContextReady));
+}
+
+function updateContextPreview() {
+  const context = getContextPayload();
+  elements.contextPreview.innerHTML = `
+    <div>
+      <span class="summary-label">Context sent to router</span>
+      <strong>Customer ID:</strong> ${escapeHtml(safeText(context.customer_id, "Not provided"))}
+      <span class="context-divider">•</span>
+      <strong>Order ID:</strong> ${escapeHtml(safeText(context.order_id, "Not provided"))}
+    </div>
+  `;
+  updateRunWorkflowAvailability();
+}
+
+function resetRouterResult() {
+  appState.intakeResult = null;
+  renderIntakeResult();
+  updateRunWorkflowAvailability();
+}
+
+function routerReadinessText(result) {
+  if (result.can_start_workflow) {
+    return "Ready to Start Governed Workflow";
+  }
+  return "Not Ready";
+}
+
+function clarificationText(result) {
+  return result.requires_clarification ? "Clarification Required" : "No Clarification Required";
 }
 
 function replacementAction(workflow) {
@@ -197,6 +276,13 @@ async function requestJson(url, options = {}) {
 }
 
 async function startWorkflow() {
+  const identifiers = getWorkflowIdentifiers();
+  if (!identifiers.customer_id || !identifiers.order_id) {
+    setStatus("Customer ID and Order ID are required to start the governed workflow.", true);
+    updateRunWorkflowAvailability();
+    return;
+  }
+
   setLoading(true);
   setStatus("Running governed workflow...");
   elements.reviewResponse.innerHTML = "";
@@ -205,9 +291,9 @@ async function startWorkflow() {
     const result = await requestJson("/api/workflows/start", {
       method: "POST",
       body: JSON.stringify({
-        customer_request: elements.request.value,
-        customer_id: elements.customerId.value,
-        order_id: elements.orderId.value,
+        customer_request: elements.intakeMessage.value,
+        customer_id: identifiers.customer_id,
+        order_id: identifiers.order_id,
       }),
     });
 
@@ -218,6 +304,7 @@ async function startWorkflow() {
     setStatus(error.message, true);
   } finally {
     setLoading(false);
+    updateRunWorkflowAvailability();
   }
 }
 
@@ -231,25 +318,24 @@ async function analyzeRequest() {
       method: "POST",
       body: JSON.stringify({
         message: elements.intakeMessage.value,
-        customer_id: elements.customerId.value || null,
-        order_id: elements.orderId.value || null,
+        ...getContextPayload(),
       }),
     });
 
     appState.intakeResult = result;
     renderIntakeResult();
 
-    if (result.customer_id) {
+    if (result.customer_id && elements.useContext.checked) {
       elements.customerId.value = result.customer_id;
     }
-    if (result.order_id) {
+    if (result.order_id && elements.useContext.checked) {
       elements.orderId.value = result.order_id;
     }
-    elements.request.value = elements.intakeMessage.value;
+    updateContextPreview();
 
     setIntakeStatus(
       result.can_start_workflow
-        ? "Ready to start the warranty workflow."
+        ? "Ready to start the governed workflow."
         : result.requires_clarification
           ? "Clarification needed before workflow start."
           : "No workflow route selected.",
@@ -259,6 +345,7 @@ async function analyzeRequest() {
   } finally {
     elements.analyzeRequest.disabled = false;
     elements.analyzeRequest.textContent = "Analyze Request";
+    updateRunWorkflowAvailability();
   }
 }
 
@@ -280,11 +367,11 @@ function renderIntakeResult() {
     routerField("Product Type", result.product_type || "Not Available"),
     routerField("Product Issue", result.product_issue || "Not Available"),
     routerField("Damage Type", result.damage_type || "Not Available"),
-    routerField("Requires Clarification", result.requires_clarification),
+    routerField("Requires Clarification", clarificationText(result), "pill"),
     routerField("Missing Fields", missingFields),
     routerField("Routed Workflow", result.routed_workflow || "Not Routed"),
     routerField("Routing Status", result.routing_status, "pill"),
-    routerField("Can Start Workflow", result.can_start_workflow),
+    routerField("Can Start Workflow", routerReadinessText(result), "pill"),
     routerField("Next Question", result.next_question || "None"),
     routerField("Error", result.error_message || "None"),
   ].join("");
@@ -610,18 +697,46 @@ async function submitHumanReview(event) {
 
 function loadCrackedScreenScenario() {
   elements.intakeMessage.value = "My laptop screen cracked after 9 months. Can I get a replacement?";
-  elements.request.value = "My laptop screen cracked after 9 months. Can I get a replacement?";
   elements.customerId.value = "cust_primary_001";
   elements.orderId.value = "ord_laptop_001";
-  setStatus("Cracked screen scenario loaded.");
+  elements.useContext.checked = true;
+  appState.intakeResult = null;
+  renderIntakeResult();
+  updateContextPreview();
+  setStatus("Cracked screen scenario loaded with optional workflow context.");
 }
 
 function loadUnknownCustomerScenario() {
   elements.intakeMessage.value = "I need a replacement for my laptop.";
-  elements.request.value = "I need a replacement for my laptop.";
   elements.customerId.value = "UNKNOWN_CUSTOMER";
   elements.orderId.value = "ord_laptop_001";
-  setStatus("Unknown customer scenario loaded.");
+  elements.useContext.checked = true;
+  appState.intakeResult = null;
+  renderIntakeResult();
+  updateContextPreview();
+  setStatus("Unknown customer scenario loaded with optional workflow context.");
+}
+
+function clearContext() {
+  elements.customerId.value = "";
+  elements.orderId.value = "";
+  elements.useContext.checked = false;
+  appState.intakeResult = null;
+  renderIntakeResult();
+  updateContextPreview();
+  setStatus("Optional workflow context cleared.");
+}
+
+function clearIntake() {
+  elements.intakeMessage.value = "";
+  elements.customerId.value = "";
+  elements.orderId.value = "";
+  elements.useContext.checked = false;
+  appState.intakeResult = null;
+  renderIntakeResult();
+  updateContextPreview();
+  setStatus("Intake cleared.");
+  setIntakeStatus("");
 }
 
 function initializeConsole() {
@@ -631,10 +746,26 @@ function initializeConsole() {
   renderTelemetryTiles();
   renderAiDraftingPanel();
   renderIntakeResult();
+  updateContextPreview();
   elements.analyzeRequest.addEventListener("click", analyzeRequest);
   elements.runButton.addEventListener("click", startWorkflow);
   elements.loadCracked.addEventListener("click", loadCrackedScreenScenario);
   elements.loadUnknown.addEventListener("click", loadUnknownCustomerScenario);
+  elements.clearContext.addEventListener("click", clearContext);
+  elements.clearIntake.addEventListener("click", clearIntake);
+  elements.useContext.addEventListener("change", () => {
+    updateContextPreview();
+    resetRouterResult();
+  });
+  elements.customerId.addEventListener("input", () => {
+    updateContextPreview();
+    resetRouterResult();
+  });
+  elements.orderId.addEventListener("input", () => {
+    updateContextPreview();
+    resetRouterResult();
+  });
+  elements.intakeMessage.addEventListener("input", resetRouterResult);
   elements.reviewForm.addEventListener("submit", submitHumanReview);
 }
 

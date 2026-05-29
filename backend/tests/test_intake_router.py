@@ -117,3 +117,23 @@ def test_intake_route_api_returns_router_output() -> None:
     assert data["routed_workflow"] == "warranty_replacement"
     assert data["requires_clarification"] is False
     assert data["can_start_workflow"] is True
+
+
+def test_intake_route_api_requires_clarification_without_ids() -> None:
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/intake/route",
+        json={
+            "message": "My laptop screen cracked after 9 months. Can I get a replacement?",
+            "customer_id": None,
+            "order_id": None,
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["intent"] == "warranty_replacement_request"
+    assert data["requires_clarification"] is True
+    assert data["missing_fields"] == ["customer_id", "order_id"]
+    assert data["can_start_workflow"] is False

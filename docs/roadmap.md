@@ -107,6 +107,8 @@ Architecture principle: the intake router is the language layer; LangGraph remai
 
 The current implementation returns a `next_question` when required fields are missing. The router may ask for clarification in future multi-turn flows. It may classify intent and extract structured fields, but it must not decide eligibility, approve requests, or execute business actions.
 
+The Phase 2 UI now makes Natural Language Intake the primary workflow entry point. Customer/order identifiers are treated as optional workflow context required to start the governed workflow, and the context sent to the router is shown explicitly to avoid hidden Phase 1-style defaults.
+
 Example structured output:
 
 ```json

@@ -72,6 +72,8 @@ The router can:
 
 The router does not decide eligibility, set guardrail decisions, create replacement requests, claim action approval, or execute business tools. When OpenAI configuration is unavailable, the router uses deterministic fallback classification so local development and tests remain stable. The FastAPI endpoint is `POST /api/intake/route`, and the frontend displays router output before the existing workflow is started.
 
+Phase 2 Natural Language Intake is now the primary UI entry point. Customer and order identifiers are shown as optional workflow context required to start the governed workflow, not as the main user experience. The UI makes the context sent to the router visible, and it does not send optional identifiers during analysis unless the user enables that context.
+
 ## Phase 1 LangGraph Workflow
 
 Phase 1 uses LangGraph to model the warranty replacement flow as an explicit local state machine. The graph gives the capstone a clear orchestration layer for sequencing governed tools, branching on deterministic state, and preserving decision fields that can later become audit records.

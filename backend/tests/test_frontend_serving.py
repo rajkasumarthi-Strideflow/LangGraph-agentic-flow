@@ -25,8 +25,17 @@ def test_frontend_index_returns_decisiontrace_branding(client: TestClient) -> No
     assert response.status_code == 200
     assert "DecisionTrace AI" in response.text
     assert "Auditable Agentic Workflows for Governed Customer Decisions" in response.text
+    assert "Natural Language Intake" in response.text
+    assert "Optional Workflow Context" in response.text
+    assert "Use optional workflow context when analyzing request" in response.text
+    assert "Clear Context" in response.text
     assert "Analyze Request" in response.text
+    assert "Run Governed Workflow" in response.text
     assert 'id="analyze-intake-button"' in response.text
+    assert 'id="use-context"' in response.text
+    assert "Context sent to router" in response.text or "context-preview" in response.text
+    assert 'id="customer-request"' not in response.text
+    assert "Customer Intake" not in response.text
 
 
 def test_frontend_static_assets_are_served(client: TestClient) -> None:
@@ -38,6 +47,8 @@ def test_frontend_static_assets_are_served(client: TestClient) -> None:
     assert "telemetry-grid" in css_response.text
     assert "refreshWorkflowView" in js_response.text
     assert "analyze-intake-button" in js_response.text
+    assert "getContextPayload" in js_response.text
+    assert "clearContext" in js_response.text
 
 
 def test_health_still_returns_ok(client: TestClient) -> None:
