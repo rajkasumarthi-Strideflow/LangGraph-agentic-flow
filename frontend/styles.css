@@ -162,6 +162,13 @@ h2 {
   white-space: nowrap;
 }
 
+.panel-helper {
+  max-width: 880px;
+  margin: -6px 0 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 label {
   display: block;
   margin: 14px 0 6px;
