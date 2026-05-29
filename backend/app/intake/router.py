@@ -1,4 +1,5 @@
 import json
+import re
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -39,6 +40,7 @@ class IntakeRouterOutput(BaseModel):
     missing_fields: list[str] = Field(default_factory=list)
     next_question: str | None = None
     routed_workflow: Literal["warranty_replacement"] | None = None
+    can_start_workflow: bool = False
     routing_status: RoutingStatus
     error_message: str | None = None
 
@@ -81,6 +83,25 @@ def _next_question(missing_fields: list[str]) -> str | None:
     return f"Please provide your {', '.join(friendly[:-1])}, and {friendly[-1]} so I can route this request."
 
 
+def _extract_identifier(message: str, label: str) -> str | None:
+    patterns = [
+        rf"\b{label}\s*(?:id|number|#)?\s*(?:is|=|:)?\s*([A-Za-z0-9_-]+)",
+        rf"\b{label}[_\s-]*id\s*(?:is|=|:)?\s*([A-Za-z0-9_-]+)",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, message, flags=re.IGNORECASE)
+        if match:
+            return match.group(1).strip().strip(".,;:")
+    return None
+
+
+def _extract_identifiers(message: str) -> dict[str, str | None]:
+    return {
+        "customer_id": _extract_identifier(message, "customer"),
+        "order_id": _extract_identifier(message, "order"),
+    }
+
+
 def _finalize_output(
     *,
     intent: Intent,
@@ -109,9 +130,10 @@ def _finalize_output(
     requires_clarification = bool(missing_fields)
     routed_workflow = (
         "warranty_replacement"
-        if intent == "warranty_replacement_request" and not requires_clarification
+        if intent == "warranty_replacement_request"
         else None
     )
+    can_start_workflow = bool(routed_workflow) and not requires_clarification
 
     if requires_clarification:
         routing_status: RoutingStatus = (
@@ -140,6 +162,7 @@ def _finalize_output(
         missing_fields=missing_fields,
         next_question=_next_question(missing_fields),
         routed_workflow=routed_workflow,
+        can_start_workflow=can_start_workflow,
         routing_status=routing_status,
         error_message=error_message,
     ).model_dump()
@@ -275,8 +298,9 @@ def route_customer_message(
     order_id: str | None = None,
 ) -> dict[str, Any]:
     cleaned_message = message.strip()
-    cleaned_customer_id = _clean(customer_id)
-    cleaned_order_id = _clean(order_id)
+    extracted_ids = _extract_identifiers(cleaned_message)
+    cleaned_customer_id = _clean(customer_id) or extracted_ids["customer_id"]
+    cleaned_order_id = _clean(order_id) or extracted_ids["order_id"]
 
     if not cleaned_message:
         return _finalize_output(

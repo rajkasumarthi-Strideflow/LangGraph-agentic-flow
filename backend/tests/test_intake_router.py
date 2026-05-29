@@ -33,8 +33,9 @@ def test_router_identifies_missing_customer_and_order() -> None:
 
     assert result["requires_clarification"] is True
     assert result["missing_fields"] == ["customer_id", "order_id"]
+    assert result["can_start_workflow"] is False
     assert "customer ID" in result["next_question"]
-    assert result["routed_workflow"] is None
+    assert result["routed_workflow"] == "warranty_replacement"
 
 
 def test_router_routes_when_customer_and_order_are_provided() -> None:
@@ -48,8 +49,22 @@ def test_router_routes_when_customer_and_order_are_provided() -> None:
     assert result["missing_fields"] == []
     assert result["customer_id"] == PRIMARY_CUSTOMER_ID
     assert result["order_id"] == PRIMARY_ORDER_ID
+    assert result["can_start_workflow"] is True
     assert result["routed_workflow"] == "warranty_replacement"
     assert result["routing_status"] == "fallback_routed"
+
+
+def test_router_extracts_customer_and_order_ids_from_message() -> None:
+    result = route_customer_message(
+        "My laptop screen cracked. customer id is 12345 and order id is 776644",
+    )
+
+    assert result["customer_id"] == "12345"
+    assert result["order_id"] == "776644"
+    assert result["requires_clarification"] is False
+    assert result["missing_fields"] == []
+    assert result["routed_workflow"] == "warranty_replacement"
+    assert result["can_start_workflow"] is True
 
 
 def test_router_does_not_output_decision_or_action_fields() -> None:

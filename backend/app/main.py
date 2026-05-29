@@ -131,7 +131,7 @@ def route_intake_request(request: IntakeRouteRequest) -> IntakeRouteResponse:
         customer_id=request.customer_id,
         order_id=request.order_id,
     )
-    result["can_start_workflow"] = (
+    result["can_start_workflow"] = bool(result.get("can_start_workflow")) and (
         result.get("routed_workflow") == "warranty_replacement"
         and not result.get("requires_clarification")
     )
