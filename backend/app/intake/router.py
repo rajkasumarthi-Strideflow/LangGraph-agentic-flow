@@ -85,8 +85,9 @@ def _next_question(missing_fields: list[str]) -> str | None:
 
 def _extract_identifier(message: str, label: str) -> str | None:
     patterns = [
-        rf"\b{label}\s*(?:id|number|#)?\s*(?:is|=|:)?\s*([A-Za-z0-9_-]+)",
-        rf"\b{label}[_\s-]*id\s*(?:is|=|:)?\s*([A-Za-z0-9_-]+)",
+        rf"\b{label}\s+(?:id|number|#)\s*(?:is|=|:)?\s*([A-Za-z0-9_-]+)",
+        rf"\b{label}[_-]id\s*(?:is|=|:)?\s*([A-Za-z0-9_-]+)",
+        rf"\b{label}\s*(?:is|=|:)\s*([A-Za-z0-9_-]+)",
     ]
     for pattern in patterns:
         match = re.search(pattern, message, flags=re.IGNORECASE)

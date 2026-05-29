@@ -67,6 +67,19 @@ def test_router_extracts_customer_and_order_ids_from_message() -> None:
     assert result["can_start_workflow"] is True
 
 
+def test_router_extracts_primary_mock_ids_from_complete_prompt() -> None:
+    result = route_customer_message(
+        "My laptop screen broke. Can I get a replacement? "
+        f"customer id is {PRIMARY_CUSTOMER_ID} and order id is {PRIMARY_ORDER_ID}",
+    )
+
+    assert result["customer_id"] == PRIMARY_CUSTOMER_ID
+    assert result["order_id"] == PRIMARY_ORDER_ID
+    assert result["requires_clarification"] is False
+    assert result["missing_fields"] == []
+    assert result["can_start_workflow"] is True
+
+
 def test_router_does_not_output_decision_or_action_fields() -> None:
     result = route_customer_message(
         "My laptop screen cracked after 9 months. Can I get a replacement?",
@@ -137,3 +150,26 @@ def test_intake_route_api_requires_clarification_without_ids() -> None:
     assert data["requires_clarification"] is True
     assert data["missing_fields"] == ["customer_id", "order_id"]
     assert data["can_start_workflow"] is False
+
+
+def test_intake_route_api_returns_embedded_customer_and_order_ids() -> None:
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/intake/route",
+        json={
+            "message": (
+                "My laptop screen broke. Can I get a replacement? "
+                f"customer id is {PRIMARY_CUSTOMER_ID} and order id is {PRIMARY_ORDER_ID}"
+            ),
+            "customer_id": None,
+            "order_id": None,
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["customer_id"] == PRIMARY_CUSTOMER_ID
+    assert data["order_id"] == PRIMARY_ORDER_ID
+    assert data["requires_clarification"] is False
+    assert data["can_start_workflow"] is True

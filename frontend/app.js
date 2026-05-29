@@ -180,8 +180,8 @@ function getContextPayload() {
 
 function getWorkflowIdentifiers() {
   return {
-    customer_id: appState.intakeResult?.customer_id || optionalValue(elements.customerId),
-    order_id: appState.intakeResult?.order_id || optionalValue(elements.orderId),
+    customer_id: appState.intakeResult?.customer_id || null,
+    order_id: appState.intakeResult?.order_id || null,
   };
 }
 
@@ -192,11 +192,10 @@ function hasRequiredContext() {
 
 function updateRunWorkflowAvailability() {
   const messageReady = Boolean(elements.intakeMessage.value.trim());
+  const identifiers = getWorkflowIdentifiers();
   const routerReady = Boolean(appState.intakeResult?.can_start_workflow);
-  const checkedContextReady = elements.useContext.checked
-    && Boolean(optionalValue(elements.customerId))
-    && Boolean(optionalValue(elements.orderId));
-  elements.runButton.disabled = !(messageReady && (routerReady || checkedContextReady));
+  const identifiersReady = Boolean(identifiers.customer_id && identifiers.order_id);
+  elements.runButton.disabled = !(messageReady && routerReady && identifiersReady);
 }
 
 function updateContextPreview() {
@@ -278,7 +277,11 @@ async function requestJson(url, options = {}) {
 async function startWorkflow() {
   const identifiers = getWorkflowIdentifiers();
   if (!identifiers.customer_id || !identifiers.order_id) {
-    setStatus("Customer ID and Order ID are required to start the governed workflow.", true);
+    setStatus(
+      appState.intakeResult?.next_question
+        || "Customer ID and Order ID are required to start the governed workflow.",
+      true,
+    );
     updateRunWorkflowAvailability();
     return;
   }
@@ -364,6 +367,8 @@ function renderIntakeResult() {
   elements.intakeResult.innerHTML = [
     routerField("Intent", result.intent, "pill"),
     routerField("Confidence", result.confidence ?? "Not Available"),
+    routerField("Extracted Customer ID", result.customer_id || "Not provided"),
+    routerField("Extracted Order ID", result.order_id || "Not provided"),
     routerField("Product Type", result.product_type || "Not Available"),
     routerField("Product Issue", result.product_issue || "Not Available"),
     routerField("Damage Type", result.damage_type || "Not Available"),

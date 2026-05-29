@@ -34,6 +34,7 @@ def test_frontend_index_returns_decisiontrace_branding(client: TestClient) -> No
     assert 'id="analyze-intake-button"' in response.text
     assert 'id="use-context"' in response.text
     assert "Context sent to router" in response.text or "context-preview" in response.text
+    assert "/static/app.js?v=phase2-router-output-2" in response.text
     assert 'id="customer-request"' not in response.text
     assert "Customer Intake" not in response.text
 
@@ -49,6 +50,8 @@ def test_frontend_static_assets_are_served(client: TestClient) -> None:
     assert "analyze-intake-button" in js_response.text
     assert "getContextPayload" in js_response.text
     assert "clearContext" in js_response.text
+    assert "Extracted Customer ID" in js_response.text
+    assert "Extracted Order ID" in js_response.text
 
 
 def test_health_still_returns_ok(client: TestClient) -> None:
