@@ -26,14 +26,17 @@ def test_frontend_index_returns_decisiontrace_branding(client: TestClient) -> No
     assert "DecisionTrace AI" in response.text
     assert "Auditable Agentic Workflows for Governed Customer Decisions" in response.text
     assert "Natural Language Intake" in response.text
+    assert "Reply / Continue" in response.text
+    assert "Conversation" in response.text
     assert "Router Output" in response.text
     assert "Missing Info Scenario" in response.text
     assert "Complete Cracked Screen Scenario" in response.text
     assert "Unknown Customer Scenario" in response.text
+    assert "Invalid Identifier Scenario" in response.text
     assert "Analyze Request" in response.text
     assert "Run Governed Workflow" in response.text
     assert 'id="analyze-intake-button"' in response.text
-    assert "/static/app.js?v=phase2-natural-intake-primary-1" in response.text
+    assert "/static/app.js?v=phase2-multiturn-clarification-1" in response.text
     assert "Optional Workflow Context" not in response.text
     assert "Use optional workflow context when analyzing request" not in response.text
     assert "Clear Context" not in response.text
@@ -52,6 +55,9 @@ def test_frontend_static_assets_are_served(client: TestClient) -> None:
     assert "telemetry-grid" in css_response.text
     assert "refreshWorkflowView" in js_response.text
     assert "analyze-intake-button" in js_response.text
+    assert "reply-intake-button" in js_response.text
+    assert "/api/intake/session/start" in js_response.text
+    assert "/reply" in js_response.text
     assert "getContextPayload" in js_response.text
     assert "customer_id: null" in js_response.text
     assert "order_id: null" in js_response.text
@@ -60,7 +66,7 @@ def test_frontend_static_assets_are_served(client: TestClient) -> None:
     assert "Extracted Order ID" in js_response.text
     assert "Invalid identifier format" in js_response.text
     assert "cust_unknown_001" in js_response.text
-    assert "UNKNOWN_CUSTOMER" not in js_response.text
+    assert "UNKNOWN_CUSTOMER" in js_response.text
 
 
 def test_health_still_returns_ok(client: TestClient) -> None:

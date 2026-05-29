@@ -105,9 +105,9 @@ Examples:
 
 Architecture principle: the intake router is the language layer; LangGraph remains the control layer.
 
-The current implementation returns a `next_question` when required fields are missing. The router may ask for clarification in future multi-turn flows. It may classify intent and extract structured fields, but it must not decide eligibility, approve requests, or execute business actions.
+The current implementation returns a `next_question` when required fields are missing or syntactically invalid. The Phase 2 branch now includes a lightweight in-memory multi-turn clarification session: the router preserves the original request, accepts a follow-up answer, extracts missing identifiers, validates identifier format, and marks the governed workflow ready only when required facts are collected.
 
-The Phase 2 UI now makes Natural Language Intake the primary workflow entry point. Customer/order identifiers are treated as optional workflow context required to start the governed workflow, and the context sent to the router is shown explicitly to avoid hidden Phase 1-style defaults.
+The Phase 2 UI now makes Natural Language Intake the primary workflow entry point. Customer/order identifiers are supplied inside the freeform message and extracted by the router. Conversation context supports clarification only; workflow state still controls execution, and the router must not decide eligibility, approve requests, or execute business actions.
 
 Example structured output:
 
@@ -119,7 +119,8 @@ Example structured output:
   "confidence": 0.91,
   "requires_order_lookup": true,
   "requires_policy_lookup": true,
-  "requires_clarification": false
+  "requires_clarification": false,
+  "can_start_workflow": true
 }
 ```
 

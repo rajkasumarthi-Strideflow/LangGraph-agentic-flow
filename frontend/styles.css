@@ -230,6 +230,43 @@ select:focus {
   margin-top: 20px;
 }
 
+.conversation-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.conversation-message {
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.conversation-message.router {
+  background: var(--primary-soft);
+  border-color: #c7d8ff;
+}
+
+.conversation-role {
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 820;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.conversation-text {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.conversation-time {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .button {
   min-height: 42px;
   padding: 0 14px;

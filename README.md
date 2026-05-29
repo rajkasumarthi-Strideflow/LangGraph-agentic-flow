@@ -98,7 +98,7 @@ Known limitations and roadmap: [docs/roadmap.md](docs/roadmap.md)
 
 DecisionTrace AI’s roadmap includes a stateful intake router, prompt governance, and an observability-to-evaluation loop so production failures can become regression tests.
 
-Phase 2 branch note: `phase-2/intake-router` introduces a stateful natural-language intake router that classifies freeform customer messages, extracts structured facts, identifies missing fields, and routes ready warranty replacement requests into the existing controlled workflow. The router interprets and routes only; LangGraph still governs eligibility, guardrails, escalation, and action execution.
+Phase 2 branch note: `phase-2/intake-router` introduces a stateful natural-language intake router that classifies freeform customer messages, extracts structured facts, identifies missing or invalid fields, supports a lightweight multi-turn clarification session, and routes ready warranty replacement requests into the existing controlled workflow. Conversation context is used only to collect required facts; LangGraph still governs eligibility, guardrails, escalation, and action execution.
 
 ## Phase 1 Capabilities
 

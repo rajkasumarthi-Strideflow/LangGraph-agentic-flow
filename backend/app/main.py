@@ -12,12 +12,21 @@ from app.audit.human_review_store import get_human_reviews, save_human_review
 from app.audit.store import get_audit_events
 from app.database import init_db
 from app.intake.router import route_customer_message
+from app.intake.session import (
+    IntakeSession,
+    create_intake_session,
+    get_intake_session,
+    update_intake_session,
+)
 from app.models.api import (
     AuditTimelineResponse,
     HumanReviewRequest,
     HumanReviewResponse,
     IntakeRouteRequest,
     IntakeRouteResponse,
+    IntakeSessionReplyRequest,
+    IntakeSessionResponse,
+    IntakeSessionStartRequest,
     StartWorkflowRequest,
     StartWorkflowResponse,
     WorkflowStateResponse,
@@ -110,6 +119,11 @@ def _workflow_response(state: dict[str, Any]) -> StartWorkflowResponse:
     )
 
 
+def _intake_session_response(session: IntakeSession) -> IntakeSessionResponse:
+    data = session.model_dump(mode="json")
+    return IntakeSessionResponse(**data)
+
+
 @app.get("/health")
 def health_check():
     return {
@@ -136,6 +150,46 @@ def route_intake_request(request: IntakeRouteRequest) -> IntakeRouteResponse:
         and not result.get("requires_clarification")
     )
     return IntakeRouteResponse(**result)
+
+
+@app.post(
+    "/api/intake/session/start",
+    response_model=IntakeSessionResponse,
+)
+def start_intake_session(
+    request: IntakeSessionStartRequest,
+) -> IntakeSessionResponse:
+    session = create_intake_session(request.message)
+    return _intake_session_response(session)
+
+
+@app.post(
+    "/api/intake/session/{intake_session_id}/reply",
+    response_model=IntakeSessionResponse,
+)
+def reply_to_intake_session(
+    intake_session_id: str,
+    request: IntakeSessionReplyRequest,
+) -> IntakeSessionResponse:
+    session = update_intake_session(intake_session_id, request.message)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Intake session not found.")
+
+    return _intake_session_response(session)
+
+
+@app.get(
+    "/api/intake/session/{intake_session_id}",
+    response_model=IntakeSessionResponse,
+)
+def get_intake_session_state(
+    intake_session_id: str,
+) -> IntakeSessionResponse:
+    session = get_intake_session(intake_session_id)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Intake session not found.")
+
+    return _intake_session_response(session)
 
 
 @app.post("/api/workflows/start", response_model=StartWorkflowResponse)

@@ -15,7 +15,7 @@ class IntakeRouteRequest(BaseModel):
     order_id: str | None = None
 
 
-class IntakeRouteResponse(BaseModel):
+class IntakeRouterFields(BaseModel):
     intent: str
     confidence: float | None = None
     product_type: str | None = None
@@ -33,6 +33,33 @@ class IntakeRouteResponse(BaseModel):
     routing_status: str
     error_message: str | None = None
     can_start_workflow: bool = False
+
+
+class IntakeRouteResponse(IntakeRouterFields):
+    pass
+
+
+class IntakeSessionStartRequest(BaseModel):
+    message: str
+
+
+class IntakeSessionReplyRequest(BaseModel):
+    message: str
+
+
+class IntakeConversationMessage(BaseModel):
+    role: str
+    content: str
+    timestamp: str
+
+
+class IntakeSessionResponse(IntakeRouterFields):
+    intake_session_id: str
+    original_message: str
+    latest_message: str
+    conversation_messages: list[dict[str, Any]]
+    created_at: str
+    updated_at: str
 
 
 class StartWorkflowResponse(BaseModel):

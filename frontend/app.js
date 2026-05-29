@@ -4,17 +4,23 @@ const appState = {
   auditEvents: [],
   humanReviews: [],
   intakeResult: null,
+  intakeSessionId: null,
+  intakeOriginalMessage: null,
+  conversationMessages: [],
 };
 
 const elements = {
   intakeMessage: document.querySelector("#intake-message"),
   analyzeRequest: document.querySelector("#analyze-intake-button"),
+  replyIntake: document.querySelector("#reply-intake-button"),
   intakeStatus: document.querySelector("#intake-status"),
   intakeResult: document.querySelector("#intake-result"),
+  conversationPanel: document.querySelector("#conversation-panel"),
   runButton: document.querySelector("#run-workflow"),
   loadMissing: document.querySelector("#load-missing"),
   loadCracked: document.querySelector("#load-cracked"),
   loadUnknown: document.querySelector("#load-unknown"),
+  loadInvalid: document.querySelector("#load-invalid"),
   clearIntake: document.querySelector("#clear-intake"),
   status: document.querySelector("#status-message"),
   result: document.querySelector("#workflow-result"),
@@ -179,7 +185,12 @@ function updateRunWorkflowAvailability() {
 }
 
 function resetRouterResult() {
+  appState.intakeSessionId = null;
+  appState.intakeOriginalMessage = null;
+  appState.conversationMessages = [];
   appState.intakeResult = null;
+  elements.replyIntake.classList.add("hidden");
+  renderConversation();
   renderIntakeResult();
   updateRunWorkflowAvailability();
 }
@@ -261,7 +272,7 @@ async function startWorkflow() {
     const result = await requestJson("/api/workflows/start", {
       method: "POST",
       body: JSON.stringify({
-        customer_request: elements.intakeMessage.value,
+        customer_request: appState.intakeOriginalMessage || elements.intakeMessage.value,
         customer_id: identifiers.customer_id,
         order_id: identifiers.order_id,
       }),
@@ -280,21 +291,18 @@ async function startWorkflow() {
 
 async function analyzeRequest() {
   elements.analyzeRequest.disabled = true;
-  elements.analyzeRequest.textContent = "Analyzing...";
+  elements.analyzeRequest.textContent = "Starting...";
   setIntakeStatus("Analyzing request...");
 
   try {
-    const result = await requestJson("/api/intake/route", {
+    const result = await requestJson("/api/intake/session/start", {
       method: "POST",
       body: JSON.stringify({
         message: elements.intakeMessage.value,
-        ...getContextPayload(),
       }),
     });
 
-    appState.intakeResult = result;
-    renderIntakeResult();
-    updateRunWorkflowAvailability();
+    applyIntakeSession(result);
 
     setIntakeStatus(
       result.can_start_workflow
@@ -307,9 +315,83 @@ async function analyzeRequest() {
     setIntakeStatus(error.message, true);
   } finally {
     elements.analyzeRequest.disabled = false;
-    elements.analyzeRequest.textContent = "Analyze Request";
+    elements.analyzeRequest.textContent = "Start Intake / Analyze Request";
     updateRunWorkflowAvailability();
   }
+}
+
+async function replyToIntake() {
+  if (!appState.intakeSessionId) {
+    setIntakeStatus("Start intake before replying.", true);
+    return;
+  }
+
+  elements.replyIntake.disabled = true;
+  elements.replyIntake.textContent = "Continuing...";
+  setIntakeStatus("Updating intake session...");
+
+  try {
+    const result = await requestJson(`/api/intake/session/${appState.intakeSessionId}/reply`, {
+      method: "POST",
+      body: JSON.stringify({
+        message: elements.intakeMessage.value,
+      }),
+    });
+
+    applyIntakeSession(result);
+    setIntakeStatus(
+      result.can_start_workflow
+        ? "Required facts collected. Ready to start the governed workflow."
+        : result.requires_clarification
+          ? "Clarification still needed before workflow start."
+          : "No workflow route selected.",
+    );
+  } catch (error) {
+    setIntakeStatus(error.message, true);
+  } finally {
+    elements.replyIntake.disabled = false;
+    elements.replyIntake.textContent = "Reply / Continue";
+    updateRunWorkflowAvailability();
+  }
+}
+
+function applyIntakeSession(result) {
+  appState.intakeSessionId = result.intake_session_id;
+  appState.intakeOriginalMessage = result.original_message;
+  appState.conversationMessages = result.conversation_messages || [];
+  appState.intakeResult = result;
+  renderConversation();
+  renderIntakeResult();
+  updateReplyVisibility(result);
+  updateRunWorkflowAvailability();
+}
+
+function updateReplyVisibility(result) {
+  if (result.requires_clarification) {
+    elements.replyIntake.classList.remove("hidden");
+  } else {
+    elements.replyIntake.classList.add("hidden");
+  }
+}
+
+function renderConversation() {
+  const messages = appState.conversationMessages;
+  if (!messages.length) {
+    elements.conversationPanel.className = "conversation-panel empty-state";
+    elements.conversationPanel.textContent = "Start intake to see the conversation and clarification turns.";
+    return;
+  }
+
+  elements.conversationPanel.className = "conversation-panel";
+  elements.conversationPanel.innerHTML = messages
+    .map((message) => `
+      <article class="conversation-message ${escapeHtml(message.role)}">
+        <div class="conversation-role">${escapeHtml(message.role)}</div>
+        <div class="conversation-text">${escapeHtml(message.content)}</div>
+        <div class="conversation-time">${escapeHtml(dash(message.timestamp))}</div>
+      </article>
+    `)
+    .join("");
 }
 
 function renderIntakeResult() {
@@ -671,7 +753,12 @@ async function submitHumanReview(event) {
 function loadMissingInfoScenario() {
   elements.intakeMessage.value = "My laptop screen cracked after 9 months. Can I get a replacement?";
   appState.intakeResult = null;
+  appState.intakeSessionId = null;
+  appState.intakeOriginalMessage = null;
+  appState.conversationMessages = [];
   renderIntakeResult();
+  renderConversation();
+  elements.replyIntake.classList.add("hidden");
   updateRunWorkflowAvailability();
   setStatus("Missing info scenario loaded. Analyze to see required customer and order details.");
   setIntakeStatus("");
@@ -680,7 +767,12 @@ function loadMissingInfoScenario() {
 function loadCrackedScreenScenario() {
   elements.intakeMessage.value = "My laptop screen cracked after 9 months. Can I get a replacement? Customer ID is cust_primary_001 and order ID is ord_laptop_001.";
   appState.intakeResult = null;
+  appState.intakeSessionId = null;
+  appState.intakeOriginalMessage = null;
+  appState.conversationMessages = [];
   renderIntakeResult();
+  renderConversation();
+  elements.replyIntake.classList.add("hidden");
   updateRunWorkflowAvailability();
   setStatus("Complete cracked screen scenario loaded. Analyze to extract identifiers.");
   setIntakeStatus("");
@@ -689,16 +781,40 @@ function loadCrackedScreenScenario() {
 function loadUnknownCustomerScenario() {
   elements.intakeMessage.value = "I need a replacement for my laptop. Customer ID is cust_unknown_001 and order ID is ord_laptop_001.";
   appState.intakeResult = null;
+  appState.intakeSessionId = null;
+  appState.intakeOriginalMessage = null;
+  appState.conversationMessages = [];
   renderIntakeResult();
+  renderConversation();
+  elements.replyIntake.classList.add("hidden");
   updateRunWorkflowAvailability();
   setStatus("Unknown customer scenario loaded. Analyze to extract identifiers.");
+  setIntakeStatus("");
+}
+
+function loadInvalidIdentifierScenario() {
+  elements.intakeMessage.value = "My laptop screen cracked. Customer ID is UNKNOWN_CUSTOMER and order ID is ord_laptop_001.";
+  appState.intakeResult = null;
+  appState.intakeSessionId = null;
+  appState.intakeOriginalMessage = null;
+  appState.conversationMessages = [];
+  renderIntakeResult();
+  renderConversation();
+  elements.replyIntake.classList.add("hidden");
+  updateRunWorkflowAvailability();
+  setStatus("Invalid identifier scenario loaded. Analyze to see format validation.");
   setIntakeStatus("");
 }
 
 function clearIntake() {
   elements.intakeMessage.value = "";
   appState.intakeResult = null;
+  appState.intakeSessionId = null;
+  appState.intakeOriginalMessage = null;
+  appState.conversationMessages = [];
   renderIntakeResult();
+  renderConversation();
+  elements.replyIntake.classList.add("hidden");
   updateRunWorkflowAvailability();
   setStatus("Intake cleared.");
   setIntakeStatus("");
@@ -711,14 +827,16 @@ function initializeConsole() {
   renderTelemetryTiles();
   renderAiDraftingPanel();
   renderIntakeResult();
+  renderConversation();
   updateRunWorkflowAvailability();
   elements.analyzeRequest.addEventListener("click", analyzeRequest);
+  elements.replyIntake.addEventListener("click", replyToIntake);
   elements.runButton.addEventListener("click", startWorkflow);
   elements.loadMissing.addEventListener("click", loadMissingInfoScenario);
   elements.loadCracked.addEventListener("click", loadCrackedScreenScenario);
   elements.loadUnknown.addEventListener("click", loadUnknownCustomerScenario);
+  elements.loadInvalid.addEventListener("click", loadInvalidIdentifierScenario);
   elements.clearIntake.addEventListener("click", clearIntake);
-  elements.intakeMessage.addEventListener("input", resetRouterResult);
   elements.reviewForm.addEventListener("submit", submitHumanReview);
 }
 

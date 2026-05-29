@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 
 from app.config import settings
 from app.intake.router import route_customer_message
+from app.intake.session import clear_intake_sessions
 from app.intake.validator import validate_router_output
 from app.main import app
 from app.tools.mock_data import PRIMARY_CUSTOMER_ID, PRIMARY_ORDER_ID
@@ -12,6 +13,7 @@ from app.tools.mock_data import PRIMARY_CUSTOMER_ID, PRIMARY_ORDER_ID
 def disable_openai_intake(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(settings, "OPENAI_API_KEY", None)
     monkeypatch.setattr(settings, "OPENAI_MODEL", None)
+    clear_intake_sessions()
 
 
 def test_deterministic_fallback_classifies_cracked_screen() -> None:
@@ -205,3 +207,113 @@ def test_intake_route_api_returns_embedded_customer_and_order_ids() -> None:
     assert data["requires_clarification"] is False
     assert data["invalid_fields"] == []
     assert data["can_start_workflow"] is True
+
+
+def test_intake_session_start_requires_clarification_without_ids() -> None:
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/intake/session/start",
+        json={
+            "message": "My laptop screen cracked after 9 months. Can I get a replacement?",
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["intake_session_id"].startswith("intake_")
+    assert data["original_message"] == "My laptop screen cracked after 9 months. Can I get a replacement?"
+    assert data["requires_clarification"] is True
+    assert data["missing_fields"] == ["customer_id", "order_id"]
+    assert data["can_start_workflow"] is False
+    assert any(message["role"] == "router" for message in data["conversation_messages"])
+
+
+def test_intake_session_reply_collects_missing_identifiers() -> None:
+    client = TestClient(app)
+    start_response = client.post(
+        "/api/intake/session/start",
+        json={
+            "message": "My laptop screen cracked after 9 months. Can I get a replacement?",
+        },
+    )
+    session_id = start_response.json()["intake_session_id"]
+
+    reply_response = client.post(
+        f"/api/intake/session/{session_id}/reply",
+        json={
+            "message": f"Customer ID is {PRIMARY_CUSTOMER_ID} and order ID is {PRIMARY_ORDER_ID}.",
+        },
+    )
+
+    assert reply_response.status_code == 200
+    data = reply_response.json()
+    assert data["intake_session_id"] == session_id
+    assert data["original_message"] == "My laptop screen cracked after 9 months. Can I get a replacement?"
+    assert data["intent"] == "warranty_replacement_request"
+    assert data["product_issue"] == "cracked_screen"
+    assert data["customer_id"] == PRIMARY_CUSTOMER_ID
+    assert data["order_id"] == PRIMARY_ORDER_ID
+    assert data["requires_clarification"] is False
+    assert data["missing_fields"] == []
+    assert data["invalid_fields"] == []
+    assert data["can_start_workflow"] is True
+    assert len(data["conversation_messages"]) >= 3
+
+
+def test_intake_session_invalid_identifier_reply_remains_blocked() -> None:
+    client = TestClient(app)
+    start_response = client.post(
+        "/api/intake/session/start",
+        json={
+            "message": "My laptop screen cracked after 9 months. Can I get a replacement?",
+        },
+    )
+    session_id = start_response.json()["intake_session_id"]
+
+    reply_response = client.post(
+        f"/api/intake/session/{session_id}/reply",
+        json={
+            "message": "Customer ID is UNKNOWN_CUSTOMER and order ID is ord_laptop_001.",
+        },
+    )
+
+    assert reply_response.status_code == 200
+    data = reply_response.json()
+    assert data["customer_id"] == "UNKNOWN_CUSTOMER"
+    assert data["order_id"] == PRIMARY_ORDER_ID
+    assert data["requires_clarification"] is True
+    assert data["invalid_fields"] == ["customer_id"]
+    assert data["can_start_workflow"] is False
+
+
+def test_intake_session_valid_unknown_customer_can_route() -> None:
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/intake/session/start",
+        json={
+            "message": "I need a replacement for my laptop. Customer ID is cust_unknown_001 and order ID is ord_laptop_001.",
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["customer_id"] == "cust_unknown_001"
+    assert data["order_id"] == PRIMARY_ORDER_ID
+    assert data["requires_clarification"] is False
+    assert data["can_start_workflow"] is True
+    assert "eligibility_status" not in data
+    assert "guardrail_decision" not in data
+    assert "replacement_request_id" not in data
+
+
+def test_intake_session_not_found_returns_404() -> None:
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/intake/session/intake_missing/reply",
+        json={"message": "Customer ID is cust_primary_001."},
+    )
+
+    assert response.status_code == 404

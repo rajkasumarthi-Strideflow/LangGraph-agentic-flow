@@ -60,19 +60,20 @@ execution
 
 ## Phase 2 Intake Router
 
-The `phase-2/intake-router` branch adds an implemented stateful natural-language intake router in `backend/app/intake/`. The router accepts a freeform customer message plus optional customer and order identifiers, then returns structured routing output.
+The `phase-2/intake-router` branch adds an implemented stateful natural-language intake router in `backend/app/intake/`. The router accepts a freeform customer message, extracts required identifiers from the message, and returns structured routing output.
 
 The router can:
 
 - Classify supported intents: `warranty_replacement_request`, `warranty_policy_question`, and `unknown`.
 - Extract basic structured facts such as product type, product issue, and damage type.
-- Preserve explicit `customer_id` and `order_id` values passed by the caller.
-- Identify missing required facts and produce a next clarification question.
+- Validate synthetic identifier formats before routing: `cust_...` for customer IDs and `ord_...` for order IDs.
+- Identify missing or invalid required facts and produce a next clarification question.
+- Continue a lightweight in-memory intake session when the user replies with missing facts.
 - Route ready warranty replacement requests to `routed_workflow = warranty_replacement`.
 
-The router does not decide eligibility, set guardrail decisions, create replacement requests, claim action approval, or execute business tools. When OpenAI configuration is unavailable, the router uses deterministic fallback classification so local development and tests remain stable. The FastAPI endpoint is `POST /api/intake/route`, and the frontend displays router output before the existing workflow is started.
+The router does not decide eligibility, set guardrail decisions, create replacement requests, claim action approval, or execute business tools. When OpenAI configuration is unavailable, the router uses deterministic fallback classification so local development and tests remain stable. The one-shot FastAPI endpoint is `POST /api/intake/route`. The multi-turn session endpoints are `POST /api/intake/session/start`, `POST /api/intake/session/{intake_session_id}/reply`, and `GET /api/intake/session/{intake_session_id}`.
 
-Phase 2 Natural Language Intake is now the primary UI entry point. Customer and order identifiers are shown as optional workflow context required to start the governed workflow, not as the main user experience. The UI makes the context sent to the router visible, and it does not send optional identifiers during analysis unless the user enables that context.
+Phase 2 Natural Language Intake is now the primary UI entry point. Customer and order identifiers are provided inside the freeform message and extracted by the router. Conversation context is used only to collect required facts; the existing LangGraph warranty workflow remains the execution control layer.
 
 ## Phase 1 LangGraph Workflow
 

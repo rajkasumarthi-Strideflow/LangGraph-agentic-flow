@@ -355,3 +355,50 @@ def route_customer_message(
             cleaned_order_id,
             error_message=f"LLM intake unavailable; deterministic fallback used: {exc}",
         )
+
+
+def route_customer_message_with_context(
+    message: str,
+    existing_context: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    context = existing_context or {}
+    cleaned_message = message.strip()
+    extracted_ids = _extract_identifiers(cleaned_message)
+    customer_id = (
+        _clean(extracted_ids["customer_id"])
+        or _clean(context.get("customer_id"))
+    )
+    order_id = (
+        _clean(extracted_ids["order_id"])
+        or _clean(context.get("order_id"))
+    )
+
+    current = route_customer_message(
+        cleaned_message,
+        customer_id=customer_id,
+        order_id=order_id,
+    )
+
+    intent = current.get("intent", "unknown")
+    prior_intent = context.get("intent")
+    if intent == "unknown" and prior_intent in {
+        "warranty_replacement_request",
+        "warranty_policy_question",
+    }:
+        intent = prior_intent
+
+    return _finalize_output(
+        intent=intent,
+        confidence=(
+            current.get("confidence")
+            if current.get("intent") != "unknown"
+            else context.get("confidence") or current.get("confidence")
+        ),
+        product_type=current.get("product_type") or context.get("product_type"),
+        product_issue=current.get("product_issue") or context.get("product_issue"),
+        damage_type=current.get("damage_type") or context.get("damage_type"),
+        customer_id=customer_id,
+        order_id=order_id,
+        routing_prefix="fallback_",
+        error_message=current.get("error_message"),
+    )
