@@ -8,7 +8,7 @@ const appState = {
 
 const elements = {
   intakeMessage: document.querySelector("#intake-message"),
-  analyzeRequest: document.querySelector("#analyze-request"),
+  analyzeRequest: document.querySelector("#analyze-intake-button"),
   intakeStatus: document.querySelector("#intake-status"),
   intakeResult: document.querySelector("#intake-result"),
   request: document.querySelector("#customer-request"),
@@ -224,7 +224,7 @@ async function startWorkflow() {
 async function analyzeRequest() {
   elements.analyzeRequest.disabled = true;
   elements.analyzeRequest.textContent = "Analyzing...";
-  setIntakeStatus("Routing customer message...");
+  setIntakeStatus("Analyzing request...");
 
   try {
     const result = await requestJson("/api/intake/route", {
@@ -277,8 +277,10 @@ function renderIntakeResult() {
   elements.intakeResult.innerHTML = [
     routerField("Intent", result.intent, "pill"),
     routerField("Confidence", result.confidence ?? "Not Available"),
+    routerField("Product Type", result.product_type || "Not Available"),
     routerField("Product Issue", result.product_issue || "Not Available"),
     routerField("Damage Type", result.damage_type || "Not Available"),
+    routerField("Requires Clarification", result.requires_clarification),
     routerField("Missing Fields", missingFields),
     routerField("Routed Workflow", result.routed_workflow || "Not Routed"),
     routerField("Routing Status", result.routing_status, "pill"),
@@ -623,6 +625,9 @@ function loadUnknownCustomerScenario() {
 }
 
 function initializeConsole() {
+  if (!elements.analyzeRequest) {
+    return;
+  }
   renderTelemetryTiles();
   renderAiDraftingPanel();
   renderIntakeResult();
@@ -633,4 +638,8 @@ function initializeConsole() {
   elements.reviewForm.addEventListener("submit", submitHumanReview);
 }
 
-initializeConsole();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeConsole);
+} else {
+  initializeConsole();
+}

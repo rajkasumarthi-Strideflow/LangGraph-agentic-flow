@@ -25,6 +25,8 @@ def test_frontend_index_returns_decisiontrace_branding(client: TestClient) -> No
     assert response.status_code == 200
     assert "DecisionTrace AI" in response.text
     assert "Auditable Agentic Workflows for Governed Customer Decisions" in response.text
+    assert "Analyze Request" in response.text
+    assert 'id="analyze-intake-button"' in response.text
 
 
 def test_frontend_static_assets_are_served(client: TestClient) -> None:
@@ -35,6 +37,7 @@ def test_frontend_static_assets_are_served(client: TestClient) -> None:
     assert js_response.status_code == 200
     assert "telemetry-grid" in css_response.text
     assert "refreshWorkflowView" in js_response.text
+    assert "analyze-intake-button" in js_response.text
 
 
 def test_health_still_returns_ok(client: TestClient) -> None:
