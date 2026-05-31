@@ -7,6 +7,7 @@ from app.intake.session import clear_intake_sessions
 from app.intake.validator import validate_router_output
 from app.main import app
 from app.tools.mock_data import PRIMARY_CUSTOMER_ID, PRIMARY_ORDER_ID
+from app.tools.mock_data import ELIGIBLE_POWER_ORDER_ID
 
 
 @pytest.fixture(autouse=True)
@@ -109,6 +110,25 @@ def test_router_extracts_primary_mock_ids_from_complete_prompt() -> None:
     assert result["requires_clarification"] is False
     assert result["missing_fields"] == []
     assert result["invalid_fields"] == []
+    assert result["can_start_workflow"] is True
+
+
+def test_router_extracts_eligible_power_failure_prompt() -> None:
+    result = route_customer_message(
+        "My laptop stopped powering on after 6 months. Can I get a replacement? "
+        f"Customer ID is {PRIMARY_CUSTOMER_ID} and order ID is {ELIGIBLE_POWER_ORDER_ID}.",
+    )
+
+    assert result["intent"] == "warranty_replacement_request"
+    assert result["product_type"] == "laptop"
+    assert result["product_issue"] == "power_failure"
+    assert result["damage_type"] == "manufacturing_defect"
+    assert result["customer_id"] == PRIMARY_CUSTOMER_ID
+    assert result["order_id"] == ELIGIBLE_POWER_ORDER_ID
+    assert result["requires_clarification"] is False
+    assert result["missing_fields"] == []
+    assert result["invalid_fields"] == []
+    assert result["routed_workflow"] == "warranty_replacement"
     assert result["can_start_workflow"] is True
 
 

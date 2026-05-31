@@ -41,6 +41,12 @@ This scenario is intentionally tricky. The product is inside the 12-month warran
 
 For the cracked-screen scenario, the most important message is that the system does not create a replacement request. It blocks the write/action path because the current policy excludes the issue.
 
+Phase 2 also includes an **Eligible Manufacturing Defect Scenario**:
+
+> My laptop stopped powering on after 6 months. Can I get a replacement? Customer ID is cust_primary_001 and order ID is ord_laptop_power_001.
+
+Use this scenario to show the allow path. The workflow verifies identity, retrieves the delivered order, applies the current laptop policy, determines that a power failure/manufacturing defect is eligible within the warranty window, confirms inventory, records `guardrail_decision = allow`, and creates a governed replacement request. This demonstrates that DecisionTrace AI can allow customer-impacting actions, but only after deterministic controls pass.
+
 ## E. Why This Is Enterprise-Grade
 
 - State-based workflow control keeps the process explainable.

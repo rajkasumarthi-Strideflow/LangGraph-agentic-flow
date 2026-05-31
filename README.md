@@ -100,6 +100,8 @@ DecisionTrace AI’s roadmap includes a stateful intake router, prompt governanc
 
 Phase 2 branch note: `phase-2/intake-router` introduces a stateful natural-language intake router that classifies freeform customer messages, extracts structured facts, identifies missing or invalid fields, supports a lightweight multi-turn clarification session, and routes ready warranty replacement requests into the existing controlled workflow. Conversation context is used only to collect required facts; LangGraph still governs eligibility, guardrails, escalation, and action execution.
 
+Phase 2 now demonstrates the full governed outcome set for the warranty replacement reference workflow: intake blocks missing or invalid identifiers, cracked-screen accidental damage is blocked by policy and guardrail, a valid-format unknown customer escalates after identity verification fails, and an eligible manufacturing defect creates a governed replacement request.
+
 ## Phase 1 Capabilities
 
 - FastAPI backend

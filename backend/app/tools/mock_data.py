@@ -11,6 +11,8 @@ from app.models.domain import (
 PRIMARY_CUSTOMER_ID = "cust_primary_001"
 PRIMARY_PRODUCT_ID = "prod_laptop_001"
 PRIMARY_ORDER_ID = "ord_laptop_001"
+ELIGIBLE_POWER_PRODUCT_ID = "prod_laptop_power_001"
+ELIGIBLE_POWER_ORDER_ID = "ord_laptop_power_001"
 CURRENT_LAPTOP_POLICY_ID = "pol_laptop_us_current_v2"
 DEPRECATED_LAPTOP_POLICY_ID = "pol_laptop_us_faq_v1"
 
@@ -34,6 +36,13 @@ PRODUCTS: dict[str, Product] = {
         product_family="laptop",
         sku="WW-LAPTOP-PROBOOK-14",
         replacement_product_id="prod_laptop_replacement_001",
+    ),
+    ELIGIBLE_POWER_PRODUCT_ID: Product(
+        product_id=ELIGIBLE_POWER_PRODUCT_ID,
+        name="WarrantyWise ProBook 14 Power Failure Unit",
+        product_family="laptop",
+        sku="WW-LAPTOP-PROBOOK-14-PWR",
+        replacement_product_id="prod_laptop_replacement_001",
     )
 }
 
@@ -45,6 +54,15 @@ ORDERS: dict[str, Order] = {
         order_status="delivered",
         purchase_date=date(2025, 8, 16),
         delivery_date=date(2025, 8, 23),
+        region="US",
+    ),
+    ELIGIBLE_POWER_ORDER_ID: Order(
+        order_id=ELIGIBLE_POWER_ORDER_ID,
+        customer_id=PRIMARY_CUSTOMER_ID,
+        product_id=ELIGIBLE_POWER_PRODUCT_ID,
+        order_status="delivered",
+        purchase_date=date(2025, 11, 16),
+        delivery_date=date(2025, 11, 23),
         region="US",
     )
 }
@@ -121,6 +139,14 @@ INVENTORY_ITEMS: dict[str, InventoryItem] = {
         sku="WW-LAPTOP-PROBOOK-14-R",
         status="available",
         quantity_available=5,
+        warehouse_region="US",
+    ),
+    ELIGIBLE_POWER_PRODUCT_ID: InventoryItem(
+        inventory_id="inv_laptop_power_replacement_001",
+        product_id=ELIGIBLE_POWER_PRODUCT_ID,
+        sku="WW-LAPTOP-PROBOOK-14-PWR-R",
+        status="available",
+        quantity_available=3,
         warehouse_region="US",
     )
 }

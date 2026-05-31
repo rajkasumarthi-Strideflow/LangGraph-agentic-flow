@@ -31,12 +31,13 @@ def test_frontend_index_returns_decisiontrace_branding(client: TestClient) -> No
     assert "Router Output" in response.text
     assert "Missing Info Scenario" in response.text
     assert "Complete Cracked Screen Scenario" in response.text
+    assert "Eligible Manufacturing Defect Scenario" in response.text
     assert "Unknown Customer Scenario" in response.text
     assert "Invalid Identifier Scenario" in response.text
     assert "Analyze Request" in response.text
     assert "Run Governed Workflow" in response.text
     assert 'id="analyze-intake-button"' in response.text
-    assert "/static/app.js?v=phase2-multiturn-clarification-1" in response.text
+    assert "/static/app.js?v=phase2-eligible-scenario-1" in response.text
     assert "Optional Workflow Context" not in response.text
     assert "Use optional workflow context when analyzing request" not in response.text
     assert "Clear Context" not in response.text
@@ -66,6 +67,7 @@ def test_frontend_static_assets_are_served(client: TestClient) -> None:
     assert "Extracted Order ID" in js_response.text
     assert "Invalid identifier format" in js_response.text
     assert "cust_unknown_001" in js_response.text
+    assert "ord_laptop_power_001" in js_response.text
     assert "UNKNOWN_CUSTOMER" in js_response.text
 
 

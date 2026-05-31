@@ -3,6 +3,7 @@ from typing import Any
 from app.audit.events import AuditEventType
 from app.audit.store import clear_audit_events, get_audit_events
 from app.tools.mock_data import PRIMARY_CUSTOMER_ID, PRIMARY_ORDER_ID
+from app.tools.mock_data import ELIGIBLE_POWER_ORDER_ID
 from app.workflow.graph import run_warranty_workflow
 from app.workflow.nodes import create_replacement_request_node
 from app.workflow.state import WarrantyWorkflowState
@@ -82,6 +83,49 @@ def test_unknown_customer_workflow_routes_to_escalation() -> None:
     assert result["escalation_required"] is True
     assert result["escalation_id"]
     assert "routed for human review" in result["customer_response"]
+
+
+def test_eligible_power_failure_workflow_creates_replacement() -> None:
+    clear_audit_events()
+    state = _base_state(order_id=ELIGIBLE_POWER_ORDER_ID)
+    state.update(
+        {
+            "workflow_id": "wf_eligible_power_001",
+            "correlation_id": "corr_eligible_power_001",
+            "customer_request": (
+                "My laptop stopped powering on after 6 months. "
+                "Can I get a replacement?"
+            ),
+        }
+    )
+
+    result = run_warranty_workflow(state)
+    events = get_audit_events("wf_eligible_power_001")
+    event_types = [event.event_type for event in events]
+    guardrail_events = [
+        event for event in events if event.event_type == AuditEventType.GUARDRAIL_DECISION
+    ]
+
+    assert result["workflow_status"] == "completed"
+    assert result["identity_verified"] is True
+    assert result["order_retrieved"] is True
+    assert result["customer_authorized"] is True
+    assert result["order_status"] == "delivered"
+    assert result["purchase_age_months"] == 6
+    assert result["eligibility_status"] == "eligible"
+    assert result["inventory_available"] is True
+    assert result["guardrail_decision"] == "allow"
+    assert result["replacement_request_id"] == f"repl_{ELIGIBLE_POWER_ORDER_ID}"
+    assert result["replacement_status"] == "created"
+    assert "replacement request has been created" in result["customer_response"]
+    assert "shipment is on the way" not in result["customer_response"].lower()
+    assert "has been shipped" not in result["customer_response"].lower()
+    assert AuditEventType.ELIGIBILITY_CHECKED in event_types
+    assert AuditEventType.INVENTORY_CHECKED in event_types
+    assert AuditEventType.GUARDRAIL_DECISION in event_types
+    assert AuditEventType.REPLACEMENT_REQUEST_CREATED in event_types
+    assert AuditEventType.WORKFLOW_COMPLETED in event_types
+    assert guardrail_events[-1].guardrail_decision == "allow"
 
 
 def test_eligible_replacement_workflow_creates_replacement(

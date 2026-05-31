@@ -19,6 +19,7 @@ const elements = {
   runButton: document.querySelector("#run-workflow"),
   loadMissing: document.querySelector("#load-missing"),
   loadCracked: document.querySelector("#load-cracked"),
+  loadEligible: document.querySelector("#load-eligible"),
   loadUnknown: document.querySelector("#load-unknown"),
   loadInvalid: document.querySelector("#load-invalid"),
   clearIntake: document.querySelector("#clear-intake"),
@@ -778,6 +779,20 @@ function loadCrackedScreenScenario() {
   setIntakeStatus("");
 }
 
+function loadEligibleManufacturingDefectScenario() {
+  elements.intakeMessage.value = "My laptop stopped powering on after 6 months. Can I get a replacement? Customer ID is cust_primary_001 and order ID is ord_laptop_power_001.";
+  appState.intakeResult = null;
+  appState.intakeSessionId = null;
+  appState.intakeOriginalMessage = null;
+  appState.conversationMessages = [];
+  renderIntakeResult();
+  renderConversation();
+  elements.replyIntake.classList.add("hidden");
+  updateRunWorkflowAvailability();
+  setStatus("Eligible manufacturing defect scenario loaded. Analyze to extract identifiers.");
+  setIntakeStatus("");
+}
+
 function loadUnknownCustomerScenario() {
   elements.intakeMessage.value = "I need a replacement for my laptop. Customer ID is cust_unknown_001 and order ID is ord_laptop_001.";
   appState.intakeResult = null;
@@ -834,6 +849,7 @@ function initializeConsole() {
   elements.runButton.addEventListener("click", startWorkflow);
   elements.loadMissing.addEventListener("click", loadMissingInfoScenario);
   elements.loadCracked.addEventListener("click", loadCrackedScreenScenario);
+  elements.loadEligible.addEventListener("click", loadEligibleManufacturingDefectScenario);
   elements.loadUnknown.addEventListener("click", loadUnknownCustomerScenario);
   elements.loadInvalid.addEventListener("click", loadInvalidIdentifierScenario);
   elements.clearIntake.addEventListener("click", clearIntake);

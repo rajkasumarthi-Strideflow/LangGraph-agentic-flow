@@ -243,8 +243,8 @@ def _deterministic_route(
     elif "screen" in normalized:
         product_issue = "screen_issue"
     elif "stopped powering" in normalized or "power" in normalized:
-        product_issue = "power_issue"
-        damage_type = "possible_manufacturing_defect"
+        product_issue = "power_failure"
+        damage_type = "manufacturing_defect"
     elif "damage" in normalized or "damaged" in normalized:
         product_issue = "damage_reported"
         damage_type = "unknown"

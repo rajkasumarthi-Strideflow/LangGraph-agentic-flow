@@ -6,6 +6,8 @@ This document shows how DecisionTrace AI supports audit replay for an enterprise
 
 The cracked-screen warranty replay is the first reference audit scenario. It uses persisted workflow state plus audit events to explain the decision path for the warranty replacement reference workflow.
 
+Phase 2 adds a complementary eligible manufacturing-defect scenario that exercises the allow path: `ord_laptop_power_001` is eligible, inventory is available, the guardrail decision is `allow`, and a governed replacement request is created. The cracked-screen replay below remains the canonical block-path example.
+
 ## Replay Scenario
 
 - Customer request: “My laptop screen cracked after 9 months. Can I get a replacement?”

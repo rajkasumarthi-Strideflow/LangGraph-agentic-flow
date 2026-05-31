@@ -109,6 +109,8 @@ The current implementation returns a `next_question` when required fields are mi
 
 The Phase 2 UI now makes Natural Language Intake the primary workflow entry point. Customer/order identifiers are supplied inside the freeform message and extracted by the router. Conversation context supports clarification only; workflow state still controls execution, and the router must not decide eligibility, approve requests, or execute business actions.
 
+Phase 2 also adds an eligible manufacturing-defect happy path. DecisionTrace AI can now demonstrate intake blocking, policy/guardrail blocking, identity escalation, and an allowed replacement request path in one reference workflow.
+
 Example structured output:
 
 ```json

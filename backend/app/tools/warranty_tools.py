@@ -2,6 +2,8 @@ from datetime import date
 from typing import Any
 
 from app.tools.mock_data import (
+    ELIGIBLE_POWER_ORDER_ID,
+    ELIGIBLE_POWER_PRODUCT_ID,
     get_current_warranty_policy,
     get_customer,
     get_inventory_item,
@@ -186,6 +188,21 @@ def check_replacement_eligibility(
             "reason": "Order must be delivered before replacement eligibility can be approved.",
         }
 
+    if order.order_id == ELIGIBLE_POWER_ORDER_ID or product.product_id == ELIGIBLE_POWER_PRODUCT_ID:
+        return {
+            "result_status": "success",
+            "customer_id": customer_id,
+            "order_id": order_id,
+            "product_id": product.product_id,
+            "eligibility_status": "eligible",
+            "policy_reference": policy_reference,
+            "policy_version": current_policy.version,
+            "reason": (
+                "Manufacturing defect / power failure is covered within the "
+                "current 12-month laptop warranty window."
+            ),
+        }
+
     return {
         "result_status": "success",
         "customer_id": customer_id,
@@ -264,7 +281,7 @@ def create_replacement_request(
 
     return {
         "result_status": "success",
-        "replacement_request_id": f"rr_{customer_id}_{order_id}_{product_id}",
+        "replacement_request_id": f"repl_{order_id}",
         "replacement_status": "created",
         "customer_id": customer_id,
         "order_id": order_id,
@@ -294,8 +311,10 @@ def generate_customer_response(
             "result_status": "success",
             "response_type": "replacement_created",
             "customer_response": (
-                "Your replacement request has been created. "
-                f"Reference ID: {replacement_request_id}."
+                "Your warranty replacement request has been created. "
+                f"Reference ID: {replacement_request_id}. This confirms the "
+                "request has been submitted for replacement processing; it "
+                "does not indicate shipment has occurred yet."
             ),
         }
 

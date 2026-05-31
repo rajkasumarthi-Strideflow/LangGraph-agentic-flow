@@ -1,5 +1,7 @@
 from app.tools.mock_data import (
     CURRENT_LAPTOP_POLICY_ID,
+    ELIGIBLE_POWER_ORDER_ID,
+    ELIGIBLE_POWER_PRODUCT_ID,
     PRIMARY_CUSTOMER_ID,
     PRIMARY_ORDER_ID,
     PRIMARY_PRODUCT_ID,
@@ -84,6 +86,19 @@ def test_check_replacement_eligibility_includes_policy_reference() -> None:
     assert result["policy_version"] == "2.0"
 
 
+def test_check_replacement_eligibility_returns_eligible_for_power_failure() -> None:
+    result = check_replacement_eligibility(
+        customer_id=PRIMARY_CUSTOMER_ID,
+        order_id=ELIGIBLE_POWER_ORDER_ID,
+        policy_id=CURRENT_LAPTOP_POLICY_ID,
+    )
+
+    assert result["result_status"] == "success"
+    assert result["product_id"] == ELIGIBLE_POWER_PRODUCT_ID
+    assert result["eligibility_status"] == "eligible"
+    assert "power failure" in result["reason"]
+
+
 def test_check_inventory_availability_returns_available_primary_inventory() -> None:
     result = check_inventory_availability(PRIMARY_PRODUCT_ID)
 
@@ -92,6 +107,15 @@ def test_check_inventory_availability_returns_available_primary_inventory() -> N
     assert result["inventory_available"] is True
     assert result["inventory_status"] == "available"
     assert result["available_quantity"] == 5
+
+
+def test_check_inventory_availability_returns_available_power_inventory() -> None:
+    result = check_inventory_availability(ELIGIBLE_POWER_PRODUCT_ID)
+
+    assert result["result_status"] == "success"
+    assert result["product_id"] == ELIGIBLE_POWER_PRODUCT_ID
+    assert result["inventory_available"] is True
+    assert result["inventory_status"] == "available"
 
 
 def test_create_replacement_request_blocked_when_not_eligible() -> None:
@@ -119,7 +143,7 @@ def test_create_replacement_request_succeeds_when_eligible_and_inventory_availab
 
     assert result["result_status"] == "success"
     assert result["replacement_status"] == "created"
-    assert result["replacement_request_id"]
+    assert result["replacement_request_id"] == f"repl_{PRIMARY_ORDER_ID}"
 
 
 def test_escalate_to_human_returns_open_escalation() -> None:

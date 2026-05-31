@@ -75,6 +75,13 @@ The router does not decide eligibility, set guardrail decisions, create replacem
 
 Phase 2 Natural Language Intake is now the primary UI entry point. Customer and order identifiers are provided inside the freeform message and extracted by the router. Conversation context is used only to collect required facts; the existing LangGraph warranty workflow remains the execution control layer.
 
+The Phase 2 branch now validates the complete control model outcome set:
+
+- **Intake block:** missing or invalid identifiers keep the governed workflow disabled.
+- **Guardrail block:** cracked-screen accidental damage is `not_eligible`, and replacement creation is blocked.
+- **Escalation:** a valid-format unknown customer routes into the workflow, then fails identity verification and escalates.
+- **Allow:** a laptop power failure/manufacturing defect within the warranty window passes eligibility, inventory, and guardrail checks before creating a governed replacement request.
+
 ## Phase 1 LangGraph Workflow
 
 Phase 1 uses LangGraph to model the warranty replacement flow as an explicit local state machine. The graph gives the capstone a clear orchestration layer for sequencing governed tools, branching on deterministic state, and preserving decision fields that can later become audit records.
