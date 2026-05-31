@@ -1,5 +1,9 @@
 # DecisionTrace AI Executive Summary
 
+This executive summary reflects the Phase 2 development branch of DecisionTrace AI. The Phase 1 stable release remains available on the `main` branch and GitHub release `v1.0-phase-1`.
+
+Phase 1 established the governed workflow foundation. Phase 2 adds natural-language intake, multi-turn clarification, optional LangSmith tracing, and local golden-scenario evaluation. Future phases expand monitoring, evaluation, safety controls, and cost-aware orchestration.
+
 ## Overview
 
 DecisionTrace AI is a working reference platform and prototype accelerator for governed, auditable AI-assisted workflows. It is designed to help teams validate the control model before connecting sensitive production systems.

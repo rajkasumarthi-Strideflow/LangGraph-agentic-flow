@@ -6,6 +6,15 @@
 >
 > DecisionTrace AI lets teams prototype governed AI workflows with synthetic data, align Audit/Risk/Security stakeholders early, and connect to enterprise API adapters when ready — without redesigning the workflow architecture.
 
+## Project Status
+
+DecisionTrace AI has two active documentation views:
+
+- **Phase 1 stable release:** available on the `main` branch and GitHub release `v1.0-phase-1`
+- **Phase 2 development branch:** this branch adds natural-language intake routing, multi-turn clarification, eligible replacement happy path, optional LangSmith tracing, and local golden-scenario evaluation
+
+The current branch documentation describes the Phase 2 version unless otherwise noted.
+
 ## Executive Overview
 
 DecisionTrace AI is a working reference platform and prototype accelerator for enterprises exploring AI-assisted decision workflows. It helps teams model workflow steps, decision points, guardrails, audit events, human review paths, LLM response boundaries, and cost drivers before exposing sensitive production systems.
@@ -96,6 +105,8 @@ Phase 1 release notes: [docs/phase-1-release-notes.md](docs/phase-1-release-note
 
 Phase 1 release checklist: [docs/phase-1-release-checklist.md](docs/phase-1-release-checklist.md)
 
+Phase 2 validation checklist: [docs/phase-2-validation-checklist.md](docs/phase-2-validation-checklist.md)
+
 Known limitations and roadmap: [docs/roadmap.md](docs/roadmap.md)
 
 DecisionTrace AI’s roadmap includes a stateful intake router, prompt governance, and an observability-to-evaluation loop so production failures can become regression tests.
@@ -106,7 +117,7 @@ Phase 2 now demonstrates the full governed outcome set for the warranty replacem
 
 Phase 2 tracing note: `phase-2/langsmith-tracing` adds optional LangSmith tracing for intake sessions, router turns, workflow nodes, governed tools, LLM response drafting, and validation. Audit replay remains the business/governance trail; LangSmith tracing provides execution observability and debugging. Tracing is controlled by `LANGSMITH_TRACING`, `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT`, and `LANGSMITH_ENDPOINT`, and the app runs normally without fake trace links when LangSmith is not configured.
 
-Phase 2 evaluation note: `phase-2/evaluation-pipeline` adds a local golden-scenario evaluation suite under `backend/evals/`. The first evaluation layer uses deterministic assertions to verify the control model across clarification, invalid input, guardrail block, escalation, and allow/action outcomes. Future work can connect these scenarios to LangSmith datasets and experiments; LLM-as-judge should evaluate communication quality later, not replace deterministic control assertions.
+Phase 2 evaluation note: this branch includes a local golden-scenario evaluation suite under `backend/evals/`. The first evaluation layer uses deterministic assertions to verify the control model across clarification, invalid input, guardrail block, escalation, and allow/action outcomes. Future work can connect these scenarios to LangSmith datasets and experiments; LLM-as-judge should evaluate communication quality later, not replace deterministic control assertions.
 
 ## Phase 1 Capabilities
 

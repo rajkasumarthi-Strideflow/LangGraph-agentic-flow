@@ -8,6 +8,30 @@ Phase 1 intentionally establishes a governed workflow foundation through the war
 
 Before sharing or demoing Phase 1, use the [DecisionTrace AI Phase 1 Release Checklist](phase-1-release-checklist.md) to validate branding, live demo behavior, workflow outcomes, LLM drafting boundaries, auditability, documentation, deployment, and tests.
 
+## Roadmap Status
+
+- Phase 1 is released and preserved as `v1.0-phase-1`.
+- Phase 2 is active on `phase-2/intake-router`.
+- Completed Phase 2 items include:
+  - Stateful natural-language intake router
+  - Multi-turn clarification
+  - Eligible replacement happy path
+  - LangSmith tracing support
+  - Local golden-scenario evaluation pipeline
+- Upcoming Phase 2 items include:
+  - Shared correlation ID
+  - Production monitoring / telemetry expansion
+  - LangSmith evaluation integration
+  - LLM-as-judge evaluation layer
+- Phase 3 includes:
+  - Safety detector nodes
+  - Cost-optimized orchestration
+  - CrewAI review crew
+  - MCP/A2A extensions
+  - τ-Bench-inspired dynamic evaluation harness if not completed in a later Phase 2 step
+
+Before merging Phase 2 into `main` or creating a Phase 2 release, use the [DecisionTrace AI Phase 2 Validation Checklist](phase-2-validation-checklist.md).
+
 ## Phase 1 Completed Scope
 
 - Deterministic LangGraph workflow
@@ -234,7 +258,7 @@ Core principle: production failures should become regression tests.
 
 ### Local Golden-Scenario Evaluation
 
-Status: implemented on `phase-2/evaluation-pipeline` as a local pytest-runnable evaluation layer.
+Status: implemented on the Phase 2 development branch as a local pytest-runnable evaluation layer.
 
 The first evaluation suite lives in `backend/evals/` and uses deterministic assertions to validate the control model. Current golden scenarios cover:
 

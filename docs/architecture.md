@@ -22,6 +22,50 @@ For known limitations and future roadmap, see [DecisionTrace AI Known Limitation
 
 For prompt governance and safe iteration details, see the [DecisionTrace AI Prompt Governance Checklist](prompt-governance-checklist.md) and [DecisionTrace AI Safe Iteration Loop](safe-iteration-loop.md).
 
+## Architecture Status
+
+### Implemented in Phase 1
+
+- Governed LangGraph warranty workflow
+- Deterministic guardrails
+- Controlled OpenAI response drafting
+- Output validation and deterministic fallback
+- Postgres persistence
+- Workflow runs, audit events, and human review records
+- Audit replay
+- Cost model v1
+- Agentforce mapping
+- Polished vanilla frontend
+- Railway deployment
+
+### Implemented in Phase 2 Branch
+
+- Stateful natural-language intake router
+- Multi-turn clarification workflow
+- Identifier format validation
+- Natural-language-first UI
+- Full workflow outcome coverage:
+  - Missing info / clarification
+  - Invalid identifier gate
+  - Cracked-screen block
+  - Unknown valid-format customer escalation
+  - Eligible manufacturing defect allow/action
+- Optional LangSmith tracing
+- Local golden-scenario evaluation pipeline
+- Business-readable and machine-checkable golden scenarios
+
+### Future Roadmap
+
+- Shared correlation ID across intake session, workflow, audit events, and LangSmith traces
+- Production monitoring and telemetry expansion
+- LangSmith evaluation datasets and experiments
+- Deterministic checks plus LLM-as-judge evaluation
+- τ-Bench-inspired dynamic agent evaluation
+- Safety detector nodes for malicious intent, prompt injection, and sensitive-data checks
+- Cost telemetry and cost-optimized orchestration
+- CrewAI review crew in Phase 3
+- MCP and A2A extensions in Phase 3
+
 ## Future Architecture: Router, Observability, and Safe Iteration Loop
 
 DecisionTrace AI currently validates the control model for one reference workflow: warranty replacement. The next architecture evolution is a stateful router layer that interprets natural language input and routes to the correct controlled workflow graph.
@@ -97,7 +141,7 @@ The frontend uses `GET /api/observability/status` to show the real tracing provi
 
 ## Phase 2 Local Evaluation Pipeline
 
-The `phase-2/evaluation-pipeline` branch adds a lightweight local evaluation suite in `backend/evals/`. This is not LangSmith evaluation yet. It is a repo-based golden-scenario framework that can run through `pytest` without OpenAI, LangSmith, Ragas, or external services.
+This branch includes a lightweight local evaluation suite in `backend/evals/`. This is not LangSmith evaluation yet. It is a repo-based golden-scenario framework that can run through `pytest` without OpenAI, LangSmith, Ragas, or external services.
 
 The first evaluation layer validates deterministic control-model behavior:
 
