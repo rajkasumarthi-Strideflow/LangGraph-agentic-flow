@@ -76,6 +76,23 @@ This checklist validates the Phase 2 development branch before merging into the 
 - [ ] Evaluation does not require LangSmith key
 - [ ] `pytest backend/tests/test_evaluation_pipeline.py` passes
 
+## Merge Readiness
+
+- [ ] README links to this Phase 2 validation checklist
+- [ ] Roadmap links to this Phase 2 validation checklist
+- [ ] No duplicate phase-specific architecture, executive summary, or roadmap files were created
+- [ ] Backend code is unchanged for this documentation cleanup
+- [ ] Frontend code is unchanged for this documentation cleanup
+- [ ] Tests are unchanged for this documentation cleanup
+- [ ] Deployment configuration is unchanged
+- [ ] Screenshots are unchanged
+- [ ] GitHub release tags are unchanged
+- [ ] API routes are unchanged
+- [ ] Database schema is unchanged
+- [ ] `backend/.venv/bin/pytest` passes
+- [ ] `node --check frontend/app.js` passes
+- [ ] `git diff --check` passes
+
 ## Local Validation Commands
 
 ```bash
