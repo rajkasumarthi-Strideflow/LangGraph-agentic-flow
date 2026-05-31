@@ -7,6 +7,7 @@ const appState = {
   intakeSessionId: null,
   intakeOriginalMessage: null,
   conversationMessages: [],
+  observability: null,
 };
 
 const elements = {
@@ -26,6 +27,7 @@ const elements = {
   status: document.querySelector("#status-message"),
   result: document.querySelector("#workflow-result"),
   telemetry: document.querySelector("#telemetry-tiles"),
+  observability: document.querySelector("#observability-tiles"),
   aiDrafting: document.querySelector("#ai-drafting"),
   timeline: document.querySelector("#workflow-timeline"),
   auditReplay: document.querySelector("#audit-replay"),
@@ -453,6 +455,69 @@ async function refreshWorkflowView(workflowId) {
   renderHumanReviewPanel();
 }
 
+async function refreshObservabilityStatus() {
+  try {
+    appState.observability = await requestJson("/api/observability/status");
+  } catch (error) {
+    appState.observability = {
+      provider: "langsmith",
+      tracing_status: "not_configured",
+      project: "decisiontrace-phase2",
+      trace_url: null,
+      trace_url_supported: false,
+      error_message: error.message,
+    };
+  }
+  renderObservabilityTiles();
+}
+
+function renderObservabilityTiles() {
+  const status = appState.observability || {
+    provider: "langsmith",
+    tracing_status: "not_configured",
+    project: "decisiontrace-phase2",
+    trace_url: null,
+    trace_url_supported: false,
+  };
+  const tracingLabel = status.tracing_status === "enabled"
+    ? "LangSmith tracing enabled"
+    : status.tracing_status === "disabled"
+      ? "LangSmith tracing disabled"
+      : "LangSmith not configured";
+  const traceLink = status.trace_url
+    ? `<a href="${escapeHtml(status.trace_url)}" target="_blank" rel="noreferrer">Open trace</a>`
+    : "Not available yet";
+
+  elements.observability.innerHTML = [
+    telemetryCard(
+      "Provider",
+      escapeHtml(safeText(status.provider, "langsmith")),
+      "Configured tracing provider.",
+      "audit",
+    ),
+    telemetryCard(
+      "Tracing Status",
+      pill(tracingLabel, status.tracing_status === "enabled" ? "workflow" : "llm"),
+      "Controlled by LANGSMITH_TRACING and LANGSMITH_API_KEY.",
+      status.tracing_status === "enabled" ? "positive" : "",
+    ),
+    telemetryCard(
+      "Project",
+      escapeHtml(safeText(status.project, "decisiontrace-phase2")),
+      "LangSmith project name when tracing is enabled.",
+      "audit",
+    ),
+    telemetryCard(
+      "Trace Link",
+      traceLink,
+      status.trace_url_supported
+        ? "Real trace URLs are provided by the backend when available."
+        : "Trace links will appear in a future enhancement.",
+      "",
+    ),
+  ].join("");
+}
+
 function renderDecisionSummary() {
   const workflow = appState.workflow;
   if (!workflow) {
@@ -840,10 +905,12 @@ function initializeConsole() {
     return;
   }
   renderTelemetryTiles();
+  renderObservabilityTiles();
   renderAiDraftingPanel();
   renderIntakeResult();
   renderConversation();
   updateRunWorkflowAvailability();
+  refreshObservabilityStatus();
   elements.analyzeRequest.addEventListener("click", analyzeRequest);
   elements.replyIntake.addEventListener("click", replyToIntake);
   elements.runButton.addEventListener("click", startWorkflow);

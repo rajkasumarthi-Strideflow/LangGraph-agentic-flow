@@ -4,6 +4,7 @@ from app.audit.events import AuditEventType
 from app.audit.logger import log_node_event
 from app.llm.response_drafter import draft_customer_response_with_llm
 from app.llm.response_validator import validate_llm_customer_response
+from app.observability.langsmith_tracing import traceable_if_enabled
 from app.tools.warranty_tools import (
     check_inventory_availability,
     check_replacement_eligibility,
@@ -21,6 +22,7 @@ def _failure_reason(result: dict[str, Any], fallback: str) -> str:
     return str(result.get("reason") or result.get("message") or fallback)
 
 
+@traceable_if_enabled(name="workflow_verify_identity_node")
 def verify_identity_node(state: WarrantyWorkflowState) -> dict[str, Any]:
     result = verify_identity(state["customer_id"])
     identity_verified = bool(result.get("identity_verified"))
@@ -56,6 +58,7 @@ def verify_identity_node(state: WarrantyWorkflowState) -> dict[str, Any]:
     return updates
 
 
+@traceable_if_enabled(name="workflow_lookup_order_node")
 def lookup_order_node(state: WarrantyWorkflowState) -> dict[str, Any]:
     result = lookup_order(state["customer_id"], state["order_id"])
     if result.get("result_status") == "success":
@@ -119,6 +122,7 @@ def lookup_order_node(state: WarrantyWorkflowState) -> dict[str, Any]:
     return updates
 
 
+@traceable_if_enabled(name="workflow_retrieve_warranty_policy_node")
 def retrieve_warranty_policy_node(state: WarrantyWorkflowState) -> dict[str, Any]:
     product_family = state.get("product_family")
     if not product_family:
@@ -184,6 +188,7 @@ def retrieve_warranty_policy_node(state: WarrantyWorkflowState) -> dict[str, Any
     return updates
 
 
+@traceable_if_enabled(name="workflow_check_replacement_eligibility_node")
 def check_replacement_eligibility_node(
     state: WarrantyWorkflowState,
 ) -> dict[str, Any]:
@@ -257,6 +262,7 @@ def check_replacement_eligibility_node(
     return updates
 
 
+@traceable_if_enabled(name="workflow_check_inventory_availability_node")
 def check_inventory_availability_node(
     state: WarrantyWorkflowState,
 ) -> dict[str, Any]:
@@ -321,6 +327,7 @@ def check_inventory_availability_node(
     return updates
 
 
+@traceable_if_enabled(name="workflow_guardrail_check_node")
 def guardrail_check_node(state: WarrantyWorkflowState) -> dict[str, Any]:
     allow_replacement = (
         state.get("identity_verified") is True
@@ -405,6 +412,7 @@ def guardrail_check_node(state: WarrantyWorkflowState) -> dict[str, Any]:
     return updates
 
 
+@traceable_if_enabled(name="workflow_create_replacement_request_node")
 def create_replacement_request_node(
     state: WarrantyWorkflowState,
 ) -> dict[str, Any]:
@@ -481,6 +489,7 @@ def create_replacement_request_node(
     return updates
 
 
+@traceable_if_enabled(name="workflow_escalate_to_human_node")
 def escalate_to_human_node(state: WarrantyWorkflowState) -> dict[str, Any]:
     reason = (
         state.get("escalation_reason")
@@ -517,6 +526,7 @@ def escalate_to_human_node(state: WarrantyWorkflowState) -> dict[str, Any]:
     return updates
 
 
+@traceable_if_enabled(name="workflow_generate_customer_response_node")
 def generate_customer_response_node(
     state: WarrantyWorkflowState,
 ) -> dict[str, Any]:

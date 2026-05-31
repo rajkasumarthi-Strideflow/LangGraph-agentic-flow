@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.config import settings
 from app.intake.validator import validate_router_output
+from app.observability.langsmith_tracing import traceable_if_enabled
 
 Intent = Literal[
     "warranty_replacement_request",
@@ -113,6 +114,7 @@ def _extract_identifier(message: str, label: str) -> str | None:
     return None
 
 
+@traceable_if_enabled(name="intake_extract_identifiers")
 def _extract_identifiers(message: str) -> dict[str, str | None]:
     return {
         "customer_id": _extract_identifier(message, "customer"),
@@ -120,6 +122,7 @@ def _extract_identifiers(message: str) -> dict[str, str | None]:
     }
 
 
+@traceable_if_enabled(name="intake_required_facts_validation")
 def _finalize_output(
     *,
     intent: Intent,
@@ -204,6 +207,7 @@ def _finalize_output(
     return output
 
 
+@traceable_if_enabled(name="intake_deterministic_route")
 def _deterministic_route(
     message: str,
     customer_id: str | None,
@@ -316,6 +320,7 @@ def _llm_route(
     return finalized
 
 
+@traceable_if_enabled(name="route_customer_message")
 def route_customer_message(
     message: str,
     customer_id: str | None = None,
@@ -357,6 +362,7 @@ def route_customer_message(
         )
 
 
+@traceable_if_enabled(name="route_customer_message_with_context")
 def route_customer_message_with_context(
     message: str,
     existing_context: dict[str, Any] | None = None,

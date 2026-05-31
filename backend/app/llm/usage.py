@@ -1,5 +1,7 @@
 from typing import Any
 
+from app.observability.langsmith_tracing import traceable_if_enabled
+
 
 def _read_usage_value(usage: Any, key: str) -> int | None:
     if usage is None:
@@ -32,6 +34,7 @@ def _read_cached_tokens(usage: Any) -> int | None:
     return int(value) if isinstance(value, int) else None
 
 
+@traceable_if_enabled(name="extract_llm_usage")
 def extract_usage(response: Any) -> dict[str, int | None]:
     usage = getattr(response, "usage", None)
     return {

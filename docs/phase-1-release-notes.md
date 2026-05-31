@@ -45,6 +45,8 @@ The workflow console displays telemetry from backend API responses or values der
 
 LLM token values are displayed only when returned by provider usage metadata. The frontend does not hardcode token counts, model names, fake cost metrics, fake latency values, or fake Langfuse/LangSmith trace links. Phase 2 telemetry items are clearly labeled as planned and not active.
 
+Note: LangSmith tracing is introduced only on a Phase 2 feature branch. It is not part of the Phase 1 release.
+
 ## Auditability
 
 - `workflow_runs` stores the final workflow state.

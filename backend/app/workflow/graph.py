@@ -7,6 +7,7 @@ from app.audit.logger import (
     log_workflow_failed,
     log_workflow_started,
 )
+from app.observability.langsmith_tracing import traceable_if_enabled
 from app.workflow.nodes import (
     check_inventory_availability_node,
     check_replacement_eligibility_node,
@@ -88,6 +89,7 @@ def build_warranty_workflow() -> Any:
     return graph.compile()
 
 
+@traceable_if_enabled(name="run_warranty_workflow")
 def run_warranty_workflow(
     initial_state: WarrantyWorkflowState,
 ) -> WarrantyWorkflowState:

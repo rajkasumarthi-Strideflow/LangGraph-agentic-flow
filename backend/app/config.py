@@ -8,6 +8,10 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str | None = None
     OPENAI_MODEL: str | None = None
     LLM_RESPONSE_DRAFTING_ENABLED: bool = True
+    LANGSMITH_TRACING: bool = False
+    LANGSMITH_API_KEY: str | None = None
+    LANGSMITH_PROJECT: str = "decisiontrace-phase2"
+    LANGSMITH_ENDPOINT: str | None = None
 
     @property
     def sqlalchemy_database_url(self) -> str:

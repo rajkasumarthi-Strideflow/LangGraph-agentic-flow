@@ -102,6 +102,8 @@ Phase 2 branch note: `phase-2/intake-router` introduces a stateful natural-langu
 
 Phase 2 now demonstrates the full governed outcome set for the warranty replacement reference workflow: intake blocks missing or invalid identifiers, cracked-screen accidental damage is blocked by policy and guardrail, a valid-format unknown customer escalates after identity verification fails, and an eligible manufacturing defect creates a governed replacement request.
 
+Phase 2 tracing note: `phase-2/langsmith-tracing` adds optional LangSmith tracing for intake sessions, router turns, workflow nodes, governed tools, LLM response drafting, and validation. Audit replay remains the business/governance trail; LangSmith tracing provides execution observability and debugging. Tracing is controlled by `LANGSMITH_TRACING`, `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT`, and `LANGSMITH_ENDPOINT`, and the app runs normally without fake trace links when LangSmith is not configured.
+
 ## Phase 1 Capabilities
 
 - FastAPI backend
@@ -277,7 +279,7 @@ The current workflow keeps eligibility, guardrail, and action decisions determin
 - No real customer authentication
 - No real shipping/fulfillment integration
 - No LLM intake classifier or multi-turn conversation yet
-- No real Ragas/Langfuse/LangSmith yet
+- No real Ragas/Langfuse in Phase 1; LangSmith tracing is optional on the Phase 2 tracing branch
 - No real MCP/A2A yet
 - Human review is simulated, not a true LangGraph interrupt/resume yet
 
@@ -291,7 +293,7 @@ The current workflow keeps eligibility, guardrail, and action decisions determin
 - Audit replay example
 - Agentforce mapping
 - Ragas evaluation
-- Langfuse/LangSmith observability
+- LangSmith observability on Phase 2, with Langfuse still future
 - CrewAI review crew
 - MCP-style tool abstraction
 - A2A fulfillment delegation

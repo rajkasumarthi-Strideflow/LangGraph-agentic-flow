@@ -26,7 +26,7 @@ Companion release notes: [DecisionTrace AI Phase 1 Release Notes](phase-1-releas
 - [ ] UI shows real audit event count.
 - [ ] UI shows real tool-call count derived from audit events.
 - [ ] UI shows persisted human review records.
-- [ ] No fake LLM, cost, latency, or Langfuse metrics are displayed.
+- [ ] No fake LLM, cost, latency, Langfuse, or LangSmith metrics are displayed.
 
 ## Workflow Validation
 
@@ -104,7 +104,7 @@ Expected result: all tests pass. The exact test count may change as the project 
 - No natural-language intake classifier yet.
 - No multi-turn conversation workflow yet.
 - No true LangGraph interrupt/resume yet.
-- No Langfuse/LangSmith tracing yet.
+- No Langfuse/LangSmith tracing in Phase 1. LangSmith tracing is a Phase 2 branch capability.
 - No Ragas evaluation yet.
 - No cost-optimized orchestration yet.
 - No CrewAI/MCP/A2A implementation yet.

@@ -82,6 +82,19 @@ The Phase 2 branch now validates the complete control model outcome set:
 - **Escalation:** a valid-format unknown customer routes into the workflow, then fails identity verification and escalates.
 - **Allow:** a laptop power failure/manufacturing defect within the warranty window passes eligibility, inventory, and guardrail checks before creating a governed replacement request.
 
+## Phase 2 LangSmith Tracing
+
+The `phase-2/langsmith-tracing` branch adds optional LangSmith tracing around the Phase 2 intake router, multi-turn clarification sessions, LangGraph workflow execution, governed workflow nodes, controlled OpenAI response drafting, usage extraction, and deterministic output validation.
+
+Tracing is controlled by environment variables: `LANGSMITH_TRACING`, `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT`, and optional `LANGSMITH_ENDPOINT`. When tracing is disabled or not configured, the application continues to run normally and the frontend reports `disabled` or `not_configured`. The app does not generate fake trace URLs.
+
+Audit replay and LangSmith tracing are complementary:
+
+- Audit replay answers: “What happened from a business/governance perspective?”
+- LangSmith tracing answers: “How did the router, graph, tools, and LLM drafting execute?”
+
+The frontend uses `GET /api/observability/status` to show the real tracing provider, status, and project. Trace links remain unavailable until the backend can safely provide real LangSmith run URLs.
+
 ## Phase 1 LangGraph Workflow
 
 Phase 1 uses LangGraph to model the warranty replacement flow as an explicit local state machine. The graph gives the capstone a clear orchestration layer for sequencing governed tools, branching on deterministic state, and preserving decision fields that can later become audit records.

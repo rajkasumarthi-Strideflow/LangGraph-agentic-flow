@@ -26,13 +26,13 @@ Workflow execution
 
 DecisionTrace AI already captures workflow state, audit events, human review records, and LLM drafting metadata. This provides the foundation for audit replay.
 
-Future tracing tools such as Langfuse or LangSmith can enrich this with model spans, latency, token usage, retrieval spans, and tool traces. Those tracing capabilities are not implemented in Phase 1 and should not be represented in the UI until real trace data exists.
+Future tracing tools can enrich this with model spans, latency, token usage, retrieval spans, and tool traces. LangSmith tracing is optional on the Phase 2 tracing branch and should be enabled only with real environment configuration. Phase 1 does not include tracing.
 
-## Future LangSmith/Langfuse Integration
+## Phase 2 LangSmith Integration
 
-Observability tools can help identify recurring issues such as unsafe drafts, missing escalation conditions, routing failures, slow tool calls, or recurring policy-grounding errors.
+LangSmith tracing can help identify recurring issues such as unsafe drafts, missing escalation conditions, routing failures, slow tool calls, or recurring policy-grounding errors.
 
-Trace links can be shown in the UI once real tracing is implemented. Do not fake trace links. Trace data should complement business audit events rather than replace them.
+Trace links can be shown in the UI once real run URLs are available from the backend. Do not fake trace links. Trace data should complement business audit events rather than replace them.
 
 ## From Audit Replay to Evaluation
 

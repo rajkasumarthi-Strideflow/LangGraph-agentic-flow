@@ -41,7 +41,7 @@ Before sharing or demoing Phase 1, use the [DecisionTrace AI Phase 1 Release Che
 - No true LangGraph interrupt/resume yet
 - Human review is simulated through API state update
 - No Ragas evaluation yet
-- No Langfuse/LangSmith observability yet
+- No Langfuse observability yet; LangSmith tracing is optional on the Phase 2 tracing branch
 - No real cost telemetry yet
 - No CrewAI implementation yet
 - No MCP server implementation yet
@@ -196,9 +196,9 @@ Tracked values:
 - `cached_tokens` when provider usage metadata is available
 - `estimated_total_cost`
 
-### Observability with Langfuse or LangSmith
+### Observability with LangSmith
 
-Add trace-level observability later.
+Status: optional LangSmith tracing is implemented on `phase-2/langsmith-tracing`; richer trace links, dashboards, and evaluator loops remain future work.
 
 Include:
 
@@ -210,7 +210,9 @@ Include:
 - Token usage
 - Cost
 - Errors
-- Trace link from UI
+- Trace link from UI when real run URLs are available
+
+The current Phase 2 tracing branch exposes `GET /api/observability/status` and shows the real LangSmith provider/status/project in the UI. It does not fake trace links. Audit replay remains the governance trail, while LangSmith provides execution observability for debugging and future evaluation.
 
 ### Observability-to-Improvement Loop
 

@@ -5,6 +5,7 @@ from uuid import uuid4
 from pydantic import BaseModel, Field
 
 from app.intake.router import route_customer_message, route_customer_message_with_context
+from app.observability.langsmith_tracing import traceable_if_enabled
 
 
 class ConversationMessage(BaseModel):
@@ -94,6 +95,7 @@ def _append_router_question(
         )
 
 
+@traceable_if_enabled(name="intake_session_start")
 def create_intake_session(message: str) -> IntakeSession:
     timestamp = _now()
     router_output = route_customer_message(message)
@@ -119,6 +121,7 @@ def create_intake_session(message: str) -> IntakeSession:
     return session
 
 
+@traceable_if_enabled(name="intake_session_reply")
 def update_intake_session(
     intake_session_id: str,
     message: str,

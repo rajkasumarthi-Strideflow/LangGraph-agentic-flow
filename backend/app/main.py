@@ -31,6 +31,7 @@ from app.models.api import (
     StartWorkflowResponse,
     WorkflowStateResponse,
 )
+from app.observability.langsmith_tracing import get_langsmith_status
 from app.workflow.graph import run_warranty_workflow
 from app.workflow.state import WarrantyWorkflowState
 from app.workflow.store import get_workflow_result, save_workflow_result
@@ -131,6 +132,11 @@ def health_check():
         "service": "warrantywise-agentic-support",
         "version": "0.1.0",
     }
+
+
+@app.get("/api/observability/status")
+def get_observability_status() -> dict[str, Any]:
+    return get_langsmith_status()
 
 
 @app.get("/", response_class=FileResponse)

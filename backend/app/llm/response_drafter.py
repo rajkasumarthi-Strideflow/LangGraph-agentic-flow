@@ -3,6 +3,7 @@ from typing import Any
 
 from app.config import settings
 from app.llm.usage import extract_usage
+from app.observability.langsmith_tracing import traceable_if_enabled
 
 MINIMIZED_RESPONSE_FIELDS = [
     "customer_request",
@@ -28,6 +29,7 @@ Use only the structured payload provided. Do not infer extra facts.
 """.strip()
 
 
+@traceable_if_enabled(name="build_response_drafting_payload")
 def build_response_drafting_payload(state: dict) -> dict:
     return {field: state.get(field) for field in MINIMIZED_RESPONSE_FIELDS}
 
@@ -52,6 +54,7 @@ def _empty_result(
     }
 
 
+@traceable_if_enabled(name="draft_customer_response_with_llm", run_type="llm")
 def draft_customer_response_with_llm(state: dict) -> dict[str, Any]:
     payload = build_response_drafting_payload(state)
 

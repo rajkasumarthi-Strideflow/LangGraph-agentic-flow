@@ -1,3 +1,5 @@
+from app.observability.langsmith_tracing import traceable_if_enabled
+
 FORBIDDEN_INTERNAL_TERMS = [
     "langgraph",
     "guardrail",
@@ -24,6 +26,7 @@ UNSUPPORTED_REPLACEMENT_CLAIMS = [
 ]
 
 
+@traceable_if_enabled(name="validate_llm_customer_response")
 def validate_llm_customer_response(
     state: dict,
     draft: str | None,
