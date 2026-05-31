@@ -1,12 +1,17 @@
 [
   {
     "id": "missing_info_clarification",
-    "name": "Missing customer and order identifiers require clarification",
-    "input": "My laptop screen cracked after 9 months. Can I get a replacement?",
+    "name": "Missing customer and order identifiers",
+    "business_scenario": "A customer asks whether a cracked laptop screen is covered, but does not provide customer or order identifiers.",
+    "business_expectation": "The system should not start the governed warranty workflow until required identifiers are provided.",
+    "control_model_expectation": "The intake router should classify the request, detect missing required fields, ask a clarification question, and keep workflow execution disabled.",
+    "input": {
+      "message": "My laptop screen cracked after 9 months. Can I get a replacement?"
+    },
     "expected": {
       "intake": {
         "requires_clarification": true,
-        "missing_fields_includes": ["customer_id", "order_id"],
+        "missing_fields": ["customer_id", "order_id"],
         "can_start_workflow": false
       },
       "workflow_should_start": false
@@ -14,11 +19,16 @@
   },
   {
     "id": "invalid_identifier_blocked",
-    "name": "Invalid customer identifier blocks workflow start",
-    "input": "My laptop screen cracked. Customer ID is UNKNOWN_CUSTOMER and order ID is ord_laptop_001.",
+    "name": "Invalid customer identifier",
+    "business_scenario": "A customer asks for a laptop replacement and provides an order ID, but the customer identifier is not in the expected governed identifier format.",
+    "business_expectation": "The system should not start the governed workflow with an invalid customer identifier supplied by the user.",
+    "control_model_expectation": "The intake router should treat user-provided identifiers as untrusted input, validate identifier format deterministically, report the invalid field, and keep workflow execution disabled.",
+    "input": {
+      "message": "My laptop screen cracked. Customer ID is UNKNOWN_CUSTOMER and order ID is ord_laptop_001."
+    },
     "expected": {
       "intake": {
-        "invalid_fields_includes": ["customer_id"],
+        "invalid_fields": ["customer_id"],
         "can_start_workflow": false
       },
       "workflow_should_start": false
@@ -26,8 +36,13 @@
   },
   {
     "id": "cracked_screen_blocked",
-    "name": "Cracked-screen accidental damage is blocked by policy and guardrail",
-    "input": "My laptop screen cracked after 9 months. Can I get a replacement? Customer ID is cust_primary_001 and order ID is ord_laptop_001.",
+    "name": "Cracked-screen accidental damage blocked",
+    "business_scenario": "A verified customer asks for a replacement after a laptop screen cracked within the warranty window.",
+    "business_expectation": "The customer should receive a safe explanation that the item is not automatically eligible because cracked screens caused by accidental damage are excluded by the current policy.",
+    "control_model_expectation": "The governed workflow should retrieve the current policy, mark eligibility as not_eligible, block replacement creation through the guardrail, and avoid overpromising in the final response.",
+    "input": {
+      "message": "My laptop screen cracked after 9 months. Can I get a replacement? Customer ID is cust_primary_001 and order ID is ord_laptop_001."
+    },
     "expected": {
       "intake": {
         "can_start_workflow": true
@@ -44,8 +59,13 @@
   },
   {
     "id": "unknown_customer_escalated",
-    "name": "Valid-format unknown customer routes to workflow and escalates",
-    "input": "I need a replacement for my laptop. Customer ID is cust_unknown_001 and order ID is ord_laptop_001.",
+    "name": "Unknown valid-format customer escalated",
+    "business_scenario": "A customer provides syntactically valid identifiers, but the customer ID does not match a known verified customer in the synthetic domain data.",
+    "business_expectation": "The system may start the governed workflow because the identifiers are well-formed, but identity verification should fail and the case should route to human review.",
+    "control_model_expectation": "The intake router should validate format only, while the LangGraph workflow owns identity verification and escalation. No replacement request should be created.",
+    "input": {
+      "message": "I need a replacement for my laptop. Customer ID is cust_unknown_001 and order ID is ord_laptop_001."
+    },
     "expected": {
       "intake": {
         "can_start_workflow": true
@@ -53,7 +73,7 @@
       "workflow_should_start": true,
       "workflow": {
         "identity_verified": false,
-        "escalation_id_exists": true,
+        "escalation_id": "__exists__",
         "replacement_request_id": null,
         "response_should_explain_verification_or_escalation": true
       }
@@ -61,8 +81,13 @@
   },
   {
     "id": "eligible_manufacturing_defect_allowed",
-    "name": "Covered laptop power failure creates a governed replacement request",
-    "input": "My laptop stopped powering on after 6 months. Can I get a replacement? Customer ID is cust_primary_001 and order ID is ord_laptop_power_001.",
+    "name": "Eligible manufacturing defect allowed",
+    "business_scenario": "A verified customer asks for a replacement after a laptop stops powering on within the warranty window.",
+    "business_expectation": "The system should allow a governed replacement request because the scenario matches a covered manufacturing defect and inventory is available.",
+    "control_model_expectation": "The workflow should verify identity, retrieve the order and current policy, determine eligibility, check inventory, pass the replacement guardrail, create a replacement request, and avoid claiming shipment occurred.",
+    "input": {
+      "message": "My laptop stopped powering on after 6 months. Can I get a replacement? Customer ID is cust_primary_001 and order ID is ord_laptop_power_001."
+    },
     "expected": {
       "intake": {
         "can_start_workflow": true
@@ -74,7 +99,7 @@
         "eligibility_status": "eligible",
         "inventory_available": true,
         "guardrail_decision": "allow",
-        "replacement_request_id_exists": true,
+        "replacement_request_id": "__exists__",
         "response_may_claim_replacement_created": true,
         "response_must_not_claim_shipment": true
       }

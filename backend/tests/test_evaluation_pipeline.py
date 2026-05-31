@@ -28,7 +28,10 @@ def test_all_golden_scenarios_include_expected_fields() -> None:
     scenarios = load_golden_scenarios()
 
     for scenario in scenarios:
-        assert scenario["input"]
+        assert scenario["business_scenario"]
+        assert scenario["business_expectation"]
+        assert scenario["control_model_expectation"]
+        assert scenario["input"]["message"]
         assert "expected" in scenario
         assert "intake" in scenario["expected"]
         assert "workflow_should_start" in scenario["expected"]

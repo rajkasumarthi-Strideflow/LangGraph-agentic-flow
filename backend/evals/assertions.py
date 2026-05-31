@@ -27,6 +27,9 @@ REPLACEMENT_CREATED_CLAIM_TERMS = [
 
 
 def _assert_equal(actual: Any, expected: Any, field: str) -> None:
+    if expected == "__exists__":
+        assert actual, f"{field}: expected a value to exist"
+        return
     assert actual == expected, f"{field}: expected {expected!r}, got {actual!r}"
 
 
@@ -61,10 +64,22 @@ def assert_intake_expectations(
             intake_expected["missing_fields_includes"],
             "intake.missing_fields",
         )
+    if "missing_fields" in intake_expected:
+        _assert_equal(
+            result.get("missing_fields"),
+            intake_expected["missing_fields"],
+            "intake.missing_fields",
+        )
     if "invalid_fields_includes" in intake_expected:
         _assert_includes(
             result.get("invalid_fields"),
             intake_expected["invalid_fields_includes"],
+            "intake.invalid_fields",
+        )
+    if "invalid_fields" in intake_expected:
+        _assert_equal(
+            result.get("invalid_fields"),
+            intake_expected["invalid_fields"],
             "intake.invalid_fields",
         )
 
@@ -98,6 +113,7 @@ def assert_policy_control_outcome(
         "inventory_available",
         "guardrail_decision",
         "replacement_request_id",
+        "escalation_id",
     ]:
         if field in workflow_expected:
             _assert_equal(state.get(field), workflow_expected[field], f"workflow.{field}")

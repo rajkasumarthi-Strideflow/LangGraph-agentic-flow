@@ -7,6 +7,24 @@ not call LangSmith evaluation APIs, Ragas, or an LLM judge. LLM-as-judge can be
 added later for communication quality, tone, and faithfulness checks, but it
 should not replace deterministic policy and guardrail assertions.
 
+## Scenario Format
+
+Golden scenarios are intentionally hybrid:
+
+- Business-readable for Product, Operations, Audit, Risk, Security, Compliance, and Model Risk Management review.
+- Machine-checkable for pytest automation and future LangSmith evaluations.
+
+Each scenario describes the business situation first, then encodes the technical
+assertions needed to validate the control model:
+
+- `business_scenario` explains what the user is trying to do.
+- `business_expectation` explains the expected business outcome.
+- `control_model_expectation` explains which control should be validated.
+- `expected` contains deterministic assertions used by the local runner.
+
+Golden scenarios should describe the business expectation first, then encode the
+technical assertions needed to validate the control model.
+
 ## What It Evaluates
 
 The current golden scenarios cover:

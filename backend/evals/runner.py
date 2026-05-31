@@ -88,8 +88,18 @@ def _initial_state(
     }
 
 
+def _scenario_message(scenario: dict[str, Any]) -> str:
+    scenario_input = scenario["input"]
+    if isinstance(scenario_input, str):
+        return scenario_input
+    if isinstance(scenario_input, dict) and isinstance(scenario_input.get("message"), str):
+        return scenario_input["message"]
+    raise ValueError(f"Scenario {scenario.get('id', 'unknown')} input.message is required.")
+
+
 def _run_scenario(scenario: dict[str, Any]) -> dict[str, Any]:
-    intake_result = route_customer_message(scenario["input"])
+    message = _scenario_message(scenario)
+    intake_result = route_customer_message(message)
     workflow_result: dict[str, Any] | None = None
 
     should_start = scenario["expected"].get("workflow_should_start", False)
@@ -100,7 +110,7 @@ def _run_scenario(scenario: dict[str, Any]) -> dict[str, Any]:
             run_warranty_workflow(
                 _initial_state(
                     scenario_id=scenario["id"],
-                    customer_request=scenario["input"],
+                    customer_request=message,
                     customer_id=intake_result["customer_id"],
                     order_id=intake_result["order_id"],
                 )
