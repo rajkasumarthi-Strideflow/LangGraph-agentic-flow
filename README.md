@@ -90,6 +90,8 @@ Prompt governance checklist: [docs/prompt-governance-checklist.md](docs/prompt-g
 
 Safe iteration loop: [docs/safe-iteration-loop.md](docs/safe-iteration-loop.md)
 
+Local golden-scenario evaluations: [backend/evals/README.md](backend/evals/README.md)
+
 Phase 1 release notes: [docs/phase-1-release-notes.md](docs/phase-1-release-notes.md)
 
 Phase 1 release checklist: [docs/phase-1-release-checklist.md](docs/phase-1-release-checklist.md)
@@ -103,6 +105,8 @@ Phase 2 branch note: `phase-2/intake-router` introduces a stateful natural-langu
 Phase 2 now demonstrates the full governed outcome set for the warranty replacement reference workflow: intake blocks missing or invalid identifiers, cracked-screen accidental damage is blocked by policy and guardrail, a valid-format unknown customer escalates after identity verification fails, and an eligible manufacturing defect creates a governed replacement request.
 
 Phase 2 tracing note: `phase-2/langsmith-tracing` adds optional LangSmith tracing for intake sessions, router turns, workflow nodes, governed tools, LLM response drafting, and validation. Audit replay remains the business/governance trail; LangSmith tracing provides execution observability and debugging. Tracing is controlled by `LANGSMITH_TRACING`, `LANGSMITH_API_KEY`, `LANGSMITH_PROJECT`, and `LANGSMITH_ENDPOINT`, and the app runs normally without fake trace links when LangSmith is not configured.
+
+Phase 2 evaluation note: `phase-2/evaluation-pipeline` adds a local golden-scenario evaluation suite under `backend/evals/`. The first evaluation layer uses deterministic assertions to verify the control model across clarification, invalid input, guardrail block, escalation, and allow/action outcomes. Future work can connect these scenarios to LangSmith datasets and experiments; LLM-as-judge should evaluate communication quality later, not replace deterministic control assertions.
 
 ## Phase 1 Capabilities
 

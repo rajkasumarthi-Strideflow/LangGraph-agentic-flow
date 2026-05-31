@@ -95,6 +95,20 @@ Audit replay and LangSmith tracing are complementary:
 
 The frontend uses `GET /api/observability/status` to show the real tracing provider, status, and project. Trace links remain unavailable until the backend can safely provide real LangSmith run URLs.
 
+## Phase 2 Local Evaluation Pipeline
+
+The `phase-2/evaluation-pipeline` branch adds a lightweight local evaluation suite in `backend/evals/`. This is not LangSmith evaluation yet. It is a repo-based golden-scenario framework that can run through `pytest` without OpenAI, LangSmith, Ragas, or external services.
+
+The first evaluation layer validates deterministic control-model behavior:
+
+- Missing information requires clarification and does not start the governed workflow.
+- Invalid identifier formats block routing before workflow start.
+- Cracked-screen accidental damage is blocked by policy and guardrail.
+- A valid-format unknown customer routes into the workflow and escalates after identity verification fails.
+- An eligible manufacturing defect follows the allow/action path and creates a governed replacement request.
+
+The runner checks final workflow state, policy-control outcomes, replacement action safety, and response overpromise boundaries. Future Step 28B can map the same golden scenarios into LangSmith datasets and experiments. LLM-as-judge can later evaluate communication quality, tone, and faithfulness, but it should not replace deterministic assertions for eligibility, guardrails, and action execution.
+
 ## Phase 1 LangGraph Workflow
 
 Phase 1 uses LangGraph to model the warranty replacement flow as an explicit local state machine. The graph gives the capstone a clear orchestration layer for sequencing governed tools, branching on deterministic state, and preserving decision fields that can later become audit records.

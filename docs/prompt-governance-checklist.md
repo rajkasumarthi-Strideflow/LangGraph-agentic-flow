@@ -76,6 +76,8 @@ The current multi-turn clarification flow stores session context in memory for P
 - [ ] Regression tests from production failures
 - [ ] Human review sampling
 
+The `phase-2/evaluation-pipeline` branch starts this discipline with local golden scenarios in `backend/evals/`. Prompt-related changes should preserve these deterministic control assertions before any future LLM-as-judge checks are added for tone or response quality.
+
 ## Approval and Versioning
 
 - [ ] Prompt owner identified

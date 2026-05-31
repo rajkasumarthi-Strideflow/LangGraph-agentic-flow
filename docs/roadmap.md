@@ -232,6 +232,20 @@ execution
 
 Core principle: production failures should become regression tests.
 
+### Local Golden-Scenario Evaluation
+
+Status: implemented on `phase-2/evaluation-pipeline` as a local pytest-runnable evaluation layer.
+
+The first evaluation suite lives in `backend/evals/` and uses deterministic assertions to validate the control model. Current golden scenarios cover:
+
+- Missing information and clarification behavior
+- Invalid identifier blocking
+- Cracked-screen policy/guardrail block
+- Unknown valid-format customer escalation
+- Eligible manufacturing defect allow/action path
+
+This layer measures intake readiness, final workflow state, policy compliance, guardrail outcome, replacement action safety, and response overpromise boundaries. It does not call LangSmith evaluation APIs and does not require OpenAI credentials. Future Step 28B can connect these scenarios to LangSmith datasets and experiments. LLM-as-judge should be added later for response quality, tone, and faithfulness, but not as a replacement for deterministic control assertions.
+
 ### Ragas Evaluation Foundation
 
 Add golden test cases and RAG/response evaluation.

@@ -1,0 +1,83 @@
+[
+  {
+    "id": "missing_info_clarification",
+    "name": "Missing customer and order identifiers require clarification",
+    "input": "My laptop screen cracked after 9 months. Can I get a replacement?",
+    "expected": {
+      "intake": {
+        "requires_clarification": true,
+        "missing_fields_includes": ["customer_id", "order_id"],
+        "can_start_workflow": false
+      },
+      "workflow_should_start": false
+    }
+  },
+  {
+    "id": "invalid_identifier_blocked",
+    "name": "Invalid customer identifier blocks workflow start",
+    "input": "My laptop screen cracked. Customer ID is UNKNOWN_CUSTOMER and order ID is ord_laptop_001.",
+    "expected": {
+      "intake": {
+        "invalid_fields_includes": ["customer_id"],
+        "can_start_workflow": false
+      },
+      "workflow_should_start": false
+    }
+  },
+  {
+    "id": "cracked_screen_blocked",
+    "name": "Cracked-screen accidental damage is blocked by policy and guardrail",
+    "input": "My laptop screen cracked after 9 months. Can I get a replacement? Customer ID is cust_primary_001 and order ID is ord_laptop_001.",
+    "expected": {
+      "intake": {
+        "can_start_workflow": true
+      },
+      "workflow_should_start": true,
+      "workflow": {
+        "eligibility_status": "not_eligible",
+        "guardrail_decision": "block",
+        "replacement_request_id": null,
+        "response_must_not_claim_replacement_created": true,
+        "response_must_not_claim_shipment": true
+      }
+    }
+  },
+  {
+    "id": "unknown_customer_escalated",
+    "name": "Valid-format unknown customer routes to workflow and escalates",
+    "input": "I need a replacement for my laptop. Customer ID is cust_unknown_001 and order ID is ord_laptop_001.",
+    "expected": {
+      "intake": {
+        "can_start_workflow": true
+      },
+      "workflow_should_start": true,
+      "workflow": {
+        "identity_verified": false,
+        "escalation_id_exists": true,
+        "replacement_request_id": null,
+        "response_should_explain_verification_or_escalation": true
+      }
+    }
+  },
+  {
+    "id": "eligible_manufacturing_defect_allowed",
+    "name": "Covered laptop power failure creates a governed replacement request",
+    "input": "My laptop stopped powering on after 6 months. Can I get a replacement? Customer ID is cust_primary_001 and order ID is ord_laptop_power_001.",
+    "expected": {
+      "intake": {
+        "can_start_workflow": true
+      },
+      "workflow_should_start": true,
+      "workflow": {
+        "identity_verified": true,
+        "order_retrieved": true,
+        "eligibility_status": "eligible",
+        "inventory_available": true,
+        "guardrail_decision": "allow",
+        "replacement_request_id_exists": true,
+        "response_may_claim_replacement_created": true,
+        "response_must_not_claim_shipment": true
+      }
+    }
+  }
+]
