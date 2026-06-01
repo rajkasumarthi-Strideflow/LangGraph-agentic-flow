@@ -18,10 +18,10 @@ Before sharing or demoing Phase 1, use the [DecisionTrace AI Phase 1 Release Che
   - Eligible replacement happy path
   - LangSmith tracing support
   - Local golden-scenario evaluation pipeline
+  - Optional LangSmith evaluation dataset/experiment bridge
   - Shared correlation ID across intake, workflow, audit, and trace metadata
   - Reusable control-monitoring dashboard for workflow outcomes and audit-backed KPIs
 - Upcoming Phase 2 items include:
-  - LangSmith evaluation integration
   - LLM-as-judge evaluation layer
 - Phase 3 includes:
   - Safety detector nodes
@@ -273,7 +273,9 @@ The first evaluation suite lives in `backend/evals/` and uses deterministic asse
 - Unknown valid-format customer escalation
 - Eligible manufacturing defect allow/action path
 
-This layer measures intake readiness, final workflow state, policy compliance, guardrail outcome, replacement action safety, and response overpromise boundaries. It does not call LangSmith evaluation APIs and does not require OpenAI credentials. Future Step 28B can connect these scenarios to LangSmith datasets and experiments. LLM-as-judge should be added later for response quality, tone, and faithfulness, but not as a replacement for deterministic control assertions.
+This layer measures intake readiness, final workflow state, policy compliance, guardrail outcome, replacement action safety, and response overpromise boundaries. It does not require OpenAI credentials.
+
+Step 30A adds an optional LangSmith evaluation bridge that can sync these scenarios into a LangSmith dataset and run experiments manually when `LANGSMITH_API_KEY` is configured. This helps track and compare evaluation runs over time, but local deterministic pytest evaluations remain required and authoritative. LLM-as-judge should be added later for response quality, tone, and faithfulness, but not as a replacement for deterministic control assertions.
 
 ### Ragas Evaluation Foundation
 

@@ -40,7 +40,9 @@ Audit replay explains what happened. Tracing explains how execution happened. Ev
 
 DecisionTrace AI should use audit and trace evidence to create evaluator cases for recurring or high-impact issues. Those evaluator cases then become gates for prompt, tool, router, and workflow changes.
 
-The `phase-2/evaluation-pipeline` branch adds the first local version of this loop with golden scenarios in `backend/evals/`. These scenarios use deterministic assertions to verify clarify, invalid input, block, escalate, and allow/action outcomes. Future LangSmith evaluation can reuse this scenario set as datasets and experiments, while preserving deterministic checks as the non-negotiable control layer.
+The `phase-2/evaluation-pipeline` branch adds the first local version of this loop with golden scenarios in `backend/evals/`. These scenarios use deterministic assertions to verify clarify, invalid input, block, escalate, and allow/action outcomes. Step 30A adds an optional LangSmith evaluation bridge that can reuse this scenario set as datasets and experiments, while preserving deterministic checks as the non-negotiable control layer.
+
+LangSmith tracing and LangSmith evaluation serve different purposes. Tracing explains how a run executed. Evaluation checks whether behavior met expected criteria and allows teams to compare versions over time.
 
 Phase 2 also adds a shared `correlation_id` that connects intake sessions, governed workflow runs, audit events, and LangSmith trace metadata. This prepares DecisionTrace AI for production monitoring and replay views where business audit evidence and execution traces can be joined without relying on fake trace links or inferred identifiers.
 

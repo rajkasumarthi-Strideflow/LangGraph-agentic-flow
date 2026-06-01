@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     LANGSMITH_API_KEY: str | None = None
     LANGSMITH_PROJECT: str = "decisiontrace-phase2"
     LANGSMITH_ENDPOINT: str | None = None
+    LANGSMITH_EVALUATION_ENABLED: bool = False
+    LANGSMITH_EVALUATION_DATASET: str = "decisiontrace-phase2-golden-scenarios"
+    LANGSMITH_EVALUATION_EXPERIMENT_PREFIX: str = "decisiontrace-phase2"
 
     @property
     def sqlalchemy_database_url(self) -> str:

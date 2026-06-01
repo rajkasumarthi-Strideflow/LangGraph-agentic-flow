@@ -55,6 +55,7 @@ For prompt governance and safe iteration details, see the [DecisionTrace AI Prom
 - Optional LangSmith tracing
 - Local golden-scenario evaluation pipeline
 - Business-readable and machine-checkable golden scenarios
+- Optional LangSmith evaluation dataset/experiment bridge
 - Shared `correlation_id` across intake sessions, workflow runs, audit events, and LangSmith trace metadata
 - Reusable control-monitoring dashboard backed by persisted workflow, audit, review, and LLM usage metadata
 
@@ -202,7 +203,7 @@ The frontend adds a separate Monitoring Dashboard tab with filters for workflow 
 
 ## Phase 2 Local Evaluation Pipeline
 
-This branch includes a lightweight local evaluation suite in `backend/evals/`. This is not LangSmith evaluation yet. It is a repo-based golden-scenario framework that can run through `pytest` without OpenAI, LangSmith, Ragas, or external services.
+This branch includes a lightweight local evaluation suite in `backend/evals/`. It is a repo-based golden-scenario framework that can run through `pytest` without OpenAI, LangSmith, Ragas, or external services.
 
 The first evaluation layer validates deterministic control-model behavior:
 
@@ -212,7 +213,18 @@ The first evaluation layer validates deterministic control-model behavior:
 - A valid-format unknown customer routes into the workflow and escalates after identity verification fails.
 - An eligible manufacturing defect follows the allow/action path and creates a governed replacement request.
 
-The runner checks final workflow state, policy-control outcomes, replacement action safety, and response overpromise boundaries. Future Step 28B can map the same golden scenarios into LangSmith datasets and experiments. LLM-as-judge can later evaluate communication quality, tone, and faithfulness, but it should not replace deterministic assertions for eligibility, guardrails, and action execution.
+The runner checks final workflow state, policy-control outcomes, replacement action safety, and response overpromise boundaries. Deterministic checks remain the control-model source of truth. LLM-as-judge can later evaluate communication quality, tone, and faithfulness, but it should not replace deterministic assertions for eligibility, guardrails, and action execution.
+
+## Phase 2 LangSmith Evaluation
+
+Step 30A adds optional LangSmith evaluation integration in `backend/evals/langsmith_export.py`. This module can sync local golden scenarios into a LangSmith dataset and manually run a LangSmith experiment using the same deterministic in-process evaluation target.
+
+This is different from LangSmith tracing:
+
+- **Tracing** captures how intake, workflow, tools, and LLM drafting executed.
+- **Evaluation** measures whether behavior met expected criteria.
+
+The optional LangSmith evaluation bridge is manually invoked and requires `LANGSMITH_API_KEY`. The FastAPI app and normal pytest suite run without LangSmith evaluation configuration. The bridge does not call OpenAI and does not replace local deterministic evaluation.
 
 ## Phase 1 LangGraph Workflow
 

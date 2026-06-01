@@ -82,6 +82,11 @@ This checklist validates the Phase 2 development branch before merging into the 
 - [ ] Evaluation does not require OpenAI key
 - [ ] Evaluation does not require LangSmith key
 - [ ] `pytest backend/tests/test_evaluation_pipeline.py` passes
+- [ ] Local evaluation pipeline passes
+- [ ] LangSmith evaluation dataset can be created manually when configured
+- [ ] LangSmith experiment can be run manually when configured
+- [ ] App still works when LangSmith evaluation is not configured
+- [ ] LangSmith evaluation is treated as run tracking and comparison, not as a replacement for deterministic assertions
 
 ## Control Monitoring Dashboard Validation
 
