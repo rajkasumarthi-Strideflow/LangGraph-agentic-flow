@@ -15,7 +15,12 @@
       </div>
     </header>
 
-    <main class="console-shell">
+    <nav class="top-nav" aria-label="Primary">
+      <button id="workflow-console-tab" class="nav-tab active" type="button">Workflow Console</button>
+      <button id="monitoring-dashboard-tab" class="nav-tab" type="button">Monitoring Dashboard</button>
+    </nav>
+
+    <main id="workflow-console-view" class="console-shell">
       <section class="panel intake-panel">
         <div class="panel-heading">
           <div>
@@ -183,6 +188,53 @@
       </section>
     </main>
 
-    <script src="/static/app.js?v=phase2-correlation-id-1"></script>
+    <main id="monitoring-dashboard-view" class="dashboard-shell hidden">
+      <section class="panel monitoring-dashboard-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">DecisionTrace Monitoring</p>
+            <h2>Monitoring Dashboard</h2>
+          </div>
+          <span class="panel-note">Business/control outcomes, API-backed</span>
+        </div>
+        <p class="panel-helper">
+          LangSmith monitors agent execution. DecisionTrace monitors governed business workflow outcomes across persisted workflow runs, audit events, guardrails, actions, and LLM response boundaries.
+        </p>
+
+        <div class="monitoring-filter-bar">
+          <div>
+            <label for="monitor-workflow-type">Workflow Type</label>
+            <select id="monitor-workflow-type">
+              <option value="">All workflow types</option>
+            </select>
+          </div>
+          <div>
+            <label for="monitor-outcome">Outcome</label>
+            <select id="monitor-outcome">
+              <option value="">All outcomes</option>
+            </select>
+          </div>
+          <div>
+            <label for="monitor-correlation">Correlation ID</label>
+            <input id="monitor-correlation" type="text" placeholder="corr_..." autocomplete="off" />
+          </div>
+          <button id="monitor-refresh" class="button button-primary" type="button">Refresh</button>
+        </div>
+
+        <h3 class="router-output-heading">KPI Tiles</h3>
+        <div id="monitoring-kpis" class="telemetry-grid"></div>
+
+        <h3 class="router-output-heading">Outcome Breakdown</h3>
+        <div id="monitoring-outcomes" class="outcome-grid"></div>
+
+        <h3 class="router-output-heading">Recent Runs</h3>
+        <div id="monitoring-runs" class="monitoring-runs empty-state">No workflow runs found.</div>
+
+        <h3 class="router-output-heading">Audit Drilldown</h3>
+        <div id="monitoring-audit-drilldown" class="audit-replay empty-state">Select View Audit on a recent run to inspect persisted audit events.</div>
+      </section>
+    </main>
+
+    <script src="/static/app.js?v=phase2-control-monitoring-1"></script>
   </body>
 </html>

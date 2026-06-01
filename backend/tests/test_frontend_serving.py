@@ -39,8 +39,16 @@ def test_frontend_index_returns_decisiontrace_branding(client: TestClient) -> No
     assert "LangSmith Tracing" in response.text
     assert "Trace Context" in response.text
     assert "Correlation ID" in response.text
+    assert "Workflow Console" in response.text
+    assert "Monitoring Dashboard" in response.text
+    assert "DecisionTrace Monitoring" in response.text
+    assert "Business/control outcomes, API-backed" in response.text
+    assert "KPI Tiles" in response.text
+    assert "Total Workflow Runs" not in response.text
+    assert "Recent Runs" in response.text
+    assert "View Audit" in response.text
     assert 'id="analyze-intake-button"' in response.text
-    assert "/static/app.js?v=phase2-correlation-id-1" in response.text
+    assert "/static/app.js?v=phase2-control-monitoring-1" in response.text
     assert "Optional Workflow Context" not in response.text
     assert "Use optional workflow context when analyzing request" not in response.text
     assert "Clear Context" not in response.text
@@ -67,6 +75,13 @@ def test_frontend_static_assets_are_served(client: TestClient) -> None:
     assert "<strong>Correlation:</strong>" in js_response.text
     assert "meta-label\">Correlation" in js_response.text
     assert "Trace links will appear in a future enhancement" in js_response.text
+    assert "/api/monitoring/summary" in js_response.text
+    assert "/api/monitoring/runs" in js_response.text
+    assert "/api/monitoring/outcomes" in js_response.text
+    assert "monitoring-dashboard-tab" in js_response.text
+    assert "refreshMonitoringDashboard" in js_response.text
+    assert "Total Workflow Runs" in js_response.text
+    assert "View Audit" in js_response.text
     assert "https://smith.langchain.com" not in js_response.text
     assert "/reply" in js_response.text
     assert "getContextPayload" in js_response.text

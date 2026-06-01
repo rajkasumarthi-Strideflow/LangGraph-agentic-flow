@@ -103,3 +103,53 @@ class HumanReviewResponse(BaseModel):
     reviewer_id: str
     status: str
     message: str
+
+
+class MonitoringRunResponse(BaseModel):
+    workflow_id: str
+    correlation_id: str
+    workflow_type: str
+    workflow_status: str | None = None
+    outcome: str
+    eligibility_status: str | None = None
+    guardrail_decision: str | None = None
+    escalation_id: str | None = None
+    replacement_request_id: str | None = None
+    llm_drafting_status: str | None = None
+    llm_validation_status: str | None = None
+    final_response_source: str | None = None
+    llm_input_tokens: int | None = None
+    llm_output_tokens: int | None = None
+    llm_total_tokens: int | None = None
+    audit_event_count: int
+    tool_call_count: int
+    created_at: str | None = None
+    updated_at: str | None = None
+
+
+class MonitoringSummaryResponse(BaseModel):
+    total_workflow_runs: int
+    completed_runs: int
+    failed_runs: int
+    blocked_count: int
+    escalated_count: int
+    allowed_action_count: int
+    replacement_request_count: int
+    llm_drafting_completed_count: int
+    llm_validation_failed_count: int
+    total_input_tokens: int
+    total_output_tokens: int
+    total_tokens: int
+    total_audit_events: int
+    total_tool_calls: int
+    workflow_type_breakdown: dict[str, int]
+    outcome_breakdown: dict[str, int]
+
+
+class MonitoringRunsResponse(BaseModel):
+    runs: list[MonitoringRunResponse]
+
+
+class MonitoringOutcomesResponse(BaseModel):
+    workflow_types: list[str]
+    outcomes: list[str]

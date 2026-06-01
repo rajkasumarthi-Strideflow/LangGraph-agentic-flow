@@ -29,9 +29,18 @@ from app.models.api import (
     IntakeSessionReplyRequest,
     IntakeSessionResponse,
     IntakeSessionStartRequest,
+    MonitoringOutcomesResponse,
+    MonitoringRunsResponse,
+    MonitoringSummaryResponse,
     StartWorkflowRequest,
     StartWorkflowResponse,
     WorkflowStateResponse,
+)
+from app.monitoring.service import (
+    ALLOWED_OUTCOMES,
+    WORKFLOW_TYPES,
+    build_workflow_monitoring_summary,
+    list_recent_workflow_runs,
 )
 from app.observability.langsmith_tracing import get_langsmith_status
 from app.workflow.graph import run_warranty_workflow
@@ -269,6 +278,44 @@ def get_correlation_view(correlation_id: str) -> dict[str, Any]:
             workflow_state.get("final_response_source") if workflow_state else None
         ),
     }
+
+
+@app.get("/api/monitoring/summary", response_model=MonitoringSummaryResponse)
+def get_monitoring_summary(
+    workflow_type: str | None = None,
+    outcome: str | None = None,
+) -> MonitoringSummaryResponse:
+    return MonitoringSummaryResponse(
+        **build_workflow_monitoring_summary(
+            workflow_type=workflow_type,
+            outcome=outcome,
+        )
+    )
+
+
+@app.get("/api/monitoring/runs", response_model=MonitoringRunsResponse)
+def get_monitoring_runs(
+    workflow_type: str | None = None,
+    outcome: str | None = None,
+    correlation_id: str | None = None,
+    limit: int = 25,
+) -> MonitoringRunsResponse:
+    return MonitoringRunsResponse(
+        runs=list_recent_workflow_runs(
+            workflow_type=workflow_type,
+            outcome=outcome,
+            correlation_id=correlation_id,
+            limit=limit,
+        )
+    )
+
+
+@app.get("/api/monitoring/outcomes", response_model=MonitoringOutcomesResponse)
+def get_monitoring_outcomes() -> MonitoringOutcomesResponse:
+    return MonitoringOutcomesResponse(
+        workflow_types=WORKFLOW_TYPES,
+        outcomes=ALLOWED_OUTCOMES,
+    )
 
 
 @app.post(

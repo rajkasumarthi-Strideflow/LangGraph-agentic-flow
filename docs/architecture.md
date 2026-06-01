@@ -54,11 +54,10 @@ For prompt governance and safe iteration details, see the [DecisionTrace AI Prom
 - Local golden-scenario evaluation pipeline
 - Business-readable and machine-checkable golden scenarios
 - Shared `correlation_id` across intake sessions, workflow runs, audit events, and LangSmith trace metadata
+- Reusable control-monitoring dashboard backed by persisted workflow, audit, review, and LLM usage metadata
 
 ### Future Roadmap
 
-- Shared correlation ID across intake session, workflow, audit events, and LangSmith traces
-- Production monitoring and telemetry expansion
 - LangSmith evaluation datasets and experiments
 - Deterministic checks plus LLM-as-judge evaluation
 - τ-Bench-inspired dynamic agent evaluation
@@ -153,6 +152,23 @@ The correlation ID connects both governance and observability views:
 When a user starts an intake session, the backend generates a correlation ID and returns it with the session. Clarification replies preserve the same ID. When the frontend starts the governed workflow, it passes that ID into `POST /api/workflows/start`, so the final workflow state, workflow run row, audit events, and trace metadata remain connected. Direct workflow starts without an intake session still generate a new correlation ID.
 
 The frontend displays this context in a Trace Context panel. The lightweight endpoint `GET /api/correlation/{correlation_id}` returns a joined view with intake session ID, workflow ID, audit event count, workflow status, and final response source when available.
+
+## Phase 2 Control Monitoring Dashboard
+
+The `phase-2/control-monitoring-dashboard` branch adds a reusable DecisionTrace Monitoring Dashboard for business and control outcomes. This dashboard complements LangSmith rather than replacing it:
+
+- **LangSmith** monitors execution observability: traces, spans, model calls, tool calls, latency, and debugging detail when tracing is configured.
+- **DecisionTrace** monitors governed workflow outcomes: blocked requests, escalations, allowed actions, replacement creation, audit event counts, tool-call counts, response drafting status, validation failures, token totals, and correlation IDs from persisted application data.
+
+The dashboard is backed by real API data from persisted `workflow_runs`, `audit_events`, `human_reviews`, and provider-reported LLM usage fields stored in workflow final state. It does not display fake cost, latency, trace links, or synthetic monitoring values.
+
+The first supported workflow type is `warranty_replacement`, but the API response model includes `workflow_type` and outcome categories that can be reused by future DecisionTrace workflows. The current endpoints are:
+
+- `GET /api/monitoring/summary`
+- `GET /api/monitoring/runs`
+- `GET /api/monitoring/outcomes`
+
+The frontend adds a separate Monitoring Dashboard tab with filters for workflow type, outcome, and correlation ID. Recent runs support audit drilldown by calling the existing workflow audit endpoint, so the monitoring view remains tied to persisted evidence rather than derived screenshots or hardcoded examples.
 
 ## Phase 2 Local Evaluation Pipeline
 

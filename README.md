@@ -11,7 +11,7 @@
 DecisionTrace AI has two active documentation views:
 
 - **Phase 1 stable release:** available on the `main` branch and GitHub release `v1.0-phase-1`
-- **Phase 2 development branch:** this branch adds natural-language intake routing, multi-turn clarification, eligible replacement happy path, optional LangSmith tracing, and local golden-scenario evaluation
+- **Phase 2 development branch:** this branch adds natural-language intake routing, multi-turn clarification, eligible replacement happy path, optional LangSmith tracing, local golden-scenario evaluation, and a reusable control-monitoring dashboard
 
 The current branch documentation describes the Phase 2 version unless otherwise noted.
 
@@ -120,6 +120,8 @@ Phase 2 tracing note: `phase-2/langsmith-tracing` adds optional LangSmith tracin
 Phase 2 evaluation note: this branch includes a local golden-scenario evaluation suite under `backend/evals/`. The first evaluation layer uses deterministic assertions to verify the control model across clarification, invalid input, guardrail block, escalation, and allow/action outcomes. Future work can connect these scenarios to LangSmith datasets and experiments; LLM-as-judge should evaluate communication quality later, not replace deterministic control assertions.
 
 Phase 2 correlation note: this branch includes a shared `correlation_id` across intake sessions, workflow runs, audit events, and LangSmith trace metadata. This connects one customer turn from natural-language intake through governed workflow execution, audit replay, and future monitoring views.
+
+Phase 2 monitoring note: this branch adds a DecisionTrace control-monitoring dashboard backed by real persisted workflow runs, audit events, human review records, and provider-reported LLM metadata when available. LangSmith monitors execution traces; DecisionTrace monitors business/control outcomes such as blocked requests, escalations, allowed actions, replacement creation, audit event counts, tool-call counts, and response drafting boundaries. The current workflow type is `warranty_replacement`, and the monitoring API is designed so future workflow types can reuse the same outcome model.
 
 ## Phase 1 Capabilities
 

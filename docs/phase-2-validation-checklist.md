@@ -83,6 +83,20 @@ This checklist validates the Phase 2 development branch before merging into the 
 - [ ] Evaluation does not require LangSmith key
 - [ ] `pytest backend/tests/test_evaluation_pipeline.py` passes
 
+## Control Monitoring Dashboard Validation
+
+- [ ] Monitoring Dashboard tab loads
+- [ ] `GET /api/monitoring/summary` returns real persisted workflow counts
+- [ ] `GET /api/monitoring/runs` returns recent runs with workflow type, correlation ID, outcome, audit event count, and tool-call count
+- [ ] `GET /api/monitoring/outcomes` returns supported workflow types and outcomes
+- [ ] Cracked-screen scenario increments blocked outcome count
+- [ ] Unknown valid-format customer scenario increments escalated outcome count
+- [ ] Eligible manufacturing defect scenario increments allowed/action and replacement request counts
+- [ ] LLM token totals appear only when provider usage metadata exists in persisted final state
+- [ ] Dashboard does not display fake cost, latency, trace links, or synthetic monitoring values
+- [ ] Audit drilldown loads persisted audit events for a selected workflow run
+- [ ] Dashboard clearly distinguishes DecisionTrace business/control monitoring from LangSmith execution tracing
+
 ## Merge Readiness
 
 - [ ] README links to this Phase 2 validation checklist

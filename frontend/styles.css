@@ -74,6 +74,30 @@ h3 {
   padding: 34px clamp(18px, 4vw, 52px) 28px;
 }
 
+.top-nav {
+  display: flex;
+  gap: 10px;
+  padding: 0 clamp(18px, 4vw, 52px) 18px;
+}
+
+.nav-tab {
+  min-height: 38px;
+  padding: 8px 14px;
+  color: var(--muted);
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 780;
+  cursor: pointer;
+}
+
+.nav-tab.active {
+  color: #ffffff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
 .header-copy {
   min-width: 0;
 }
@@ -119,6 +143,11 @@ h3 {
   padding: 0 clamp(18px, 4vw, 52px) 42px;
 }
 
+.dashboard-shell {
+  display: block;
+  padding: 0 clamp(18px, 4vw, 52px) 42px;
+}
+
 .panel {
   min-width: 0;
   padding: 20px;
@@ -143,6 +172,11 @@ h3 {
 .review-panel,
 .planned-panel {
   grid-column: 1 / -1;
+}
+
+.monitoring-dashboard-panel {
+  max-width: 1480px;
+  margin: 0 auto;
 }
 
 .panel-heading {
@@ -215,6 +249,14 @@ select:focus {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+}
+
+.monitoring-filter-bar {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(220px, 1.4fr) auto;
+  gap: 14px;
+  align-items: end;
+  margin-bottom: 18px;
 }
 
 .button-row {
@@ -605,6 +647,62 @@ select:focus {
   font-weight: 720;
 }
 
+.outcome-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.outcome-card {
+  padding: 14px;
+  background: var(--panel-soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.outcome-card strong {
+  display: block;
+  font-size: 22px;
+}
+
+.monitoring-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.monitoring-table {
+  width: 100%;
+  min-width: 980px;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.monitoring-table th,
+.monitoring-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  font-size: 13px;
+}
+
+.monitoring-table th {
+  color: var(--muted);
+  background: var(--panel-soft);
+  font-weight: 820;
+}
+
+.link-button {
+  padding: 0;
+  color: var(--primary);
+  background: none;
+  border: 0;
+  font: inherit;
+  font-weight: 780;
+  cursor: pointer;
+}
+
 .status-message,
 .review-response {
   color: var(--muted);
@@ -674,5 +772,9 @@ select:focus {
 
   .button {
     width: 100%;
+  }
+
+  .monitoring-filter-bar {
+    grid-template-columns: 1fr;
   }
 }

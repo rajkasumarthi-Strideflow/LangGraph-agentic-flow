@@ -2,7 +2,7 @@
 
 This executive summary reflects the Phase 2 development branch of DecisionTrace AI. The Phase 1 stable release remains available on the `main` branch and GitHub release `v1.0-phase-1`.
 
-Phase 1 established the governed workflow foundation. Phase 2 adds natural-language intake, multi-turn clarification, optional LangSmith tracing, and local golden-scenario evaluation. Future phases expand monitoring, evaluation, safety controls, and cost-aware orchestration.
+Phase 1 established the governed workflow foundation. Phase 2 adds natural-language intake, multi-turn clarification, optional LangSmith tracing, local golden-scenario evaluation, shared correlation IDs, and a reusable control-monitoring dashboard. Future phases expand evaluation, safety controls, cost telemetry, and cost-aware orchestration.
 
 ## Overview
 
@@ -72,6 +72,8 @@ The [Agentforce mapping](agentforce-mapping.md) translates the same architecture
 The [roadmap](roadmap.md) clarifies Phase 1 limitations and the planned path toward polished UX, controlled LLM use, observability, evaluation, cost telemetry, true HITL, CrewAI, MCP, A2A, and Agentforce implementation.
 
 Future phases will extend DecisionTrace AI from audit replay into safe iteration: workflow traces and production issues can be converted into evaluation cases and regression tests, enabling teams to improve agent behavior without weakening governance controls.
+
+The Phase 2 monitoring layer complements LangSmith by separating business/control monitoring from execution tracing. LangSmith can show how a run executed; DecisionTrace shows what governed outcome occurred, whether guardrails blocked or allowed action, how many audit/tool events were recorded, and how the run connects through a shared correlation ID.
 
 ## Phase 1 Scope
 

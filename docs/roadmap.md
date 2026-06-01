@@ -19,8 +19,8 @@ Before sharing or demoing Phase 1, use the [DecisionTrace AI Phase 1 Release Che
   - LangSmith tracing support
   - Local golden-scenario evaluation pipeline
   - Shared correlation ID across intake, workflow, audit, and trace metadata
+  - Reusable control-monitoring dashboard for workflow outcomes and audit-backed KPIs
 - Upcoming Phase 2 items include:
-  - Production monitoring / telemetry expansion
   - LangSmith evaluation integration
   - LLM-as-judge evaluation layer
 - Phase 3 includes:
@@ -108,10 +108,13 @@ Implemented tile examples:
 
 The UI shows LLM drafting status and provider-reported token fields when available. It intentionally does not show active dollar cost, latency, or tracing metrics yet because those backend telemetry sources are not implemented.
 
+The Phase 2 control-monitoring dashboard is now implemented as a separate enterprise dashboard tab. It uses real persisted workflow runs, audit events, human review records, and provider-reported LLM usage metadata when available. It is designed as a reusable DecisionTrace layer: today the only workflow type is `warranty_replacement`, but the same monitoring API can support future governed workflow types.
+
+LangSmith and DecisionTrace monitoring are intentionally complementary. LangSmith focuses on execution traces and debugging. DecisionTrace monitoring focuses on business/control outcomes such as blocked decisions, escalations, allowed actions, replacement creation, audit event counts, tool-call counts, response drafting status, validation failures, and correlation IDs.
+
 Future telemetry tile examples:
 
 - Estimated Cost
-- LLM Tokens
 - Latency
 - Trace Status
 

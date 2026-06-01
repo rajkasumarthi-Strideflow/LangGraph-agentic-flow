@@ -44,6 +44,17 @@ The `phase-2/evaluation-pipeline` branch adds the first local version of this lo
 
 Phase 2 also adds a shared `correlation_id` that connects intake sessions, governed workflow runs, audit events, and LangSmith trace metadata. This prepares DecisionTrace AI for production monitoring and replay views where business audit evidence and execution traces can be joined without relying on fake trace links or inferred identifiers.
 
+## Phase 2 Control Monitoring
+
+The Phase 2 control-monitoring dashboard turns persisted workflow data into business/control visibility. It summarizes real workflow runs, outcome categories, guardrail blocks, escalations, allowed actions, replacement requests, LLM drafting status, validation failures, token totals, audit event counts, and tool-call counts.
+
+This layer is deliberately separate from LangSmith:
+
+- LangSmith helps engineers debug execution traces.
+- DecisionTrace monitoring helps Product, Operations, Audit, Risk, Security, Compliance, and MRM review governed decision outcomes.
+
+The dashboard is reusable across future workflow types. The current workflow type is `warranty_replacement`, but future domains can emit the same core monitoring fields and inherit the same summary, filtering, and audit-drilldown pattern.
+
 ## Safe Deployment Gates
 
 - Tests pass

@@ -9,9 +9,16 @@ const appState = {
   intakeOriginalMessage: null,
   conversationMessages: [],
   observability: null,
+  monitoringSummary: null,
+  monitoringRuns: [],
+  monitoringOutcomes: null,
 };
 
 const elements = {
+  workflowConsoleTab: document.querySelector("#workflow-console-tab"),
+  monitoringDashboardTab: document.querySelector("#monitoring-dashboard-tab"),
+  workflowConsoleView: document.querySelector("#workflow-console-view"),
+  monitoringDashboardView: document.querySelector("#monitoring-dashboard-view"),
   intakeMessage: document.querySelector("#intake-message"),
   analyzeRequest: document.querySelector("#analyze-intake-button"),
   replyIntake: document.querySelector("#reply-intake-button"),
@@ -40,6 +47,14 @@ const elements = {
   reviewReason: document.querySelector("#review-reason"),
   reviewRecords: document.querySelector("#review-records"),
   reviewResponse: document.querySelector("#review-response"),
+  monitorWorkflowType: document.querySelector("#monitor-workflow-type"),
+  monitorOutcome: document.querySelector("#monitor-outcome"),
+  monitorCorrelation: document.querySelector("#monitor-correlation"),
+  monitorRefresh: document.querySelector("#monitor-refresh"),
+  monitoringKpis: document.querySelector("#monitoring-kpis"),
+  monitoringOutcomes: document.querySelector("#monitoring-outcomes"),
+  monitoringRuns: document.querySelector("#monitoring-runs"),
+  monitoringAuditDrilldown: document.querySelector("#monitoring-audit-drilldown"),
 };
 
 function escapeHtml(value) {
@@ -85,6 +100,10 @@ function statusClass(kind, value) {
     if (value === "allow") return "status-positive";
     if (value === "block") return "status-warning";
     if (value === "escalate") return "status-review";
+    if (value === "allowed_action") return "status-positive";
+    if (value === "blocked") return "status-warning";
+    if (value === "escalated") return "status-review";
+    if (value === "failed") return "status-danger";
   }
 
   if (kind === "eligibility") {
@@ -256,6 +275,17 @@ function sortEvents(events) {
   });
 }
 
+function queryString(params) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== null && value !== undefined && value !== "") {
+      query.set(key, value);
+    }
+  });
+  const rendered = query.toString();
+  return rendered ? `?${rendered}` : "";
+}
+
 async function requestJson(url, options = {}) {
   const response = await fetch(url, {
     headers: {
@@ -301,6 +331,9 @@ async function startWorkflow() {
 
     appState.workflowId = result.workflow_id;
     await refreshWorkflowView(result.workflow_id);
+    if (!elements.monitoringDashboardView.classList.contains("hidden")) {
+      await refreshMonitoringDashboard();
+    }
     setStatus("Workflow completed. State, audit events, and review records are current.");
   } catch (error) {
     setStatus(error.message, true);
@@ -496,6 +529,191 @@ async function refreshObservabilityStatus() {
   }
   renderObservabilityTiles();
   renderTraceContextTiles();
+}
+
+function showView(viewName) {
+  const monitoring = viewName === "monitoring";
+  elements.workflowConsoleView.classList.toggle("hidden", monitoring);
+  elements.monitoringDashboardView.classList.toggle("hidden", !monitoring);
+  elements.workflowConsoleTab.classList.toggle("active", !monitoring);
+  elements.monitoringDashboardTab.classList.toggle("active", monitoring);
+  if (monitoring) {
+    refreshMonitoringDashboard();
+  }
+}
+
+async function loadMonitoringFilterOptions() {
+  try {
+    const data = await requestJson("/api/monitoring/outcomes");
+    appState.monitoringOutcomes = data;
+    elements.monitorWorkflowType.innerHTML = [
+      '<option value="">All workflow types</option>',
+      ...(data.workflow_types || []).map(
+        (workflowType) => `<option value="${escapeHtml(workflowType)}">${escapeHtml(workflowType)}</option>`,
+      ),
+    ].join("");
+    elements.monitorOutcome.innerHTML = [
+      '<option value="">All outcomes</option>',
+      ...(data.outcomes || []).map(
+        (outcome) => `<option value="${escapeHtml(outcome)}">${escapeHtml(outcome)}</option>`,
+      ),
+    ].join("");
+  } catch (error) {
+    elements.monitoringKpis.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+function monitoringFilters() {
+  return {
+    workflow_type: elements.monitorWorkflowType.value,
+    outcome: elements.monitorOutcome.value,
+    correlation_id: elements.monitorCorrelation.value.trim(),
+  };
+}
+
+async function refreshMonitoringDashboard() {
+  const filters = monitoringFilters();
+  const summaryQuery = queryString({
+    workflow_type: filters.workflow_type,
+    outcome: filters.outcome,
+  });
+  const runsQuery = queryString({
+    ...filters,
+    limit: 25,
+  });
+
+  elements.monitorRefresh.disabled = true;
+  elements.monitorRefresh.textContent = "Refreshing...";
+  try {
+    const [summary, runs] = await Promise.all([
+      requestJson(`/api/monitoring/summary${summaryQuery}`),
+      requestJson(`/api/monitoring/runs${runsQuery}`),
+    ]);
+    appState.monitoringSummary = summary;
+    appState.monitoringRuns = runs.runs || [];
+    renderMonitoringSummary();
+    renderMonitoringRuns();
+  } catch (error) {
+    elements.monitoringKpis.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
+  } finally {
+    elements.monitorRefresh.disabled = false;
+    elements.monitorRefresh.textContent = "Refresh";
+  }
+}
+
+function renderMonitoringSummary() {
+  const summary = appState.monitoringSummary;
+  if (!summary) {
+    elements.monitoringKpis.innerHTML = "";
+    elements.monitoringOutcomes.innerHTML = "";
+    return;
+  }
+
+  elements.monitoringKpis.innerHTML = [
+    telemetryCard("Total Workflow Runs", escapeHtml(summary.total_workflow_runs), "Persisted workflow_runs records.", "audit"),
+    telemetryCard("Completed Runs", escapeHtml(summary.completed_runs), "Runs with completed workflow status.", "positive"),
+    telemetryCard("Blocked", escapeHtml(summary.blocked_count), "Policy or guardrail blocked outcomes.", "warning"),
+    telemetryCard("Escalated", escapeHtml(summary.escalated_count), "Runs routed to human review.", "review"),
+    telemetryCard("Allowed / Action Created", escapeHtml(summary.allowed_action_count), "Runs that created a governed action.", "positive"),
+    telemetryCard("Replacement Requests", escapeHtml(summary.replacement_request_count), "Replacement request IDs present in final state.", "positive"),
+    telemetryCard("LLM Drafts Completed", escapeHtml(summary.llm_drafting_completed_count), "Provider-backed LLM drafting completions.", "audit"),
+    telemetryCard("LLM Validation Failures", escapeHtml(summary.llm_validation_failed_count), "Drafts rejected by deterministic validation.", summary.llm_validation_failed_count ? "warning" : ""),
+    telemetryCard("Total Tokens", escapeHtml(summary.total_tokens), "Provider token usage from persisted final_state.", "audit"),
+    telemetryCard("Audit Events", escapeHtml(summary.total_audit_events), "Persisted audit event count.", "audit"),
+    telemetryCard("Tool Calls", escapeHtml(summary.total_tool_calls), "Audit events with tool_name populated.", "audit"),
+  ].join("");
+
+  const breakdown = summary.outcome_breakdown || {};
+  elements.monitoringOutcomes.innerHTML = Object.entries(breakdown)
+    .map(([outcome, count]) => `
+      <article class="outcome-card">
+        <strong>${escapeHtml(count)}</strong>
+        <span>${escapeHtml(outcome)}</span>
+      </article>
+    `)
+    .join("");
+}
+
+function renderMonitoringRuns() {
+  const runs = appState.monitoringRuns || [];
+  if (!runs.length) {
+    elements.monitoringRuns.className = "monitoring-runs empty-state";
+    elements.monitoringRuns.textContent = "No workflow runs found.";
+    return;
+  }
+
+  elements.monitoringRuns.className = "monitoring-runs monitoring-table-wrap";
+  elements.monitoringRuns.innerHTML = `
+    <table class="monitoring-table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Workflow Type</th>
+          <th>Correlation ID</th>
+          <th>Workflow ID</th>
+          <th>Outcome</th>
+          <th>Guardrail</th>
+          <th>LLM Status</th>
+          <th>Tokens</th>
+          <th>Audit Events</th>
+          <th>Tool Calls</th>
+          <th>Drilldown</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${runs.map((run) => `
+          <tr>
+            <td>${escapeHtml(dash(run.updated_at || run.created_at))}</td>
+            <td>${escapeHtml(dash(run.workflow_type))}</td>
+            <td>${escapeHtml(dash(run.correlation_id))}</td>
+            <td>${escapeHtml(dash(run.workflow_id))}</td>
+            <td>${pill(run.outcome, "guardrail")}</td>
+            <td>${escapeHtml(dash(run.guardrail_decision))}</td>
+            <td>${escapeHtml(dash(run.llm_drafting_status))}</td>
+            <td>${escapeHtml(dash(run.llm_total_tokens))}</td>
+            <td>${escapeHtml(dash(run.audit_event_count))}</td>
+            <td>${escapeHtml(dash(run.tool_call_count))}</td>
+            <td><button class="link-button" data-workflow-id="${escapeHtml(run.workflow_id)}" type="button">View Audit</button></td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+  elements.monitoringRuns.querySelectorAll("[data-workflow-id]").forEach((button) => {
+    button.addEventListener("click", () => loadMonitoringAudit(button.dataset.workflowId));
+  });
+}
+
+async function loadMonitoringAudit(workflowId) {
+  elements.monitoringAuditDrilldown.className = "audit-replay empty-state";
+  elements.monitoringAuditDrilldown.textContent = "Loading audit events...";
+  try {
+    const audit = await requestJson(`/api/workflows/${workflowId}/audit`);
+    const events = sortEvents(audit.events || []);
+    if (!events.length) {
+      elements.monitoringAuditDrilldown.textContent = "No audit events found for this workflow.";
+      return;
+    }
+    elements.monitoringAuditDrilldown.className = "audit-replay";
+    elements.monitoringAuditDrilldown.innerHTML = events.map((event, index) => `
+      <article class="replay-card">
+        <div class="replay-header">
+          <div>
+            <div class="replay-title">${index + 1}. ${escapeHtml(dash(event.event_type))}</div>
+            <div class="audit-meta">Correlation: ${escapeHtml(dash(event.correlation_id || audit.correlation_id))}</div>
+          </div>
+          ${event.guardrail_decision ? pill(event.guardrail_decision, "guardrail") : ""}
+        </div>
+        <div class="replay-body">
+          <div><div class="meta-label">Node</div><div>${escapeHtml(dash(event.node_name))}</div></div>
+          <div><div class="meta-label">Tool</div><div>${escapeHtml(dash(event.tool_name))}</div></div>
+          <div><div class="meta-label">Reason</div><div>${escapeHtml(dash(event.reason))}</div></div>
+        </div>
+      </article>
+    `).join("");
+  } catch (error) {
+    elements.monitoringAuditDrilldown.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
+  }
 }
 
 function renderObservabilityTiles() {
@@ -996,8 +1214,21 @@ function initializeConsole() {
   renderAiDraftingPanel();
   renderIntakeResult();
   renderConversation();
+  renderMonitoringSummary();
+  renderMonitoringRuns();
   updateRunWorkflowAvailability();
   refreshObservabilityStatus();
+  loadMonitoringFilterOptions();
+  elements.workflowConsoleTab.addEventListener("click", () => showView("workflow"));
+  elements.monitoringDashboardTab.addEventListener("click", () => showView("monitoring"));
+  elements.monitorRefresh.addEventListener("click", refreshMonitoringDashboard);
+  elements.monitorWorkflowType.addEventListener("change", refreshMonitoringDashboard);
+  elements.monitorOutcome.addEventListener("change", refreshMonitoringDashboard);
+  elements.monitorCorrelation.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      refreshMonitoringDashboard();
+    }
+  });
   elements.analyzeRequest.addEventListener("click", analyzeRequest);
   elements.replyIntake.addEventListener("click", replyToIntake);
   elements.runButton.addEventListener("click", startWorkflow);
