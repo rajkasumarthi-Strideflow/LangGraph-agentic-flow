@@ -4,6 +4,8 @@
 
 See [DecisionTrace AI Architecture Diagrams](diagrams.md) for Mermaid diagrams covering the system architecture, LangGraph workflow, guardrail decisioning, audit/event flow, Railway deployment, and future-state extensions.
 
+For a human-readable reference to the Phase 2 API surface, see the [DecisionTrace AI API Reference](api-reference.md).
+
 ## Platform Positioning
 
 DecisionTrace AI is the broader governed decision workflow platform. The current implementation demonstrates the platform through a warranty replacement reference workflow. The same architecture pattern can support other customer-impacting workflows requiring policy grounding, guardrails, audit replay, human review, and cost-aware orchestration.

@@ -103,6 +103,7 @@ This checklist validates the Phase 2 development branch before merging into the 
 
 - [ ] README links to this Phase 2 validation checklist
 - [ ] Roadmap links to this Phase 2 validation checklist
+- [ ] API reference reviewed and aligned with implemented routes
 - [ ] No duplicate phase-specific architecture, executive summary, or roadmap files were created
 - [ ] Backend code is unchanged for this documentation cleanup
 - [ ] Frontend code is unchanged for this documentation cleanup

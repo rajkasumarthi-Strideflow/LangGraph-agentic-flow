@@ -85,6 +85,8 @@ FastAPI serves both the API and the static frontend. LangGraph orchestrates the 
 
 Architecture diagrams: [docs/diagrams.md](docs/diagrams.md)
 
+API Reference: [docs/api-reference.md](docs/api-reference.md)
+
 Demo walkthrough script: [docs/demo-script.md](docs/demo-script.md)
 
 Executive summary: [docs/executive-summary.md](docs/executive-summary.md)
