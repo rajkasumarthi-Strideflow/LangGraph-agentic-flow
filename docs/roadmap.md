@@ -18,8 +18,8 @@ Before sharing or demoing Phase 1, use the [DecisionTrace AI Phase 1 Release Che
   - Eligible replacement happy path
   - LangSmith tracing support
   - Local golden-scenario evaluation pipeline
+  - Shared correlation ID across intake, workflow, audit, and trace metadata
 - Upcoming Phase 2 items include:
-  - Shared correlation ID
   - Production monitoring / telemetry expansion
   - LangSmith evaluation integration
   - LLM-as-judge evaluation layer

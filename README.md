@@ -119,6 +119,8 @@ Phase 2 tracing note: `phase-2/langsmith-tracing` adds optional LangSmith tracin
 
 Phase 2 evaluation note: this branch includes a local golden-scenario evaluation suite under `backend/evals/`. The first evaluation layer uses deterministic assertions to verify the control model across clarification, invalid input, guardrail block, escalation, and allow/action outcomes. Future work can connect these scenarios to LangSmith datasets and experiments; LLM-as-judge should evaluate communication quality later, not replace deterministic control assertions.
 
+Phase 2 correlation note: this branch includes a shared `correlation_id` across intake sessions, workflow runs, audit events, and LangSmith trace metadata. This connects one customer turn from natural-language intake through governed workflow execution, audit replay, and future monitoring views.
+
 ## Phase 1 Capabilities
 
 - FastAPI backend

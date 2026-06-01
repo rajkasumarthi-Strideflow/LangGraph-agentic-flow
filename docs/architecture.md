@@ -53,6 +53,7 @@ For prompt governance and safe iteration details, see the [DecisionTrace AI Prom
 - Optional LangSmith tracing
 - Local golden-scenario evaluation pipeline
 - Business-readable and machine-checkable golden scenarios
+- Shared `correlation_id` across intake sessions, workflow runs, audit events, and LangSmith trace metadata
 
 ### Future Roadmap
 
@@ -138,6 +139,20 @@ Audit replay and LangSmith tracing are complementary:
 - LangSmith tracing answers: “How did the router, graph, tools, and LLM drafting execute?”
 
 The frontend uses `GET /api/observability/status` to show the real tracing provider, status, and project. Trace links remain unavailable until the backend can safely provide real LangSmith run URLs.
+
+## Phase 2 Correlation ID
+
+This branch adds a shared `correlation_id` across the Phase 2 intake session, governed workflow execution, persisted audit events, and LangSmith trace metadata where available.
+
+The correlation ID connects both governance and observability views:
+
+- Audit replay answers what happened from a business and control perspective.
+- LangSmith tracing answers how the router, workflow, tools, and LLM drafting executed.
+- `correlation_id` links those views so one customer turn can be followed end to end.
+
+When a user starts an intake session, the backend generates a correlation ID and returns it with the session. Clarification replies preserve the same ID. When the frontend starts the governed workflow, it passes that ID into `POST /api/workflows/start`, so the final workflow state, workflow run row, audit events, and trace metadata remain connected. Direct workflow starts without an intake session still generate a new correlation ID.
+
+The frontend displays this context in a Trace Context panel. The lightweight endpoint `GET /api/correlation/{correlation_id}` returns a joined view with intake session ID, workflow ID, audit event count, workflow status, and final response source when available.
 
 ## Phase 2 Local Evaluation Pipeline
 

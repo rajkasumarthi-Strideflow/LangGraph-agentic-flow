@@ -37,8 +37,10 @@ def test_frontend_index_returns_decisiontrace_branding(client: TestClient) -> No
     assert "Analyze Request" in response.text
     assert "Run Governed Workflow" in response.text
     assert "LangSmith Tracing" in response.text
+    assert "Trace Context" in response.text
+    assert "Correlation ID" in response.text
     assert 'id="analyze-intake-button"' in response.text
-    assert "/static/app.js?v=phase2-langsmith-tracing-1" in response.text
+    assert "/static/app.js?v=phase2-correlation-id-1" in response.text
     assert "Optional Workflow Context" not in response.text
     assert "Use optional workflow context when analyzing request" not in response.text
     assert "Clear Context" not in response.text
@@ -60,6 +62,8 @@ def test_frontend_static_assets_are_served(client: TestClient) -> None:
     assert "reply-intake-button" in js_response.text
     assert "/api/intake/session/start" in js_response.text
     assert "/api/observability/status" in js_response.text
+    assert "correlation_id: appState.correlationId" in js_response.text
+    assert "renderTraceContextTiles" in js_response.text
     assert "Trace links will appear in a future enhancement" in js_response.text
     assert "https://smith.langchain.com" not in js_response.text
     assert "/reply" in js_response.text

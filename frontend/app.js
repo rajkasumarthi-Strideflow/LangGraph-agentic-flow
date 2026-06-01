@@ -5,6 +5,7 @@ const appState = {
   humanReviews: [],
   intakeResult: null,
   intakeSessionId: null,
+  correlationId: null,
   intakeOriginalMessage: null,
   conversationMessages: [],
   observability: null,
@@ -28,6 +29,7 @@ const elements = {
   result: document.querySelector("#workflow-result"),
   telemetry: document.querySelector("#telemetry-tiles"),
   observability: document.querySelector("#observability-tiles"),
+  traceContext: document.querySelector("#trace-context-tiles"),
   aiDrafting: document.querySelector("#ai-drafting"),
   timeline: document.querySelector("#workflow-timeline"),
   auditReplay: document.querySelector("#audit-replay"),
@@ -187,14 +189,29 @@ function updateRunWorkflowAvailability() {
   elements.runButton.disabled = !(messageReady && routerReady && identifiersReady);
 }
 
+function resetWorkflowData() {
+  appState.workflowId = null;
+  appState.workflow = null;
+  appState.auditEvents = [];
+  appState.humanReviews = [];
+  renderDecisionSummary();
+  renderTelemetryTiles();
+  renderAiDraftingPanel();
+  renderWorkflowTimeline();
+  renderAuditReplay();
+  renderHumanReviewPanel();
+}
+
 function resetRouterResult() {
   appState.intakeSessionId = null;
+  appState.correlationId = null;
   appState.intakeOriginalMessage = null;
   appState.conversationMessages = [];
   appState.intakeResult = null;
   elements.replyIntake.classList.add("hidden");
   renderConversation();
   renderIntakeResult();
+  renderTraceContextTiles();
   updateRunWorkflowAvailability();
 }
 
@@ -278,6 +295,7 @@ async function startWorkflow() {
         customer_request: appState.intakeOriginalMessage || elements.intakeMessage.value,
         customer_id: identifiers.customer_id,
         order_id: identifiers.order_id,
+        correlation_id: appState.correlationId,
       }),
     });
 
@@ -359,12 +377,17 @@ async function replyToIntake() {
 }
 
 function applyIntakeSession(result) {
+  if (appState.workflow?.correlation_id !== result.correlation_id) {
+    resetWorkflowData();
+  }
   appState.intakeSessionId = result.intake_session_id;
+  appState.correlationId = result.correlation_id;
   appState.intakeOriginalMessage = result.original_message;
   appState.conversationMessages = result.conversation_messages || [];
   appState.intakeResult = result;
   renderConversation();
   renderIntakeResult();
+  renderTraceContextTiles();
   updateReplyVisibility(result);
   updateRunWorkflowAvailability();
 }
@@ -438,6 +461,7 @@ function renderIntakeResult() {
 async function refreshWorkflowView(workflowId) {
   const workflowResponse = await requestJson(`/api/workflows/${workflowId}`);
   appState.workflow = workflowResponse.state;
+  appState.correlationId = workflowResponse.correlation_id || appState.workflow?.correlation_id || appState.correlationId;
 
   const [auditResponse, reviewResponse] = await Promise.all([
     requestJson(`/api/workflows/${workflowId}/audit`),
@@ -445,8 +469,10 @@ async function refreshWorkflowView(workflowId) {
   ]);
 
   appState.auditEvents = sortEvents(auditResponse.events || []);
+  appState.correlationId = auditResponse.correlation_id || appState.correlationId;
   appState.humanReviews = reviewResponse.reviews || [];
 
+  renderTraceContextTiles();
   renderDecisionSummary();
   renderTelemetryTiles();
   renderAiDraftingPanel();
@@ -469,6 +495,7 @@ async function refreshObservabilityStatus() {
     };
   }
   renderObservabilityTiles();
+  renderTraceContextTiles();
 }
 
 function renderObservabilityTiles() {
@@ -514,6 +541,48 @@ function renderObservabilityTiles() {
         ? "Real trace URLs are provided by the backend when available."
         : "Trace links will appear in a future enhancement.",
       "",
+    ),
+  ].join("");
+}
+
+function renderTraceContextTiles() {
+  const status = appState.observability || {};
+  const workflow = appState.workflow || {};
+  const correlationId = appState.correlationId || workflow.correlation_id || "Not Available";
+  const intakeSessionId = appState.intakeSessionId || "Not Available";
+  const workflowId = appState.workflowId || workflow.workflow_id || "Not Available";
+  const tracingStatus = safeText(status.tracing_status, "Not Configured");
+
+  elements.traceContext.innerHTML = [
+    telemetryCard(
+      "Correlation ID",
+      escapeHtml(correlationId),
+      "Shared identifier connecting intake, workflow, audit, and trace metadata.",
+      correlationId === "Not Available" ? "" : "audit",
+    ),
+    telemetryCard(
+      "Intake Session ID",
+      escapeHtml(intakeSessionId),
+      "In-memory Phase 2 intake session identifier.",
+      intakeSessionId === "Not Available" ? "" : "audit",
+    ),
+    telemetryCard(
+      "Workflow ID",
+      escapeHtml(workflowId),
+      "Governed workflow run identifier.",
+      workflowId === "Not Available" ? "" : "workflow",
+    ),
+    telemetryCard(
+      "LangSmith Project",
+      escapeHtml(safeText(status.project, "decisiontrace-phase2")),
+      "Tracing project when LangSmith is configured.",
+      "audit",
+    ),
+    telemetryCard(
+      "Tracing Status",
+      pill(tracingStatus, "llm"),
+      "Real backend observability status; no trace links are faked.",
+      tracingStatus === "enabled" ? "positive" : "",
     ),
   ].join("");
 }
@@ -820,10 +889,12 @@ function loadMissingInfoScenario() {
   elements.intakeMessage.value = "My laptop screen cracked after 9 months. Can I get a replacement?";
   appState.intakeResult = null;
   appState.intakeSessionId = null;
+  appState.correlationId = null;
   appState.intakeOriginalMessage = null;
   appState.conversationMessages = [];
   renderIntakeResult();
   renderConversation();
+  renderTraceContextTiles();
   elements.replyIntake.classList.add("hidden");
   updateRunWorkflowAvailability();
   setStatus("Missing info scenario loaded. Analyze to see required customer and order details.");
@@ -834,10 +905,12 @@ function loadCrackedScreenScenario() {
   elements.intakeMessage.value = "My laptop screen cracked after 9 months. Can I get a replacement? Customer ID is cust_primary_001 and order ID is ord_laptop_001.";
   appState.intakeResult = null;
   appState.intakeSessionId = null;
+  appState.correlationId = null;
   appState.intakeOriginalMessage = null;
   appState.conversationMessages = [];
   renderIntakeResult();
   renderConversation();
+  renderTraceContextTiles();
   elements.replyIntake.classList.add("hidden");
   updateRunWorkflowAvailability();
   setStatus("Complete cracked screen scenario loaded. Analyze to extract identifiers.");
@@ -848,10 +921,12 @@ function loadEligibleManufacturingDefectScenario() {
   elements.intakeMessage.value = "My laptop stopped powering on after 6 months. Can I get a replacement? Customer ID is cust_primary_001 and order ID is ord_laptop_power_001.";
   appState.intakeResult = null;
   appState.intakeSessionId = null;
+  appState.correlationId = null;
   appState.intakeOriginalMessage = null;
   appState.conversationMessages = [];
   renderIntakeResult();
   renderConversation();
+  renderTraceContextTiles();
   elements.replyIntake.classList.add("hidden");
   updateRunWorkflowAvailability();
   setStatus("Eligible manufacturing defect scenario loaded. Analyze to extract identifiers.");
@@ -862,10 +937,12 @@ function loadUnknownCustomerScenario() {
   elements.intakeMessage.value = "I need a replacement for my laptop. Customer ID is cust_unknown_001 and order ID is ord_laptop_001.";
   appState.intakeResult = null;
   appState.intakeSessionId = null;
+  appState.correlationId = null;
   appState.intakeOriginalMessage = null;
   appState.conversationMessages = [];
   renderIntakeResult();
   renderConversation();
+  renderTraceContextTiles();
   elements.replyIntake.classList.add("hidden");
   updateRunWorkflowAvailability();
   setStatus("Unknown customer scenario loaded. Analyze to extract identifiers.");
@@ -876,10 +953,12 @@ function loadInvalidIdentifierScenario() {
   elements.intakeMessage.value = "My laptop screen cracked. Customer ID is UNKNOWN_CUSTOMER and order ID is ord_laptop_001.";
   appState.intakeResult = null;
   appState.intakeSessionId = null;
+  appState.correlationId = null;
   appState.intakeOriginalMessage = null;
   appState.conversationMessages = [];
   renderIntakeResult();
   renderConversation();
+  renderTraceContextTiles();
   elements.replyIntake.classList.add("hidden");
   updateRunWorkflowAvailability();
   setStatus("Invalid identifier scenario loaded. Analyze to see format validation.");
@@ -890,10 +969,12 @@ function clearIntake() {
   elements.intakeMessage.value = "";
   appState.intakeResult = null;
   appState.intakeSessionId = null;
+  appState.correlationId = null;
   appState.intakeOriginalMessage = null;
   appState.conversationMessages = [];
   renderIntakeResult();
   renderConversation();
+  renderTraceContextTiles();
   elements.replyIntake.classList.add("hidden");
   updateRunWorkflowAvailability();
   setStatus("Intake cleared.");
@@ -906,6 +987,7 @@ function initializeConsole() {
   }
   renderTelemetryTiles();
   renderObservabilityTiles();
+  renderTraceContextTiles();
   renderAiDraftingPanel();
   renderIntakeResult();
   renderConversation();

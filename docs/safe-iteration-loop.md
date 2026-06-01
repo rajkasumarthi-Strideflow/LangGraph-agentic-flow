@@ -42,6 +42,8 @@ DecisionTrace AI should use audit and trace evidence to create evaluator cases f
 
 The `phase-2/evaluation-pipeline` branch adds the first local version of this loop with golden scenarios in `backend/evals/`. These scenarios use deterministic assertions to verify clarify, invalid input, block, escalate, and allow/action outcomes. Future LangSmith evaluation can reuse this scenario set as datasets and experiments, while preserving deterministic checks as the non-negotiable control layer.
 
+Phase 2 also adds a shared `correlation_id` that connects intake sessions, governed workflow runs, audit events, and LangSmith trace metadata. This prepares DecisionTrace AI for production monitoring and replay views where business audit evidence and execution traces can be joined without relying on fake trace links or inferred identifiers.
+
 ## Safe Deployment Gates
 
 - Tests pass

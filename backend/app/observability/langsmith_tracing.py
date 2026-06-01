@@ -65,11 +65,66 @@ def traceable_if_enabled(
 
         try:
             traced = traceable(name=name or func.__name__, run_type=run_type)(func)
-            return cast(F, traced)
+            trace_name = name or func.__name__
+
+            @wraps(func)
+            def wrapper(*args: Any, **kwargs: Any) -> Any:
+                metadata = _metadata_from_call(
+                    component=trace_name,
+                    args=args,
+                    kwargs=kwargs,
+                )
+                try:
+                    return traced(
+                        *args,
+                        **kwargs,
+                        **with_langsmith_metadata(metadata),
+                    )
+                except TypeError:
+                    return traced(*args, **kwargs)
+
+            return cast(F, wrapper)
         except Exception:
             return func
 
     return decorator
+
+
+def _extract_metadata_value(source: Any, key: str) -> Any:
+    if source is None:
+        return None
+    if isinstance(source, dict):
+        return source.get(key)
+    return getattr(source, key, None)
+
+
+def _metadata_from_call(
+    *,
+    component: str,
+    args: tuple[Any, ...],
+    kwargs: dict[str, Any],
+) -> dict[str, Any]:
+    metadata: dict[str, Any] = {"component": component}
+    for source in [*args, *kwargs.values()]:
+        for key in ["correlation_id", "intake_session_id", "workflow_id"]:
+            metadata.setdefault(key, _extract_metadata_value(source, key))
+        if _extract_metadata_value(source, "eligibility_status"):
+            metadata.setdefault(
+                "eligibility_status",
+                _extract_metadata_value(source, "eligibility_status"),
+            )
+        if _extract_metadata_value(source, "guardrail_decision"):
+            metadata.setdefault(
+                "guardrail_decision",
+                _extract_metadata_value(source, "guardrail_decision"),
+            )
+        if _extract_metadata_value(source, "routing_status"):
+            metadata.setdefault(
+                "routing_status",
+                _extract_metadata_value(source, "routing_status"),
+            )
+
+    return {key: value for key, value in metadata.items() if value is not None}
 
 
 def with_langsmith_metadata(metadata: dict[str, Any] | None = None) -> dict[str, Any]:

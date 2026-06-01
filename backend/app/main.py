@@ -9,12 +9,14 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.audit.human_review_store import get_human_reviews, save_human_review
-from app.audit.store import get_audit_events
+from app.audit.store import get_audit_events, get_audit_events_by_correlation_id
+from app.correlation import generate_correlation_id
 from app.database import init_db
 from app.intake.router import route_customer_message
 from app.intake.session import (
     IntakeSession,
     create_intake_session,
+    get_intake_session_by_correlation_id,
     get_intake_session,
     update_intake_session,
 )
@@ -34,7 +36,11 @@ from app.models.api import (
 from app.observability.langsmith_tracing import get_langsmith_status
 from app.workflow.graph import run_warranty_workflow
 from app.workflow.state import WarrantyWorkflowState
-from app.workflow.store import get_workflow_result, save_workflow_result
+from app.workflow.store import (
+    get_workflow_result,
+    get_workflow_result_by_correlation_id,
+    save_workflow_result,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 FRONTEND_DIR = PROJECT_ROOT / "frontend"
@@ -165,7 +171,10 @@ def route_intake_request(request: IntakeRouteRequest) -> IntakeRouteResponse:
 def start_intake_session(
     request: IntakeSessionStartRequest,
 ) -> IntakeSessionResponse:
-    session = create_intake_session(request.message)
+    session = create_intake_session(
+        request.message,
+        correlation_id=generate_correlation_id(),
+    )
     return _intake_session_response(session)
 
 
@@ -201,7 +210,7 @@ def get_intake_session_state(
 @app.post("/api/workflows/start", response_model=StartWorkflowResponse)
 def start_workflow(request: StartWorkflowRequest) -> StartWorkflowResponse:
     workflow_id = f"wf_{uuid4().hex}"
-    correlation_id = f"corr_{uuid4().hex}"
+    correlation_id = request.correlation_id or generate_correlation_id()
     initial_state = _build_initial_state(workflow_id, correlation_id, request)
     final_state = run_warranty_workflow(initial_state)
     saved_state = save_workflow_result(workflow_id, dict(final_state))
@@ -214,7 +223,11 @@ def get_workflow_state(workflow_id: str) -> WorkflowStateResponse:
     if state is None:
         raise HTTPException(status_code=404, detail="Workflow not found.")
 
-    return WorkflowStateResponse(workflow_id=workflow_id, state=state)
+    return WorkflowStateResponse(
+        workflow_id=workflow_id,
+        correlation_id=state.get("correlation_id"),
+        state=state,
+    )
 
 
 @app.get("/api/workflows/{workflow_id}/audit", response_model=AuditTimelineResponse)
@@ -226,7 +239,36 @@ def get_workflow_audit(workflow_id: str) -> AuditTimelineResponse:
     events = [
         event.model_dump(mode="json") for event in get_audit_events(workflow_id)
     ]
-    return AuditTimelineResponse(workflow_id=workflow_id, events=events)
+    return AuditTimelineResponse(
+        workflow_id=workflow_id,
+        correlation_id=state.get("correlation_id"),
+        events=events,
+    )
+
+
+@app.get("/api/correlation/{correlation_id}")
+def get_correlation_view(correlation_id: str) -> dict[str, Any]:
+    intake_session = get_intake_session_by_correlation_id(correlation_id)
+    workflow_state = get_workflow_result_by_correlation_id(correlation_id)
+    audit_events = get_audit_events_by_correlation_id(correlation_id)
+
+    if intake_session is None and workflow_state is None and not audit_events:
+        raise HTTPException(status_code=404, detail="Correlation ID not found.")
+
+    return {
+        "correlation_id": correlation_id,
+        "intake_session_id": (
+            intake_session.intake_session_id if intake_session is not None else None
+        ),
+        "workflow_id": workflow_state.get("workflow_id") if workflow_state else None,
+        "audit_event_count": len(audit_events),
+        "workflow_status": (
+            workflow_state.get("workflow_status") if workflow_state else None
+        ),
+        "final_response_source": (
+            workflow_state.get("final_response_source") if workflow_state else None
+        ),
+    }
 
 
 @app.post(

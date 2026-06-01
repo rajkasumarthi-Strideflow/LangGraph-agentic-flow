@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
+from app.correlation import generate_correlation_id
 from app.intake.router import route_customer_message, route_customer_message_with_context
 from app.observability.langsmith_tracing import traceable_if_enabled
 
@@ -16,6 +17,7 @@ class ConversationMessage(BaseModel):
 
 class IntakeSession(BaseModel):
     intake_session_id: str
+    correlation_id: str
     original_message: str
     latest_message: str
     conversation_messages: list[ConversationMessage] = Field(default_factory=list)
@@ -71,6 +73,8 @@ def _router_fields(router_output: dict[str, Any]) -> dict[str, Any]:
 
 def _session_context(session: IntakeSession) -> dict[str, Any]:
     return {
+        "intake_session_id": session.intake_session_id,
+        "correlation_id": session.correlation_id,
         "intent": session.intent,
         "confidence": session.confidence,
         "product_type": session.product_type,
@@ -96,8 +100,12 @@ def _append_router_question(
 
 
 @traceable_if_enabled(name="intake_session_start")
-def create_intake_session(message: str) -> IntakeSession:
+def create_intake_session(
+    message: str,
+    correlation_id: str | None = None,
+) -> IntakeSession:
     timestamp = _now()
+    session_correlation_id = correlation_id or generate_correlation_id()
     router_output = route_customer_message(message)
     conversation_messages = [
         ConversationMessage(
@@ -110,6 +118,7 @@ def create_intake_session(message: str) -> IntakeSession:
 
     session = IntakeSession(
         intake_session_id=f"intake_{uuid4().hex}",
+        correlation_id=session_correlation_id,
         original_message=message,
         latest_message=message,
         conversation_messages=conversation_messages,
@@ -159,6 +168,13 @@ def update_intake_session(
 
 def get_intake_session(intake_session_id: str) -> IntakeSession | None:
     return INTAKE_SESSIONS.get(intake_session_id)
+
+
+def get_intake_session_by_correlation_id(correlation_id: str) -> IntakeSession | None:
+    for session in INTAKE_SESSIONS.values():
+        if session.correlation_id == correlation_id:
+            return session
+    return None
 
 
 def clear_intake_sessions() -> None:

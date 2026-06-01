@@ -87,6 +87,18 @@
         <div id="observability-tiles" class="telemetry-grid"></div>
       </section>
 
+      <section class="panel trace-context-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">Trace Context</p>
+            <h2>Correlation</h2>
+          </div>
+          <span class="panel-note">Shared across intake, workflow, audit, and traces</span>
+        </div>
+        <p class="panel-helper">Correlation ID connects the intake session, workflow run, audit events, and LangSmith trace metadata.</p>
+        <div id="trace-context-tiles" class="telemetry-grid"></div>
+      </section>
+
       <section class="panel ai-panel">
         <div class="panel-heading">
           <div>
@@ -171,6 +183,6 @@
       </section>
     </main>
 
-    <script src="/static/app.js?v=phase2-langsmith-tracing-1"></script>
+    <script src="/static/app.js?v=phase2-correlation-id-1"></script>
   </body>
 </html>

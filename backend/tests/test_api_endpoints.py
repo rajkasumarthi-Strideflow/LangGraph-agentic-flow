@@ -65,7 +65,9 @@ def test_get_workflow_returns_final_state(client: TestClient) -> None:
     assert response.status_code == 200
     data = response.json()
     assert data["workflow_id"] == started["workflow_id"]
+    assert data["correlation_id"] == started["correlation_id"]
     assert data["state"]["workflow_status"] == "completed"
+    assert data["state"]["correlation_id"] == started["correlation_id"]
     assert data["state"]["eligibility_status"] == "not_eligible"
     assert data["state"]["llm_drafting_status"] == "not_configured"
 
@@ -79,8 +81,52 @@ def test_get_workflow_audit_returns_timeline(client: TestClient) -> None:
     data = response.json()
     event_types = [event["event_type"] for event in data["events"]]
     assert data["workflow_id"] == started["workflow_id"]
+    assert data["correlation_id"] == started["correlation_id"]
+    assert all(event["correlation_id"] == started["correlation_id"] for event in data["events"])
     assert "workflow_started" in event_types
     assert "workflow_completed" in event_types
+
+
+def test_workflow_started_from_intake_reuses_correlation_id(client: TestClient) -> None:
+    intake_response = client.post(
+        "/api/intake/session/start",
+        json={
+            "message": (
+                "My laptop screen cracked after 9 months. Can I get a replacement? "
+                "Customer ID is cust_primary_001 and order ID is ord_laptop_001."
+            ),
+        },
+    )
+    assert intake_response.status_code == 200
+    intake = intake_response.json()
+
+    workflow_response = client.post(
+        "/api/workflows/start",
+        json={
+            "customer_request": intake["original_message"],
+            "customer_id": intake["customer_id"],
+            "order_id": intake["order_id"],
+            "correlation_id": intake["correlation_id"],
+        },
+    )
+    assert workflow_response.status_code == 200
+    workflow = workflow_response.json()
+    assert workflow["correlation_id"] == intake["correlation_id"]
+
+    correlation_response = client.get(f"/api/correlation/{intake['correlation_id']}")
+    assert correlation_response.status_code == 200
+    correlation = correlation_response.json()
+    assert correlation["correlation_id"] == intake["correlation_id"]
+    assert correlation["intake_session_id"] == intake["intake_session_id"]
+    assert correlation["workflow_id"] == workflow["workflow_id"]
+    assert correlation["audit_event_count"] > 0
+    assert correlation["workflow_status"] == "completed"
+
+
+def test_direct_workflow_start_generates_correlation_id(client: TestClient) -> None:
+    started = _start_workflow(client)
+
+    assert started["correlation_id"].startswith("corr_")
 
 
 def test_unknown_workflow_returns_404_for_state(client: TestClient) -> None:

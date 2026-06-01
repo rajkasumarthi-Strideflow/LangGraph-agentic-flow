@@ -242,6 +242,7 @@ def test_intake_session_start_requires_clarification_without_ids() -> None:
     assert response.status_code == 200
     data = response.json()
     assert data["intake_session_id"].startswith("intake_")
+    assert data["correlation_id"].startswith("corr_")
     assert data["original_message"] == "My laptop screen cracked after 9 months. Can I get a replacement?"
     assert data["requires_clarification"] is True
     assert data["missing_fields"] == ["customer_id", "order_id"]
@@ -258,6 +259,7 @@ def test_intake_session_reply_collects_missing_identifiers() -> None:
         },
     )
     session_id = start_response.json()["intake_session_id"]
+    correlation_id = start_response.json()["correlation_id"]
 
     reply_response = client.post(
         f"/api/intake/session/{session_id}/reply",
@@ -269,6 +271,7 @@ def test_intake_session_reply_collects_missing_identifiers() -> None:
     assert reply_response.status_code == 200
     data = reply_response.json()
     assert data["intake_session_id"] == session_id
+    assert data["correlation_id"] == correlation_id
     assert data["original_message"] == "My laptop screen cracked after 9 months. Can I get a replacement?"
     assert data["intent"] == "warranty_replacement_request"
     assert data["product_issue"] == "cracked_screen"
@@ -279,6 +282,10 @@ def test_intake_session_reply_collects_missing_identifiers() -> None:
     assert data["invalid_fields"] == []
     assert data["can_start_workflow"] is True
     assert len(data["conversation_messages"]) >= 3
+
+    get_response = client.get(f"/api/intake/session/{session_id}")
+    assert get_response.status_code == 200
+    assert get_response.json()["correlation_id"] == correlation_id
 
 
 def test_intake_session_invalid_identifier_reply_remains_blocked() -> None:

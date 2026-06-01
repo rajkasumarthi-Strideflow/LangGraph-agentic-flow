@@ -55,6 +55,35 @@ def get_audit_events(workflow_id: str) -> list[AuditEvent]:
         ]
 
 
+def get_audit_events_by_correlation_id(correlation_id: str) -> list[AuditEvent]:
+    init_db()
+    with SessionLocal() as db:
+        rows = (
+            db.query(AuditEventORM)
+            .filter(AuditEventORM.correlation_id == correlation_id)
+            .order_by(AuditEventORM.timestamp.asc(), AuditEventORM.id.asc())
+            .all()
+        )
+        return [
+            AuditEvent(
+                event_id=row.event_id,
+                workflow_id=row.workflow_id,
+                correlation_id=row.correlation_id,
+                event_type=row.event_type,
+                timestamp=row.timestamp,
+                actor=row.actor,
+                node_name=row.node_name,
+                tool_name=row.tool_name,
+                input_summary=row.input_summary,
+                output_summary=row.output_summary,
+                policy_reference=row.policy_reference,
+                guardrail_decision=row.guardrail_decision,
+                reason=row.reason,
+            )
+            for row in rows
+        ]
+
+
 def clear_audit_events() -> None:
     init_db()
     with SessionLocal() as db:

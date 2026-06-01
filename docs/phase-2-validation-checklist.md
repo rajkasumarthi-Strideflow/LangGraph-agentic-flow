@@ -60,6 +60,13 @@ This checklist validates the Phase 2 development branch before merging into the 
 - [ ] `workflow_runs` are persisted
 - [ ] `audit_events` are persisted
 - [ ] `human_reviews` are persisted when applicable
+- [ ] Intake session includes a `correlation_id`
+- [ ] Clarification replies preserve the same `correlation_id`
+- [ ] Governed workflow receives the intake `correlation_id`
+- [ ] Workflow final state includes the same `correlation_id`
+- [ ] Audit events include the same `correlation_id`
+- [ ] `GET /api/correlation/{correlation_id}` returns intake/workflow/audit linkage when available
+- [ ] Trace Context panel shows correlation ID, intake session ID, workflow ID, LangSmith project, and tracing status
 - [ ] LangSmith tracing status endpoint returns enabled when configured
 - [ ] LangSmith project receives intake session trace
 - [ ] LangSmith project receives workflow trace

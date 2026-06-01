@@ -7,6 +7,7 @@ class StartWorkflowRequest(BaseModel):
     customer_request: str
     customer_id: str
     order_id: str
+    correlation_id: str | None = None
 
 
 class IntakeRouteRequest(BaseModel):
@@ -55,6 +56,7 @@ class IntakeConversationMessage(BaseModel):
 
 class IntakeSessionResponse(IntakeRouterFields):
     intake_session_id: str
+    correlation_id: str
     original_message: str
     latest_message: str
     conversation_messages: list[dict[str, Any]]
@@ -79,11 +81,13 @@ class StartWorkflowResponse(BaseModel):
 
 class WorkflowStateResponse(BaseModel):
     workflow_id: str
+    correlation_id: str | None = None
     state: dict[str, Any]
 
 
 class AuditTimelineResponse(BaseModel):
     workflow_id: str
+    correlation_id: str | None = None
     events: list[dict[str, Any]]
 
 

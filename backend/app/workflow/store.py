@@ -45,6 +45,20 @@ def get_workflow_result(workflow_id: str) -> dict[str, Any] | None:
         return dict(workflow.final_state)
 
 
+def get_workflow_result_by_correlation_id(correlation_id: str) -> dict[str, Any] | None:
+    init_db()
+    with SessionLocal() as db:
+        workflow = (
+            db.query(WorkflowRunORM)
+            .filter(WorkflowRunORM.correlation_id == correlation_id)
+            .order_by(WorkflowRunORM.updated_at.desc(), WorkflowRunORM.id.desc())
+            .first()
+        )
+        if workflow is None:
+            return None
+        return dict(workflow.final_state)
+
+
 def clear_workflow_results() -> None:
     init_db()
     with SessionLocal() as db:
