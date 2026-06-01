@@ -88,7 +88,9 @@ This checklist validates the Phase 2 development branch before merging into the 
 - [ ] Monitoring Dashboard tab loads
 - [ ] `GET /api/monitoring/summary` returns real persisted workflow counts
 - [ ] `GET /api/monitoring/runs` returns recent runs with workflow type, correlation ID, outcome, audit event count, and tool-call count
-- [ ] `GET /api/monitoring/outcomes` returns supported workflow types and outcomes
+- [ ] `GET /api/monitoring/outcomes` returns supported workflow types and persisted workflow-run outcomes
+- [ ] Outcome filter excludes intake-only values such as clarification-required and invalid-input
+- [ ] Workflow type must be selected before KPI values are displayed
 - [ ] Cracked-screen scenario increments blocked outcome count
 - [ ] Unknown valid-format customer scenario increments escalated outcome count
 - [ ] Eligible manufacturing defect scenario increments allowed/action and replacement request counts

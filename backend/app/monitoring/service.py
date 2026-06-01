@@ -8,14 +8,16 @@ from app.audit.store import get_audit_events
 from app.database import SessionLocal, init_db
 from app.models.db import WorkflowRunORM
 
-ALLOWED_OUTCOMES = [
-    "clarification_required",
-    "invalid_input",
+VISIBLE_WORKFLOW_OUTCOMES = [
     "blocked",
     "escalated",
     "allowed_action",
     "completed_no_action",
     "failed",
+]
+INTERNAL_OUTCOMES = [
+    "clarification_required",
+    "invalid_input",
     "unknown",
 ]
 WORKFLOW_TYPES = ["warranty_replacement"]
@@ -125,6 +127,10 @@ def build_workflow_monitoring_summary(
     workflow_type_counts = Counter(row["workflow_type"] for row in runs)
     outcome_counts = Counter(row["outcome"] for row in runs)
 
+    visible_outcomes = [*VISIBLE_WORKFLOW_OUTCOMES]
+    if outcome_counts.get("unknown", 0) > 0:
+        visible_outcomes.append("unknown")
+
     return {
         "total_workflow_runs": len(runs),
         "completed_runs": sum(
@@ -153,6 +159,14 @@ def build_workflow_monitoring_summary(
         "workflow_type_breakdown": dict(workflow_type_counts),
         "outcome_breakdown": {
             allowed: outcome_counts.get(allowed, 0)
-            for allowed in ALLOWED_OUTCOMES
+            for allowed in visible_outcomes
         },
     }
+
+
+def list_monitoring_outcome_filters() -> list[str]:
+    outcomes = [*VISIBLE_WORKFLOW_OUTCOMES]
+    runs = list_recent_workflow_runs(limit=100)
+    if any(row["outcome"] == "unknown" for row in runs):
+        outcomes.append("unknown")
+    return outcomes

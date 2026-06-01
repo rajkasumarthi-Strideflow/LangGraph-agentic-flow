@@ -43,12 +43,19 @@ def test_frontend_index_returns_decisiontrace_branding(client: TestClient) -> No
     assert "Monitoring Dashboard" in response.text
     assert "DecisionTrace Monitoring" in response.text
     assert "Business/control outcomes, API-backed" in response.text
+    assert "Select Workflow Type" in response.text
+    assert "Select a workflow type to view monitoring metrics." in response.text
+    assert "Warranty Replacement" in response.text
+    assert "All Workflow Outcomes" in response.text
     assert "KPI Tiles" in response.text
     assert "Total Workflow Runs" not in response.text
     assert "Recent Runs" in response.text
     assert "View Audit" in response.text
+    assert '<option value="clarification_required">' not in response.text
+    assert '<option value="invalid_input">' not in response.text
+    assert '<option value="unknown">' not in response.text
     assert 'id="analyze-intake-button"' in response.text
-    assert "/static/app.js?v=phase2-control-monitoring-1" in response.text
+    assert "/static/app.js?v=phase2-control-monitoring-2" in response.text
     assert "Optional Workflow Context" not in response.text
     assert "Use optional workflow context when analyzing request" not in response.text
     assert "Clear Context" not in response.text
@@ -80,6 +87,10 @@ def test_frontend_static_assets_are_served(client: TestClient) -> None:
     assert "/api/monitoring/outcomes" in js_response.text
     assert "monitoring-dashboard-tab" in js_response.text
     assert "refreshMonitoringDashboard" in js_response.text
+    assert "Select Workflow Type" in js_response.text
+    assert "Select a workflow type to view monitoring metrics." in js_response.text
+    assert "Warranty Replacement" in js_response.text
+    assert "All Workflow Outcomes" in js_response.text
     assert "Total Workflow Runs" in js_response.text
     assert "View Audit" in js_response.text
     assert "https://smith.langchain.com" not in js_response.text

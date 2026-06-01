@@ -104,6 +104,10 @@ function statusClass(kind, value) {
     if (value === "blocked") return "status-warning";
     if (value === "escalated") return "status-review";
     if (value === "failed") return "status-danger";
+    if (value === "Allowed / Action Created") return "status-positive";
+    if (value === "Blocked") return "status-warning";
+    if (value === "Escalated") return "status-review";
+    if (value === "Failed") return "status-danger";
   }
 
   if (kind === "eligibility") {
@@ -174,6 +178,25 @@ function telemetryCard(label, value, help, tone = "") {
       <div class="telemetry-help">${escapeHtml(help)}</div>
     </article>
   `;
+}
+
+function workflowTypeLabel(value) {
+  const labels = {
+    warranty_replacement: "Warranty Replacement",
+  };
+  return labels[value] || safeText(value);
+}
+
+function outcomeLabel(value) {
+  const labels = {
+    blocked: "Blocked",
+    escalated: "Escalated",
+    allowed_action: "Allowed / Action Created",
+    completed_no_action: "Completed No Action",
+    failed: "Failed",
+    unknown: "Unknown",
+  };
+  return labels[value] || safeText(value);
 }
 
 function routerField(label, value, kind = "neutral") {
@@ -547,15 +570,15 @@ async function loadMonitoringFilterOptions() {
     const data = await requestJson("/api/monitoring/outcomes");
     appState.monitoringOutcomes = data;
     elements.monitorWorkflowType.innerHTML = [
-      '<option value="">All workflow types</option>',
+      '<option value="">Select Workflow Type</option>',
       ...(data.workflow_types || []).map(
-        (workflowType) => `<option value="${escapeHtml(workflowType)}">${escapeHtml(workflowType)}</option>`,
+        (workflowType) => `<option value="${escapeHtml(workflowType)}">${escapeHtml(workflowTypeLabel(workflowType))}</option>`,
       ),
     ].join("");
     elements.monitorOutcome.innerHTML = [
-      '<option value="">All outcomes</option>',
+      '<option value="">All Workflow Outcomes</option>',
       ...(data.outcomes || []).map(
-        (outcome) => `<option value="${escapeHtml(outcome)}">${escapeHtml(outcome)}</option>`,
+        (outcome) => `<option value="${escapeHtml(outcome)}">${escapeHtml(outcomeLabel(outcome))}</option>`,
       ),
     ].join("");
   } catch (error) {
@@ -573,6 +596,20 @@ function monitoringFilters() {
 
 async function refreshMonitoringDashboard() {
   const filters = monitoringFilters();
+  if (!filters.workflow_type) {
+    appState.monitoringSummary = null;
+    appState.monitoringRuns = [];
+    elements.monitoringKpis.className = "telemetry-grid empty-state";
+    elements.monitoringKpis.textContent = "Select a workflow type to view monitoring metrics.";
+    elements.monitoringOutcomes.className = "outcome-grid empty-state";
+    elements.monitoringOutcomes.textContent = "Outcome breakdown appears after a workflow type is selected.";
+    elements.monitoringRuns.className = "monitoring-runs empty-state";
+    elements.monitoringRuns.textContent = "Recent runs appear after a workflow type is selected.";
+    elements.monitoringAuditDrilldown.className = "audit-replay empty-state";
+    elements.monitoringAuditDrilldown.textContent = "Select View Audit on a recent run to inspect persisted audit events.";
+    return;
+  }
+
   const summaryQuery = queryString({
     workflow_type: filters.workflow_type,
     outcome: filters.outcome,
@@ -604,11 +641,14 @@ async function refreshMonitoringDashboard() {
 function renderMonitoringSummary() {
   const summary = appState.monitoringSummary;
   if (!summary) {
-    elements.monitoringKpis.innerHTML = "";
-    elements.monitoringOutcomes.innerHTML = "";
+    elements.monitoringKpis.className = "telemetry-grid empty-state";
+    elements.monitoringKpis.textContent = "Select a workflow type to view monitoring metrics.";
+    elements.monitoringOutcomes.className = "outcome-grid empty-state";
+    elements.monitoringOutcomes.textContent = "Outcome breakdown appears after a workflow type is selected.";
     return;
   }
 
+  elements.monitoringKpis.className = "telemetry-grid";
   elements.monitoringKpis.innerHTML = [
     telemetryCard("Total Workflow Runs", escapeHtml(summary.total_workflow_runs), "Persisted workflow_runs records.", "audit"),
     telemetryCard("Completed Runs", escapeHtml(summary.completed_runs), "Runs with completed workflow status.", "positive"),
@@ -624,11 +664,12 @@ function renderMonitoringSummary() {
   ].join("");
 
   const breakdown = summary.outcome_breakdown || {};
+  elements.monitoringOutcomes.className = "outcome-grid";
   elements.monitoringOutcomes.innerHTML = Object.entries(breakdown)
     .map(([outcome, count]) => `
       <article class="outcome-card">
         <strong>${escapeHtml(count)}</strong>
-        <span>${escapeHtml(outcome)}</span>
+        <span>${escapeHtml(outcomeLabel(outcome))}</span>
       </article>
     `)
     .join("");
@@ -664,10 +705,10 @@ function renderMonitoringRuns() {
         ${runs.map((run) => `
           <tr>
             <td>${escapeHtml(dash(run.updated_at || run.created_at))}</td>
-            <td>${escapeHtml(dash(run.workflow_type))}</td>
+            <td>${escapeHtml(workflowTypeLabel(run.workflow_type))}</td>
             <td>${escapeHtml(dash(run.correlation_id))}</td>
             <td>${escapeHtml(dash(run.workflow_id))}</td>
-            <td>${pill(run.outcome, "guardrail")}</td>
+            <td>${pill(outcomeLabel(run.outcome), "guardrail")}</td>
             <td>${escapeHtml(dash(run.guardrail_decision))}</td>
             <td>${escapeHtml(dash(run.llm_drafting_status))}</td>
             <td>${escapeHtml(dash(run.llm_total_tokens))}</td>

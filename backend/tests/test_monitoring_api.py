@@ -180,6 +180,7 @@ def test_monitoring_token_totals_use_final_state_values(monkeypatch) -> None:
 
 
 def test_monitoring_outcomes_endpoint_returns_filters() -> None:
+    _clear_tables()
     client = TestClient(app)
 
     response = client.get("/api/monitoring/outcomes")
@@ -189,3 +190,9 @@ def test_monitoring_outcomes_endpoint_returns_filters() -> None:
     assert "warranty_replacement" in data["workflow_types"]
     assert "blocked" in data["outcomes"]
     assert "allowed_action" in data["outcomes"]
+    assert "escalated" in data["outcomes"]
+    assert "completed_no_action" in data["outcomes"]
+    assert "failed" in data["outcomes"]
+    assert "clarification_required" not in data["outcomes"]
+    assert "invalid_input" not in data["outcomes"]
+    assert "unknown" not in data["outcomes"]

@@ -37,9 +37,9 @@ from app.models.api import (
     WorkflowStateResponse,
 )
 from app.monitoring.service import (
-    ALLOWED_OUTCOMES,
     WORKFLOW_TYPES,
     build_workflow_monitoring_summary,
+    list_monitoring_outcome_filters,
     list_recent_workflow_runs,
 )
 from app.observability.langsmith_tracing import get_langsmith_status
@@ -314,7 +314,7 @@ def get_monitoring_runs(
 def get_monitoring_outcomes() -> MonitoringOutcomesResponse:
     return MonitoringOutcomesResponse(
         workflow_types=WORKFLOW_TYPES,
-        outcomes=ALLOWED_OUTCOMES,
+        outcomes=list_monitoring_outcome_filters(),
     )
 
 

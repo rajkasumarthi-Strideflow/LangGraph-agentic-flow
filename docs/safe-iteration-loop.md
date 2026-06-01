@@ -55,6 +55,8 @@ This layer is deliberately separate from LangSmith:
 
 The dashboard is reusable across future workflow types. The current workflow type is `warranty_replacement`, but future domains can emit the same core monitoring fields and inherit the same summary, filtering, and audit-drilldown pattern.
 
+The current dashboard monitors persisted governed workflow runs only. Intake-router funnel metrics such as missing-information clarification and invalid identifier counts should be added only after intake sessions are persisted, so the monitoring layer continues to avoid fake or inferred telemetry.
+
 ## Safe Deployment Gates
 
 - Tests pass

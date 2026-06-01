@@ -200,18 +200,22 @@
         <p class="panel-helper">
           LangSmith monitors agent execution. DecisionTrace monitors governed business workflow outcomes across persisted workflow runs, audit events, guardrails, actions, and LLM response boundaries.
         </p>
+        <p class="panel-helper monitoring-note">
+          Current dashboard shows persisted governed workflow runs. Intake funnel metrics such as clarification-required and invalid-input counts will be added after intake sessions are persisted.
+        </p>
 
         <div class="monitoring-filter-bar">
           <div>
             <label for="monitor-workflow-type">Workflow Type</label>
             <select id="monitor-workflow-type">
-              <option value="">All workflow types</option>
+              <option value="">Select Workflow Type</option>
+              <option value="warranty_replacement">Warranty Replacement</option>
             </select>
           </div>
           <div>
             <label for="monitor-outcome">Outcome</label>
             <select id="monitor-outcome">
-              <option value="">All outcomes</option>
+              <option value="">All Workflow Outcomes</option>
             </select>
           </div>
           <div>
@@ -222,7 +226,7 @@
         </div>
 
         <h3 class="router-output-heading">KPI Tiles</h3>
-        <div id="monitoring-kpis" class="telemetry-grid"></div>
+        <div id="monitoring-kpis" class="telemetry-grid empty-state">Select a workflow type to view monitoring metrics.</div>
 
         <h3 class="router-output-heading">Outcome Breakdown</h3>
         <div id="monitoring-outcomes" class="outcome-grid"></div>
@@ -235,6 +239,6 @@
       </section>
     </main>
 
-    <script src="/static/app.js?v=phase2-control-monitoring-1"></script>
+    <script src="/static/app.js?v=phase2-control-monitoring-2"></script>
   </body>
 </html>

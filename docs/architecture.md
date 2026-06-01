@@ -162,6 +162,8 @@ The `phase-2/control-monitoring-dashboard` branch adds a reusable DecisionTrace 
 
 The dashboard is backed by real API data from persisted `workflow_runs`, `audit_events`, `human_reviews`, and provider-reported LLM usage fields stored in workflow final state. It does not display fake cost, latency, trace links, or synthetic monitoring values.
 
+The current dashboard covers persisted governed workflow runs only. Intake-router outcomes such as clarification-required and invalid-input are intentionally excluded from historical dashboard filters and KPI tiles because intake sessions are still in-memory. A future Intake Funnel section can be added after intake sessions are persisted.
+
 The first supported workflow type is `warranty_replacement`, but the API response model includes `workflow_type` and outcome categories that can be reused by future DecisionTrace workflows. The current endpoints are:
 
 - `GET /api/monitoring/summary`

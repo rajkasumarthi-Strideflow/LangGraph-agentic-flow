@@ -110,6 +110,8 @@ The UI shows LLM drafting status and provider-reported token fields when availab
 
 The Phase 2 control-monitoring dashboard is now implemented as a separate enterprise dashboard tab. It uses real persisted workflow runs, audit events, human review records, and provider-reported LLM usage metadata when available. It is designed as a reusable DecisionTrace layer: today the only workflow type is `warranty_replacement`, but the same monitoring API can support future governed workflow types.
 
+The dashboard intentionally monitors persisted governed workflow runs only. Intake-router outcomes such as clarification-required and invalid-input remain outside the historical monitoring dashboard because intake sessions are currently in-memory. A future Intake Funnel section should be added after intake sessions are persisted.
+
 LangSmith and DecisionTrace monitoring are intentionally complementary. LangSmith focuses on execution traces and debugging. DecisionTrace monitoring focuses on business/control outcomes such as blocked decisions, escalations, allowed actions, replacement creation, audit event counts, tool-call counts, response drafting status, validation failures, and correlation IDs.
 
 Future telemetry tile examples:
