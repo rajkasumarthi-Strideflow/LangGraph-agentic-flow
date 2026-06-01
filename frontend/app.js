@@ -738,6 +738,7 @@ function renderWorkflowTimeline() {
         <div class="timeline-meta">
           <div><strong>Node:</strong> ${escapeHtml(dash(event.node_name))}</div>
           <div><strong>Tool:</strong> ${escapeHtml(dash(event.tool_name))}</div>
+          <div><strong>Correlation:</strong> ${escapeHtml(dash(event.correlation_id))}</div>
           <div><strong>Policy:</strong> ${escapeHtml(dash(event.policy_reference))}</div>
           <div><strong>Guardrail:</strong> ${escapeHtml(dash(event.guardrail_decision))}</div>
         </div>
@@ -799,6 +800,10 @@ function renderAuditReplay() {
             <div>
               <div class="meta-label">Tool</div>
               <div>${escapeHtml(dash(event.tool_name))}</div>
+            </div>
+            <div>
+              <div class="meta-label">Correlation</div>
+              <div>${escapeHtml(dash(event.correlation_id))}</div>
             </div>
             <div>
               <div class="meta-label">Policy</div>

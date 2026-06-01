@@ -83,6 +83,14 @@ def test_get_workflow_audit_returns_timeline(client: TestClient) -> None:
     assert data["workflow_id"] == started["workflow_id"]
     assert data["correlation_id"] == started["correlation_id"]
     assert all(event["correlation_id"] == started["correlation_id"] for event in data["events"])
+    assert all(
+        event["input_summary"]["correlation_id"] == started["correlation_id"]
+        for event in data["events"]
+    )
+    assert all(
+        event["output_summary"]["correlation_id"] == started["correlation_id"]
+        for event in data["events"]
+    )
     assert "workflow_started" in event_types
     assert "workflow_completed" in event_types
 
@@ -127,6 +135,11 @@ def test_direct_workflow_start_generates_correlation_id(client: TestClient) -> N
     started = _start_workflow(client)
 
     assert started["correlation_id"].startswith("corr_")
+    audit_response = client.get(f"/api/workflows/{started['workflow_id']}/audit")
+    assert audit_response.status_code == 200
+    events = audit_response.json()["events"]
+    assert events
+    assert all(event["correlation_id"] == started["correlation_id"] for event in events)
 
 
 def test_unknown_workflow_returns_404_for_state(client: TestClient) -> None:

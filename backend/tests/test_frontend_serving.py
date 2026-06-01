@@ -64,6 +64,8 @@ def test_frontend_static_assets_are_served(client: TestClient) -> None:
     assert "/api/observability/status" in js_response.text
     assert "correlation_id: appState.correlationId" in js_response.text
     assert "renderTraceContextTiles" in js_response.text
+    assert "<strong>Correlation:</strong>" in js_response.text
+    assert "meta-label\">Correlation" in js_response.text
     assert "Trace links will appear in a future enhancement" in js_response.text
     assert "https://smith.langchain.com" not in js_response.text
     assert "/reply" in js_response.text

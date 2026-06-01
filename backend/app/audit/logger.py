@@ -20,6 +20,18 @@ def create_audit_event(
     guardrail_decision: str | None = None,
     reason: str | None = None,
 ) -> AuditEvent:
+    if not correlation_id:
+        raise ValueError("correlation_id is required for audit events.")
+
+    safe_input_summary = {
+        "correlation_id": correlation_id,
+        **(input_summary or {}),
+    }
+    safe_output_summary = {
+        "correlation_id": correlation_id,
+        **(output_summary or {}),
+    }
+
     event = AuditEvent(
         event_id=f"audit_{uuid4().hex}",
         workflow_id=workflow_id,
@@ -29,8 +41,8 @@ def create_audit_event(
         actor=actor,
         node_name=node_name,
         tool_name=tool_name,
-        input_summary=input_summary or {},
-        output_summary=output_summary or {},
+        input_summary=safe_input_summary,
+        output_summary=safe_output_summary,
         policy_reference=policy_reference,
         guardrail_decision=guardrail_decision,
         reason=reason,
