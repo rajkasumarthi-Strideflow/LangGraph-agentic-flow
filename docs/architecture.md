@@ -104,6 +104,32 @@ execution
 
 **Production failures should become regression tests.**
 
+## Tool Adapter Pattern
+
+Phase 2 uses controlled tool simulations so teams can validate the control model before connecting production systems. In a future client implementation, the tool implementation layer can be replaced with enterprise API adapters while the workflow and control layer remains stable.
+
+```text
+LangGraph node
+→ governed tool interface
+→ enterprise API adapter
+→ MuleSoft / enterprise API endpoint
+→ system of record
+```
+
+Example:
+
+```text
+check_inventory_availability node
+→ check_inventory tool
+→ InventoryAPIAdapter
+→ MuleSoft GET /inventory/availability
+→ SAP / Oracle / Salesforce / OMS inventory source
+```
+
+The LangGraph node decides when a step should happen. The governed tool interface defines the allowed action contract, input schema, output schema, error handling, and audit metadata. The enterprise API adapter connects that contract to platforms such as MuleSoft, Salesforce, ServiceNow, SAP, Oracle, or internal APIs. The system of record owns the business data and transaction state.
+
+This is why DecisionTrace AI functions as a prototype accelerator and reference architecture rather than a one-off demo: the workflow, state model, guardrails, audit logging, correlation ID, monitoring dashboard, LangSmith tracing metadata, evaluation scenarios, and LLM response drafting boundary can remain stable while simulated tools are replaced with client API adapters.
+
 ## Phase 2 Intake Router
 
 The `phase-2/intake-router` branch adds an implemented stateful natural-language intake router in `backend/app/intake/`. The router accepts a freeform customer message, extracts required identifiers from the message, and returns structured routing output.

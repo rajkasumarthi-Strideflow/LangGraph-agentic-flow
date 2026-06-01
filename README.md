@@ -25,6 +25,37 @@ The current implementation is a warranty replacement reference workflow, but the
 
 A client does not need to connect sensitive production systems on day one. The current reference workflow uses synthetic data and controlled tool simulations so cross-functional stakeholders can validate the control model quickly and cost-effectively. Once the control model is validated, tool implementations can be connected to enterprise API adapters while preserving the same LangGraph workflow, state model, guardrails, audit trail, LLM response drafting boundary, and UI telemetry.
 
+DecisionTrace AI’s accelerator value is that teams can swap the tool implementation layer without redesigning the control model. The prototype can begin with synthetic data and controlled tool simulations, then later replace those tools with enterprise API wrappers when the client is ready for integration.
+
+```text
+LangGraph node
+→ governed tool interface
+→ enterprise API adapter
+→ MuleSoft / enterprise API endpoint
+→ system of record
+```
+
+Example:
+
+```text
+check_inventory_availability node
+→ check_inventory tool
+→ InventoryAPIAdapter
+→ MuleSoft GET /inventory/availability
+→ SAP / Oracle / Salesforce / OMS inventory source
+```
+
+### Important Distinction
+
+| Layer | Responsibility |
+| --- | --- |
+| LangGraph node | Decides when a step should happen in the governed workflow. |
+| Governed tool interface | Defines the allowed action contract, input schema, output schema, error handling, and audit metadata. |
+| Enterprise API adapter | Connects the tool contract to enterprise integration platforms such as MuleSoft, Salesforce, ServiceNow, SAP, Oracle, or internal APIs. |
+| System of record | Owns the business data and transaction state. |
+
+In a client implementation, DecisionTrace AI would not require redesigning the control model when moving from prototype to integration. For example, the simulated `check_inventory` tool can be replaced with a MuleSoft-backed inventory adapter while preserving the same LangGraph workflow, state model, guardrails, audit logging, correlation ID, monitoring dashboard, LangSmith tracing metadata, evaluation scenarios, and LLM response drafting boundary.
+
 ## Business Problem
 
 Customer-impacting decision workflows are high-trust processes. A correct warranty replacement decision, for example, requires customer verification, order lookup, warranty policy review, eligibility decisioning, inventory checks, controlled action execution, customer-safe communication, and a durable audit trail. A weak implementation can approve the wrong replacement, cite stale policy, expose unnecessary data, or leave the business unable to reconstruct why a decision was made.

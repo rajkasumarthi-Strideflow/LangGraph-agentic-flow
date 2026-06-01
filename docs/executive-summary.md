@@ -10,6 +10,8 @@ DecisionTrace AI is a working reference platform and prototype accelerator for g
 
 The platform lets stakeholders evaluate the workflow, decision points, guardrails, audit evidence, human review paths, LLM response boundaries, and cost drivers using synthetic data and controlled tool simulations. This enables early alignment across Product, Operations, Audit, Risk, Security, Compliance, Legal, and Model Risk Management teams before production integration begins.
 
+The accelerator value is not only faster prototyping; it is architectural continuity. Teams can validate the control model using synthetic data and controlled tool simulations, then connect the same governed workflow to enterprise API adapters when ready. This allows Product, Operations, Audit, Risk, Security, Compliance, Legal, and MRM stakeholders to align on the control model before production systems are exposed.
+
 The first implemented reference workflow is warranty replacement, branded historically in the repository as the WarrantyWise workflow. DecisionTrace AI is broader than warranty replacement: the same architecture pattern can extend to regulated financial and operational workflows such as credit approval, claims review, refund governance, subscription cancellation, and compliance exception handling.
 
 The Phase 1 implementation is deployed publicly on Railway and includes a FastAPI backend, browser UI, LangGraph workflow, controlled tool simulations, controlled OpenAI response drafting, SQLAlchemy persistence, and Postgres-compatible audit storage. Phase 1 is not presented as production-ready or regulatory-compliant; it demonstrates patterns required for governed workflows before production integration.
@@ -34,6 +36,17 @@ DecisionTrace AI uses:
 - A browser UI for workflow visibility
 
 Once the control model is validated, tool implementations can be connected to enterprise API adapters without redesigning the workflow architecture. The LangGraph workflow, state model, guardrails, audit logging, LLM response drafting boundary, and UI telemetry can remain stable while the tool layer is connected to systems such as CRM, order management, policy/knowledge repositories, inventory, approval engines, or case management platforms.
+
+Executive implementation pattern:
+
+```text
+Governed workflow
+→ controlled tool contract
+→ enterprise API adapter
+→ system of record
+```
+
+Examples include `check_inventory` connecting to a MuleSoft inventory API, `lookup_order` connecting to an order management API, `retrieve_policy` connecting to a policy or knowledge API, and `create_case` or `create_replacement_request` connecting to a CRM or workflow API.
 
 ## Architecture at a Glance
 
