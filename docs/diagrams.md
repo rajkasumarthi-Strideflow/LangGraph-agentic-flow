@@ -2,6 +2,66 @@
 
 These diagrams show the Phase 1 architecture and planned future-state extensions for DecisionTrace AI, an enterprise-grade agentic decision workflow platform. The diagrams currently show the warranty replacement reference workflow implemented in Phase 1. Phase 1 is deterministic and production-aware: FastAPI serves the frontend and API, LangGraph orchestrates the workflow, governed tools execute bounded actions, SQLAlchemy persists state and audit records, and Railway provides the deployment target.
 
+Phase 2 extends the reference platform with natural-language intake, multi-turn clarification, shared correlation IDs, LangSmith tracing, DecisionTrace monitoring, local golden-scenario evaluation, and optional LangSmith evaluation integration.
+
+## Phase 2 End-to-End Architecture
+
+```mermaid
+flowchart TD
+    User["Customer Message"] --> Intake["Natural Language Intake UI"]
+    Intake --> Router["Stateful Intake Router"]
+    Router --> Clarify{"Required facts present?"}
+    Clarify -- "No" --> Question["Clarification Question"]
+    Question --> Router
+    Clarify -- "Yes" --> Workflow["Governed LangGraph Workflow"]
+    Workflow --> Tools["Governed Tool Interfaces"]
+    Tools --> Guardrails["Deterministic Guardrails"]
+    Guardrails --> Drafting["Controlled OpenAI Response Drafting"]
+    Workflow --> Audit["Persisted Audit Events"]
+    Workflow --> Trace["LangSmith Tracing"]
+    Workflow --> Monitor["DecisionTrace Monitoring"]
+    Workflow --> Evals["Golden-Scenario Evaluation"]
+```
+
+## Phase 2 Correlation Flow
+
+```mermaid
+flowchart LR
+    IntakeSession["intake_session_id"] --> Correlation["correlation_id"]
+    Correlation --> WorkflowRun["workflow_id"]
+    WorkflowRun --> AuditEvents["audit_events"]
+    Correlation --> LangSmith["LangSmith trace metadata"]
+    WorkflowRun --> Monitoring["Monitoring Dashboard"]
+    AuditEvents --> Replay["Audit Replay"]
+```
+
+## Tool Adapter Pattern
+
+```mermaid
+flowchart LR
+    Node["LangGraph node"] --> Tool["Governed tool interface"]
+    Tool --> Adapter["Enterprise API adapter"]
+    Adapter --> API["MuleSoft / API endpoint"]
+    API --> SOR["System of record"]
+
+    ExampleNode["check_inventory_availability"] --> ExampleTool["check_inventory"]
+    ExampleTool --> ExampleAdapter["InventoryAPIAdapter"]
+    ExampleAdapter --> ExampleAPI["MuleSoft GET /inventory/availability"]
+    ExampleAPI --> ExampleSOR["SAP / Oracle / Salesforce / OMS"]
+```
+
+## Monitoring vs Tracing
+
+```mermaid
+flowchart TD
+    Run["Governed Workflow Run"] --> LangSmith["LangSmith Tracing"]
+    Run --> DecisionTrace["DecisionTrace Monitoring"]
+
+    LangSmith --> TraceDetails["Execution traces<br/>spans<br/>tool calls<br/>LLM calls"]
+    DecisionTrace --> Outcomes["Business/control outcomes<br/>blocked<br/>escalated<br/>allowed/action"]
+    DecisionTrace --> Evidence["Audit counts<br/>tool-call counts<br/>correlation-linked runs"]
+```
+
 ## Diagram 1: System Architecture
 
 ```mermaid

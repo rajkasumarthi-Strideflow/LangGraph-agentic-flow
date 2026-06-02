@@ -7,6 +7,8 @@ This document provides a human-readable API reference for DecisionTrace AI Phase
 - `/docs`
 - `/openapi.json`
 
+For release context and validated Phase 2 scenarios, see [DecisionTrace AI Phase 2 Release Notes](phase-2-release-notes.md).
+
 The APIs are organized around the platform control model:
 
 - Intake APIs collect and validate required facts.

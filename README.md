@@ -140,6 +140,8 @@ Phase 1 release checklist: [docs/phase-1-release-checklist.md](docs/phase-1-rele
 
 Phase 2 validation checklist: [docs/phase-2-validation-checklist.md](docs/phase-2-validation-checklist.md)
 
+Phase 2 release notes: [docs/phase-2-release-notes.md](docs/phase-2-release-notes.md)
+
 Known limitations and roadmap: [docs/roadmap.md](docs/roadmap.md)
 
 DecisionTrace AI’s roadmap includes a stateful intake router, prompt governance, and an observability-to-evaluation loop so production failures can become regression tests.
@@ -155,6 +157,26 @@ Phase 2 evaluation note: this branch includes a local golden-scenario evaluation
 Phase 2 correlation note: this branch includes a shared `correlation_id` across intake sessions, workflow runs, audit events, and LangSmith trace metadata. This connects one customer turn from natural-language intake through governed workflow execution, audit replay, and future monitoring views.
 
 Phase 2 monitoring note: this branch adds a DecisionTrace control-monitoring dashboard backed by real persisted workflow runs, audit events, human review records, and provider-reported LLM metadata when available. LangSmith monitors execution traces; DecisionTrace monitors business/control outcomes such as blocked requests, escalations, allowed actions, replacement creation, audit event counts, tool-call counts, and response drafting boundaries. The dashboard currently covers persisted governed workflow runs only; intake-router outcomes such as missing information and invalid identifiers are not shown as historical metrics because intake sessions are still in-memory. A future Intake Funnel section can be added after intake sessions are persisted. The current workflow type is `warranty_replacement`, and the monitoring API is designed so future workflow types can reuse the same outcome model.
+
+## Phase 2 Capabilities
+
+- Natural-language intake router
+- Multi-turn clarification workflow
+- Identifier format validation
+- Full outcome coverage:
+  - Clarification required
+  - Invalid input blocked before workflow start
+  - Cracked-screen policy/guardrail block
+  - Unknown valid-format customer escalation
+  - Eligible manufacturing defect allow/action
+- Eligible replacement happy path
+- Shared correlation ID across intake, workflow, audit, and trace metadata
+- LangSmith tracing
+- Local golden-scenario evaluation
+- Optional LangSmith evaluation integration
+- DecisionTrace control monitoring dashboard
+- API reference
+- Phase 2 validation checklist
 
 ## Phase 1 Capabilities
 

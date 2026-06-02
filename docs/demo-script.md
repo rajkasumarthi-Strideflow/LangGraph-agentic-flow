@@ -1,177 +1,193 @@
 # DecisionTrace AI Demo Script
 
-This script is for a 5–7 minute walkthrough of the Phase 1 DecisionTrace AI capstone.
+This script supports a 5–7 minute Phase 2 walkthrough of DecisionTrace AI.
 
-## A. Opening / Positioning
+## Opening Positioning
 
-This is DecisionTrace AI: an enterprise platform for auditable agentic workflows that support governed customer decisions. The first implemented workflow is warranty replacement, but the pattern generalizes to other customer-impacting decisions where policy grounding, guardrails, audit replay, and human review matter.
+This is DecisionTrace AI: a governed workflow reference platform and prototype accelerator for AI-assisted customer decisions.
 
-The platform demonstrates auditability, deterministic workflow control, governed tools, action guardrails, controlled LLM response drafting, persistence, and human review. The problem is not simply answering a customer chat message; the system has to verify identity, retrieve order context, apply the current warranty policy, enforce action guardrails, generate a safe customer response, persist the decision trail, and support human review.
+The core message is simple:
 
-## B. Architecture Overview
+> Validate the control model before connecting production systems.
 
-The Phase 1 architecture is:
+The first implemented reference workflow is warranty replacement. That does not mean DecisionTrace AI is only a warranty app. Warranty replacement is Reference Workflow 1 because it demonstrates the same controls needed in higher-stakes workflows: policy grounding, identity and order checks, guardrails, human review, audit replay, observability, monitoring, and evaluation.
+
+## Architecture Overview
+
+The Phase 2 architecture is:
 
 ```text
-Browser UI -> FastAPI -> LangGraph -> governed tools -> guardrails -> controlled OpenAI response drafting -> SQLAlchemy persistence -> Postgres audit trail
+Natural Language Intake
+→ Stateful Router
+→ Multi-turn Clarification
+→ Governed LangGraph Workflow
+→ Governed Tools
+→ Deterministic Guardrails
+→ Controlled OpenAI Response Drafting
+→ Persisted Audit Trail
+→ LangSmith Tracing
+→ DecisionTrace Monitoring
+→ Golden-scenario Evaluation
 ```
 
-FastAPI serves both the API and the static frontend from one Railway app to reduce tool complexity. LangGraph coordinates the stateful workflow. Controlled tool simulations perform bounded actions like identity verification, order lookup, policy retrieval, eligibility checks, inventory checks, escalation, and response generation. SQLAlchemy persists workflow runs, audit events, and human review records, with Railway Postgres used in deployment and SQLite available locally.
+The router interprets the customer message and collects required facts. It does not decide eligibility or execute business actions. The LangGraph workflow remains the control layer. It verifies identity, retrieves order and policy context, checks eligibility, enforces guardrails, creates or blocks actions, escalates when needed, and generates the final customer-safe response.
 
-## C. Scenario Setup
+## Live Demo Walkthrough
 
-Use the primary scenario:
+Open the Phase 2 Railway app and start in the natural-language intake panel.
+
+### 1. Missing Info Scenario
+
+Click **Missing Info Scenario**:
 
 > My laptop screen cracked after 9 months. Can I get a replacement?
 
-This scenario is intentionally tricky. The product is inside the 12-month warranty window, so a shallow system might approve the request. The current warranty policy, however, excludes cracked screens caused by drops, impact, or accidental damage. The correct enterprise behavior is to verify the context, retrieve the current policy, identify the exclusion, block replacement creation, and give the customer a safe explanation.
+Click **Start Intake / Analyze Request**.
 
-## D. Live Demo Walkthrough
+Point out:
 
-1. Open the Railway public URL.
-2. Click **Load Cracked Screen Scenario**.
-3. Click **Run Warranty Workflow**.
-4. Point out the workflow result panel.
-5. Highlight `eligibility_status = not_eligible`.
-6. Highlight `guardrail_decision = block`.
-7. Point out that there is no `replacement_request_id`.
-8. Read the customer-safe response.
-9. Scroll to the audit timeline and show the event sequence.
-10. Optionally click **Load Unknown Customer Scenario**, run it, and show escalation plus the human review simulation.
+- The router identifies a warranty replacement request.
+- It detects missing customer and order identifiers.
+- It asks a clarification question.
+- **Run Governed Workflow** stays disabled.
 
-For the cracked-screen scenario, the most important message is that the system does not create a replacement request. It blocks the write/action path because the current policy excludes the issue.
+Message: the system does not start a governed workflow until required facts are collected.
 
-Phase 2 also includes an **Eligible Manufacturing Defect Scenario**:
+### 2. Multi-turn Clarification
 
-> My laptop stopped powering on after 6 months. Can I get a replacement? Customer ID is cust_primary_001 and order ID is ord_laptop_power_001.
+Reply with:
 
-Use this scenario to show the allow path. The workflow verifies identity, retrieves the delivered order, applies the current laptop policy, determines that a power failure/manufacturing defect is eligible within the warranty window, confirms inventory, records `guardrail_decision = allow`, and creates a governed replacement request. This demonstrates that DecisionTrace AI can allow customer-impacting actions, but only after deterministic controls pass.
+> Customer ID is cust_primary_001 and order ID is ord_laptop_001.
 
-## E. Why This Is Enterprise-Grade
+Point out:
 
-- State-based workflow control keeps the process explainable.
-- Tool/action separation makes each operation bounded and testable.
-- Eligibility and guardrail logic are deterministic.
-- Policy-grounded decisioning uses the current warranty policy, not stale FAQ content.
-- Tool outputs use data minimization and avoid exposing unnecessary customer details.
-- Audit events are persisted for replay and review.
-- Human handoff is simulated for escalation paths.
-- Deployment uses Railway with Postgres persistence.
-- Tests and documentation cover workflow, API, persistence, auditability, deployment config, and frontend serving.
+- The same intake session is updated.
+- The original request is preserved.
+- The shared `correlation_id` remains stable.
+- The router extracts and validates the identifiers.
+- The workflow is now ready to start.
 
-## F. Key Architecture Decisions
+### 3. Invalid Identifier Scenario
 
-- **Why LangGraph:** It makes the workflow explicit, stateful, and branchable, which is better for governed support workflows than a single free-form chat completion.
-- **Why deterministic tools in Phase 1:** The goal is to prove control, auditability, and policy behavior before adding probabilistic LLM behavior.
-- **Why no LLM for eligibility:** Eligibility is a business decision that should be deterministic, testable, and policy-controlled.
-- **Why the cracked-screen scenario is blocked:** The current policy excludes accidental damage and cracked screens caused by drops, impact, or accidental damage.
-- **Why audit events are persisted:** Enterprise reviewers need to reconstruct decisions after the process restarts or after a customer dispute.
-- **Why Railway:** It provides a simple deployment path for one FastAPI service and one Postgres service.
-- **Why Postgres in deployment:** Workflow results, audit events, and human reviews need durable persistence beyond process memory.
+Click **Invalid Identifier Scenario**.
 
-## G. Audit Replay Talking Points
+Point out:
 
-Reference: [docs/audit-replay-example.md](audit-replay-example.md)
+- The router treats user-provided identifiers as untrusted.
+- `UNKNOWN_CUSTOMER` is blocked by deterministic identifier format validation.
+- The workflow does not start.
 
-The system can reconstruct:
+Message: the router validates format only; the workflow verifies business truth later.
 
-- Customer request
-- Identity verification
-- Order lookup
-- Policy retrieval
-- Eligibility decision
-- Guardrail decision
-- Replacement created, blocked, or escalated
-- Customer response
+### 4. Complete Cracked Screen Scenario
 
-The audit trail shows not only the final outcome, but also which node and tool produced each event, what minimal inputs and outputs were recorded, what policy reference was used, and why the guardrail allowed, blocked, or escalated.
+Click **Complete Cracked Screen Scenario**, analyze it, then run the governed workflow.
 
-## H. Cost-Aware Architecture Preview
+Expected outcome:
 
-Reference: [docs/cost-model.md](cost-model.md)
+- Identity is verified.
+- Order is retrieved.
+- Current warranty policy is retrieved.
+- The screen issue is classified as accidental damage / cracked screen.
+- `eligibility_status = not_eligible`.
+- `guardrail_decision = block`.
+- No `replacement_request_id` is created.
+- The customer response does not claim replacement creation.
 
-Future cost modeling will include:
+Point out audit replay as the business/governance trail.
 
-- LLM token cost
-- Tool/API invocation cost
-- Retrieved context cost
-- Audit/observability overhead
-- Human escalation cost
-- Semantic caching
-- Prompt caching
-- Model routing
-- State/history summarization
-- Execution hard caps
+### 5. Unknown Valid-Format Customer Scenario
 
-The current deterministic workflow establishes the control plane where those cost decisions can be measured and enforced later.
+Click **Unknown Customer Scenario**, analyze it, and run the workflow.
 
-## I. Future Enhancements
+Expected outcome:
 
-Reference: [docs/roadmap.md](roadmap.md)
+- Router allows start because `cust_unknown_001` has a valid format.
+- Workflow identity verification fails.
+- The case escalates.
+- Human review simulation becomes available.
 
-- Polished workflow UI
-- Controlled LLM response drafting
-- Stateful intake router
-- Safe iteration loop where audit/trace data feeds evaluation and regression testing
-- Ragas evaluation
-- Langfuse/LangSmith observability
-- LangGraph interrupts for true HITL pause/resume
-- CrewAI review crew
-- MCP tool/resource abstraction
-- A2A fulfillment delegation
-- Agentforce implementation mapping ([docs/agentforce-mapping.md](agentforce-mapping.md))
+Message: format validation is not business validation. The governed workflow owns business truth.
 
-## J. 30-Second Version
+### 6. Eligible Manufacturing Defect Scenario
 
-DecisionTrace AI is an enterprise agentic AI capstone for governed customer decisions. Its first implemented reference workflow is warranty replacement support: it uses FastAPI, LangGraph, OpenAI response drafting, governed tools, deterministic guardrails, SQLAlchemy persistence, and Railway Postgres to show how a customer request can be verified, policy-grounded, decisioned, audited, and escalated without relying on an uncontrolled chatbot. The primary demo blocks a cracked-screen replacement because the current warranty policy excludes accidental damage, and it persists the full audit trail for replay.
+Click **Eligible Manufacturing Defect Scenario**, analyze it, and run the workflow.
 
-## K. Interview Q&A Prompts
+Expected outcome:
 
-### Why LangGraph?
+- Identity and order checks pass.
+- Current policy is retrieved.
+- Power failure / manufacturing defect is eligible.
+- Inventory is available.
+- `guardrail_decision = allow`.
+- A governed replacement request is created.
 
-- It makes workflow state, branching, and tool sequencing explicit.
-- It supports future HITL interrupt/resume patterns.
-- It is easier to audit than a single opaque agent loop.
+Message: DecisionTrace can allow actions, but only after required controls pass.
 
-### Why no LLM for eligibility?
+## Correlation, Audit, and Observability
 
-- Eligibility is a policy decision, not a creative drafting task.
-- Deterministic logic is easier to test, audit, and govern.
-- LLMs can be added later for controlled response drafting.
+Show the Trace Context panel.
 
-### How is auditability handled?
+Point out:
 
-- Each meaningful workflow step emits an `AuditEvent`.
-- Events are persisted in the `audit_events` table.
-- The UI retrieves events through the audit API and displays the timeline.
+- `intake_session_id`
+- `correlation_id`
+- `workflow_id`
 
-### How would this map to Agentforce?
+The correlation ID connects intake, workflow, audit events, and LangSmith trace metadata.
 
-- Workflow -> Agentforce agent or subagent.
-- Tools -> Agentforce actions.
-- Policy retrieval -> grounding.
-- Guardrails -> Flow, Apex, and policy controls.
-- Human review -> case, approval, or queue.
-- Audit events -> execution and audit trail.
+Use this distinction:
 
-### How would you control cost?
+- **Audit replay** is the business/governance trail: what happened, which policy was used, what decision was made, and why.
+- **LangSmith tracing** is execution observability: how the router, workflow, tools, and LLM drafting executed.
+- **DecisionTrace Monitoring** is business/control monitoring: blocked, escalated, allowed/action outcomes, audit events, tool calls, token metadata, and correlation-linked runs.
 
-- Track token usage, tool calls, retrieved context, audit overhead, and escalations.
-- Add prompt caching, semantic caching, model routing, state summarization, and execution caps.
-- Keep deterministic decisions out of LLM calls where possible.
+## Evaluation
 
-### How would you add real HITL?
+DecisionTrace Phase 2 includes local golden-scenario evaluation.
 
-- Use LangGraph interrupts for pause/resume.
-- Persist checkpoint state.
-- Route escalations to a real review queue.
-- Resume the graph after a human approval or rejection.
+Explain:
 
-### What would you productionize next?
+- Golden scenarios are business-readable and machine-checkable.
+- Deterministic assertions validate the control model.
+- Local pytest evaluations remain the source of truth.
+- Optional LangSmith evaluation integration can sync the scenarios into datasets and run experiments for tracking and version comparison.
+- LLM-as-judge is future work for response quality, tone, and faithfulness. It does not replace deterministic control assertions.
 
-- Add real identity/order/inventory integrations.
-- Add controlled LLM response drafting.
-- Add observability and evaluation.
-- Add Alembic migrations.
-- Add real human review workflow.
-- Add Salesforce/Agentforce mapping and integration design.
+## Tool Adapter Accelerator Value
+
+This is one of the most important enterprise architecture points:
+
+> The accelerator value is that teams can swap the tool implementation layer without redesigning the control model.
+
+Pattern:
+
+```text
+LangGraph node
+→ governed tool interface
+→ enterprise API adapter
+→ MuleSoft / enterprise API endpoint
+→ system of record
+```
+
+Example:
+
+```text
+check_inventory_availability node
+→ check_inventory tool
+→ InventoryAPIAdapter
+→ MuleSoft GET /inventory/availability
+→ SAP / Oracle / Salesforce / OMS inventory source
+```
+
+In a client implementation, simulated tools can be replaced with enterprise API wrappers while preserving the same LangGraph workflow, state model, guardrails, audit logging, correlation ID, monitoring dashboard, LangSmith tracing metadata, evaluation scenarios, and LLM response drafting boundary.
+
+## Closing
+
+DecisionTrace AI is not a warranty app. It is a governed workflow reference platform and prototype accelerator.
+
+Warranty replacement is Reference Workflow 1. The larger value is the control model: natural-language intake, deterministic workflow execution, bounded tools, guardrails, audit replay, observability, monitoring, evaluation, and an adapter layer that can connect to enterprise APIs when the organization is ready.
+
+## 30-Second Version
+
+DecisionTrace AI validates the control model before connecting production systems. Phase 2 adds natural-language intake, multi-turn clarification, identifier validation, full outcome coverage, shared correlation IDs, LangSmith tracing, DecisionTrace monitoring, and deterministic golden-scenario evaluation. The first workflow is warranty replacement, but the platform pattern generalizes to governed customer decisions. Its accelerator value is architectural continuity: teams can replace simulated tools with enterprise API adapters without redesigning the workflow, guardrails, audit trail, monitoring, tracing, or evaluation model.

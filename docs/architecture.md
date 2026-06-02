@@ -58,9 +58,12 @@ For prompt governance and safe iteration details, see the [DecisionTrace AI Prom
 - Optional LangSmith evaluation dataset/experiment bridge
 - Shared `correlation_id` across intake sessions, workflow runs, audit events, and LangSmith trace metadata
 - Reusable control-monitoring dashboard backed by persisted workflow, audit, review, and LLM usage metadata
+- Phase 2 release-candidate documentation, API reference, and release notes
 
 ### Future Roadmap
 
+- Freeze warranty replacement as Reference Workflow 1
+- Add a second workflow with MCP-style tool/resource abstraction
 - LangSmith evaluation datasets and experiments
 - Deterministic checks plus LLM-as-judge evaluation
 - τ-Bench-inspired dynamic agent evaluation

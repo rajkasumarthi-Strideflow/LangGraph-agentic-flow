@@ -11,8 +11,8 @@ Before sharing or demoing Phase 1, use the [DecisionTrace AI Phase 1 Release Che
 ## Roadmap Status
 
 - Phase 1 is released and preserved as `v1.0-phase-1`.
-- Phase 2 is active on `phase-2/intake-router`.
-- Completed Phase 2 items include:
+- Phase 2 is a release candidate on `phase-2/intake-router`.
+- Completed Phase 2 release-candidate items include:
   - Stateful natural-language intake router
   - Multi-turn clarification
   - Eligible replacement happy path
@@ -21,14 +21,20 @@ Before sharing or demoing Phase 1, use the [DecisionTrace AI Phase 1 Release Che
   - Optional LangSmith evaluation dataset/experiment bridge
   - Shared correlation ID across intake, workflow, audit, and trace metadata
   - Reusable control-monitoring dashboard for workflow outcomes and audit-backed KPIs
-- Upcoming Phase 2 items include:
-  - LLM-as-judge evaluation layer
-- Phase 3 includes:
+- Phase 2 release-candidate documentation includes:
+  - API reference
+  - Phase 2 validation checklist
+  - Phase 2 release notes
+- Next priorities:
+  - Freeze warranty replacement as Reference Workflow 1
+  - Phase 3: build a second workflow with MCP-style tools/resources
+  - Add cost telemetry and cost-optimized orchestration
+- Later Phase 4 items:
+  - τ-Bench-inspired dynamic evaluation
+  - LLM-as-judge response quality evaluation
   - Safety detector nodes
-  - Cost-optimized orchestration
+  - Agentforce implementation prototype
   - CrewAI review crew
-  - MCP/A2A extensions
-  - τ-Bench-inspired dynamic evaluation harness if not completed in a later Phase 2 step
 
 Before merging Phase 2 into `main` or creating a Phase 2 release, use the [DecisionTrace AI Phase 2 Validation Checklist](phase-2-validation-checklist.md).
 

@@ -104,6 +104,21 @@ This checklist validates the Phase 2 development branch before merging into the 
 - [ ] Audit drilldown loads persisted audit events for a selected workflow run
 - [ ] Dashboard clearly distinguishes DecisionTrace business/control monitoring from LangSmith execution tracing
 
+## Phase 2 Release Candidate Validation
+
+- [ ] All five demo scenarios validated on Railway
+- [ ] Correlation ID validated across intake, workflow, audit events, and LangSmith traces
+- [ ] Monitoring Dashboard validated
+- [ ] LangSmith tracing validated
+- [ ] LangSmith evaluation dataset/experiment integration validated if configured
+- [ ] Local evaluation pipeline passes
+- [ ] API reference updated
+- [ ] Demo script updated
+- [ ] Executive summary updated
+- [ ] Release notes created
+- [ ] No fake telemetry introduced
+- [ ] No Phase 1 release artifacts changed
+
 ## Merge Readiness
 
 - [ ] README links to this Phase 2 validation checklist

@@ -1,6 +1,6 @@
 # DecisionTrace AI Executive Summary
 
-This executive summary reflects the Phase 2 development branch of DecisionTrace AI. The Phase 1 stable release remains available on the `main` branch and GitHub release `v1.0-phase-1`.
+This executive summary reflects the Phase 2 release-candidate branch of DecisionTrace AI. The Phase 1 stable release remains available on the `main` branch and GitHub release `v1.0-phase-1`.
 
 Phase 1 established the governed workflow foundation. Phase 2 adds natural-language intake, multi-turn clarification, optional LangSmith tracing, local golden-scenario evaluation, shared correlation IDs, and a reusable control-monitoring dashboard. Future phases expand evaluation, safety controls, cost telemetry, and cost-aware orchestration.
 
@@ -14,7 +14,9 @@ The accelerator value is not only faster prototyping; it is architectural contin
 
 The first implemented reference workflow is warranty replacement, branded historically in the repository as the WarrantyWise workflow. DecisionTrace AI is broader than warranty replacement: the same architecture pattern can extend to regulated financial and operational workflows such as credit approval, claims review, refund governance, subscription cancellation, and compliance exception handling.
 
-The Phase 1 implementation is deployed publicly on Railway and includes a FastAPI backend, browser UI, LangGraph workflow, controlled tool simulations, controlled OpenAI response drafting, SQLAlchemy persistence, and Postgres-compatible audit storage. Phase 1 is not presented as production-ready or regulatory-compliant; it demonstrates patterns required for governed workflows before production integration.
+Warranty replacement is Reference Workflow 1. Phase 3 may add a second workflow using MCP-style tools and resources, such as Credit Application Readiness Review rather than automated credit approval.
+
+The Phase 1 implementation is deployed publicly on Railway and includes a FastAPI backend, browser UI, LangGraph workflow, controlled tool simulations, controlled OpenAI response drafting, SQLAlchemy persistence, and Postgres-compatible audit storage. Phase 2 validates the control model through natural-language intake, multi-turn clarification, deterministic identifier validation, guardrails, audit replay, LangSmith tracing, DecisionTrace monitoring, and golden-scenario evaluation. This project is not presented as production-ready or regulatory-compliant; it demonstrates patterns required for governed workflows before production integration.
 
 The project is intentionally scoped to demonstrate enterprise architecture patterns: controlled decisioning, explainable workflow execution, safe action boundaries, and a persistent audit trail.
 
